@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>After Review - Hackathon Voting App Redesign</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+
+      :root {
+        --bg: #100f0d;
+        --bg-soft: #151311;
+        --bg-elevated: rgba(28, 24, 21, 0.92);
+        --panel: rgba(20, 17, 15, 0.86);
+        --panel-soft: rgba(255, 255, 255, 0.03);
+        --line: rgba(255, 244, 231, 0.1);
+        --line-strong: rgba(255, 244, 231, 0.16);
+        --text: #f5efe6;
+        --muted: #b5aca1;
+        --accent: #d97b3b;
+        --accent-soft: rgba(217, 123, 59, 0.16);
+        --success: #94b78f;
+        --warning: #e6b063;
+        --shadow: 0 36px 90px rgba(0, 0, 0, 0.42);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        color-scheme: dark;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Outfit", system-ui, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top, rgba(217, 123, 59, 0.18), transparent 26%),
+          linear-gradient(180deg, #0f0d0b 0%, #15120f 100%);
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .shell {
+        width: min(1240px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 28px 0 70px;
+      }
+
+      .nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 46px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-weight: 700;
+      }
+
+      .brand-mark {
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+        background: var(--accent);
+        box-shadow: 0 0 0 8px var(--accent-soft);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .nav-links a {
+        padding: 11px 16px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.03);
+        text-decoration: none;
+        color: var(--muted);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+        gap: 22px;
+        margin-bottom: 24px;
+      }
+
+      .hero-copy,
+      .hero-panel,
+      .section,
+      .mockup,
+      .mini-card {
+        border: 1px solid var(--line);
+        border-radius: 30px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .hero-copy,
+      .hero-panel,
+      .section {
+        padding: 34px;
+      }
+
+      .eyebrow {
+        margin: 0 0 14px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        line-height: 1.4;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(44px, 8vw, 84px);
+        line-height: 0.92;
+        letter-spacing: -0.07em;
+        max-width: 9ch;
+        text-wrap: balance;
+      }
+
+      .lead {
+        margin-top: 18px;
+        max-width: 58ch;
+        color: var(--muted);
+        line-height: 1.8;
+        font-size: 18px;
+      }
+
+      .hero-panel {
+        display: grid;
+        gap: 18px;
+        align-content: start;
+      }
+
+      .hero-panel .mini-card {
+        padding: 18px 20px;
+        background: var(--panel-soft);
+        box-shadow: none;
+      }
+
+      .hero-panel h2 {
+        font-size: 16px;
+        letter-spacing: -0.03em;
+      }
+
+      .hero-panel p {
+        margin-top: 8px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .sections {
+        display: grid;
+        gap: 22px;
+      }
+
+      .section {
+        display: grid;
+        grid-template-columns: minmax(300px, 0.72fr) minmax(0, 1.1fr);
+        gap: 24px;
+        align-items: start;
+      }
+
+      .section-copy {
+        display: grid;
+        gap: 16px;
+      }
+
+      .section-copy h2 {
+        font-size: 38px;
+        line-height: 0.95;
+        letter-spacing: -0.06em;
+      }
+
+      .section-copy p {
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      .change-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .change {
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .change strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 15px;
+      }
+
+      .change span {
+        color: var(--muted);
+        line-height: 1.65;
+        font-size: 14px;
+      }
+
+      .mockup {
+        padding: 18px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at top left, rgba(217, 123, 59, 0.12), transparent 26%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+      }
+
+      .screen-shell {
+        border-radius: 24px;
+        border: 1px solid var(--line-strong);
+        background: linear-gradient(180deg, #171310 0%, #120f0d 100%);
+        overflow: hidden;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .topbar .title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 600;
+      }
+
+      .dot {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+
+      .meta-row,
+      .pill-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .pill {
+        padding: 7px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.04);
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .pill.accent {
+        border-color: transparent;
+        background: var(--accent-soft);
+        color: #ffd9c3;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .stat {
+        padding: 14px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 28px;
+        line-height: 1;
+        letter-spacing: -0.05em;
+      }
+
+      .stat span {
+        display: block;
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .directory-body {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 16px;
+        padding: 16px;
+      }
+
+      .side-rail,
+      .content-pane,
+      .score-panel,
+      .preview-panel,
+      .hero-panel-card,
+      .ladder,
+      .decision-strip,
+      .evidence-grid,
+      .board-grid,
+      .asset-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .side-rail,
+      .queue-card,
+      .project-row,
+      .hero-panel-card,
+      .rubric-block,
+      .summary-block,
+      .ladder-row,
+      .tie-block,
+      .upload-block,
+      .preview-card,
+      .checklist-item {
+        padding: 14px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .rail-title,
+      .section-title {
+        font-size: 13px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-family: "IBM Plex Mono", monospace;
+        color: var(--muted);
+      }
+
+      .queue-card {
+        display: grid;
+        gap: 12px;
+      }
+
+      .queue-card h3,
+      .hero-panel-card h3,
+      .summary-block h3,
+      .tie-block h3,
+      .preview-card h3,
+      .upload-block h3,
+      .rubric-block h3 {
+        font-size: 18px;
+        letter-spacing: -0.04em;
+      }
+
+      .queue-card p,
+      .hero-panel-card p,
+      .summary-block p,
+      .tie-block p,
+      .preview-card p,
+      .upload-block p,
+      .rubric-block p,
+      .ladder-row p,
+      .project-row p,
+      .checklist-item p {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .bar {
+        position: relative;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+      }
+
+      .bar::after {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: var(--value, 50%);
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--accent), #e8a96f);
+      }
+
+      .project-stack {
+        display: grid;
+        gap: 12px;
+      }
+
+      .project-row {
+        display: grid;
+        grid-template-columns: 58px minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .thumb {
+        width: 58px;
+        height: 58px;
+        border-radius: 16px;
+        background:
+          radial-gradient(circle at 30% 30%, rgba(217, 123, 59, 0.6), transparent 30%),
+          linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03));
+      }
+
+      .badge-col {
+        display: grid;
+        justify-items: end;
+        gap: 8px;
+      }
+
+      .score-chip {
+        padding: 8px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .score-chip.hot {
+        background: var(--accent-soft);
+        color: #ffd9c3;
+      }
+
+      .detail-shell {
+        padding: 16px;
+        display: grid;
+        gap: 16px;
+      }
+
+      .detail-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) 250px;
+        gap: 14px;
+      }
+
+      .hero-media {
+        min-height: 240px;
+        padding: 20px;
+        border-radius: 24px;
+        background:
+          radial-gradient(circle at 50% 24%, rgba(217, 123, 59, 0.28), transparent 24%),
+          linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01));
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+
+      .hero-media h3 {
+        font-size: 44px;
+        line-height: 0.94;
+        letter-spacing: -0.06em;
+        max-width: 8ch;
+      }
+
+      .hero-side {
+        display: grid;
+        gap: 12px;
+      }
+
+      .decision-strip {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .evidence-grid {
+        grid-template-columns: minmax(0, 1.2fr) 300px;
+      }
+
+      .evidence-copy {
+        display: grid;
+        gap: 14px;
+      }
+
+      .evidence-block {
+        padding-top: 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .scoring-shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 14px;
+        padding: 16px;
+      }
+
+      .rubric-column,
+      .score-panel {
+        display: grid;
+        gap: 12px;
+      }
+
+      .rubric-block .meter {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .meter span {
+        height: 40px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .meter span.active {
+        color: #1b120c;
+        border-color: transparent;
+        background: linear-gradient(180deg, #f1a15f, var(--accent));
+      }
+
+      .summary-block strong {
+        display: block;
+        font-size: 34px;
+        line-height: 1;
+        letter-spacing: -0.05em;
+      }
+
+      .results-shell {
+        padding: 16px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .board-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .tie-block {
+        min-height: 150px;
+        display: grid;
+        align-content: space-between;
+      }
+
+      .ladder {
+        gap: 10px;
+      }
+
+      .ladder-row {
+        display: grid;
+        grid-template-columns: 52px minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .rank {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .rank.focus {
+        background: var(--accent-soft);
+        color: #ffd9c3;
+      }
+
+      .asset-shell {
+        padding: 16px;
+        display: grid;
+        grid-template-columns: 220px minmax(0, 1fr);
+        gap: 14px;
+        align-items: start;
+      }
+
+      .asset-shell .content-pane,
+      .asset-shell .preview-panel {
+        min-width: 0;
+      }
+
+      .asset-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .asset-shell .preview-panel {
+        grid-column: 2;
+        grid-template-columns: minmax(0, 1.1fr) minmax(220px, 0.9fr);
+      }
+
+      .upload-block {
+        min-height: 120px;
+      }
+
+      .upload-block.large {
+        min-height: 180px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+
+      .checklist-item {
+        display: grid;
+        gap: 6px;
+      }
+
+      .asset-shell .upload-block h3,
+      .asset-shell .preview-card h3,
+      .asset-shell .checklist-item h3 {
+        font-size: 16px;
+        line-height: 1.2;
+      }
+
+      .preview-card {
+        min-height: 150px;
+      }
+
+      .preview-frame {
+        height: 132px;
+        border-radius: 18px;
+        margin-top: 12px;
+        background:
+          linear-gradient(180deg, rgba(217, 123, 59, 0.1), transparent),
+          rgba(255, 255, 255, 0.04);
+      }
+
+      @media (max-width: 1120px) {
+        .hero,
+        .section {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .shell {
+          width: min(1240px, calc(100% - 28px));
+        }
+
+        .directory-body,
+        .detail-hero,
+        .evidence-grid,
+        .scoring-shell,
+        .board-grid,
+        .asset-shell,
+        .decision-strip,
+        .asset-shell .preview-panel {
+          grid-template-columns: 1fr;
+        }
+
+        .stats {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="nav">
+        <div class="brand">
+          <span class="brand-mark"></span>
+          <span>After review</span>
+        </div>
+        <div class="nav-links">
+          <a href="./index.html">Overview</a>
+          <a href="./before.html">Back to before</a>
+        </div>
+      </div>
+
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Proposed redesign</p>
+          <h1>A warmer, sharper judging system built around decisions instead of generic cards.</h1>
+          <p class="lead">
+            The redesign keeps the same routes and product intent, but changes the visual language to a single accent,
+            higher-contrast hierarchy, and structures that match each task: triage on the directory, evidence on project
+            detail, calibration on scoring, escalation on results, and readiness on asset upload.
+          </p>
+        </div>
+
+        <aside class="hero-panel">
+          <div class="mini-card">
+            <h2>Applied from taste-skill</h2>
+            <p>Single accent palette, stronger type character, fewer generic cards, asymmetry where it helps, and dashboard-safe sans-serif typography.</p>
+          </div>
+          <div class="mini-card">
+            <h2>Applied from redesign-skill</h2>
+            <p>Priority order: font swap, palette cleanup, state clarity, layout refinement, then component replacement for the most generic surfaces.</p>
+          </div>
+          <div class="mini-card">
+            <h2>Applied from output-skill</h2>
+            <p>All five major prototype screens are represented as complete standalone mockups rather than partial fragments.</p>
+          </div>
+        </aside>
+      </section>
+
+      <div class="sections">
+        <section class="section">
+          <div class="section-copy">
+            <div>
+              <p class="eyebrow">Screen 1</p>
+              <h2>Directory becomes a triage desk</h2>
+            </div>
+            <p>
+              Instead of treating every project as the same card, the redesigned directory splits the screen into a status
+              rail and a priority queue. That makes urgent work and incomplete judging more legible than cover imagery.
+            </p>
+            <div class="change-list">
+              <div class="change">
+                <strong>Single accent and warmer neutrals</strong>
+                <span>The teal and purple mix is replaced with one copper accent so statuses and calls to action feel intentional.</span>
+              </div>
+              <div class="change">
+                <strong>Status-first layout</strong>
+                <span>Filters move into a command rail and projects are rendered as ranked rows with urgency tags instead of equal-weight cards.</span>
+              </div>
+              <div class="change">
+                <strong>More useful metrics</strong>
+                <span>Completion, average score, and pending tie-breaks sit in the same visual plane as the queue instead of being pushed to the footer.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mockup">
+            <div class="screen-shell">
+              <div class="topbar">
+                <div class="title"><span class="dot"></span><span>Judge desk</span></div>
+                <div class="pill-row">
+                  <span class="pill">main track</span>
+                  <span class="pill accent">12 awaiting review</span>
+                </div>
+              </div>
+              <div class="directory-body">
+                <aside class="side-rail">
+                  <div class="section-title">Filters</div>
+                  <div class="queue-card">
+                    <h3>Assigned queue</h3>
+                    <p>Focus on unfinished scoring first, then review high-variance projects before final locking.</p>
+                    <div class="bar" style="--value: 62%;"></div>
+                  </div>
+                  <div class="queue-card">
+                    <h3>Track split</h3>
+                    <div class="pill-row">
+                      <span class="pill accent">AI and ML</span>
+                      <span class="pill">sustainability</span>
+                      <span class="pill">fintech</span>
+                    </div>
+                  </div>
+                  <div class="queue-card">
+                    <h3>Decision mode</h3>
+                    <div class="pill-row">
+                      <span class="pill accent">needs score</span>
+                      <span class="pill">ready to lock</span>
+                    </div>
+                  </div>
+                </aside>
+
+                <main class="content-pane">
+                  <div class="stats">
+                    <div class="stat">
+                      <strong>12</strong>
+                      <span>unfinished reviews</span>
+                    </div>
+                    <div class="stat">
+                      <strong>8.6</strong>
+                      <span>mean quality score</span>
+                    </div>
+                    <div class="stat">
+                      <strong>3</strong>
+                      <span>tie-break candidates</span>
+                    </div>
+                  </div>
+
+                  <div class="project-stack">
+                    <div class="project-row">
+                      <div class="thumb"></div>
+                      <div>
+                        <h3>EcoTrack AI</h3>
+                        <p>GreenHorizon · sustainability · 2 rubric sections still unset</p>
+                      </div>
+                      <div class="badge-col">
+                        <span class="score-chip hot">score now</span>
+                        <span class="score-chip">booth 204</span>
+                      </div>
+                    </div>
+
+                    <div class="project-row">
+                      <div class="thumb"></div>
+                      <div>
+                        <h3>MicroLend DAO</h3>
+                        <p>Decentral · fintech · no judge activity yet</p>
+                      </div>
+                      <div class="badge-col">
+                        <span class="score-chip hot">priority</span>
+                        <span class="score-chip">first pass</span>
+                      </div>
+                    </div>
+
+                    <div class="project-row">
+                      <div class="thumb"></div>
+                      <div>
+                        <h3>NeuralHealth Assistant</h3>
+                        <p>CyberFlow · AI and ML · finalist band with low variance</p>
+                      </div>
+                      <div class="badge-col">
+                        <span class="score-chip">94.1 / 100</span>
+                        <span class="score-chip">locked</span>
+                      </div>
+                    </div>
+                  </div>
+                </main>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-copy">
+            <div>
+              <p class="eyebrow">Screen 2</p>
+              <h2>Project detail becomes an evidence brief</h2>
+            </div>
+            <p>
+              The project page should not just impress; it should help a judge decide. The redesign shifts the hero from
+              pure mood into a summary brief, then keeps track fit, readiness, and team evidence visible beside the story.
+            </p>
+            <div class="change-list">
+              <div class="change">
+                <strong>Hero supports judgment</strong>
+                <span>The headline shares space with a summary of readiness, strongest differentiator, and route to scoring.</span>
+              </div>
+              <div class="change">
+                <strong>Metadata becomes a briefing rail</strong>
+                <span>Booth, track, team, and reviewer notes are grouped as operational context rather than a secondary card.</span>
+              </div>
+              <div class="change">
+                <strong>Evidence before action</strong>
+                <span>The action layer is separated from supporting proof so the page encourages informed scoring rather than impulsive clicking.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mockup">
+            <div class="screen-shell">
+              <div class="topbar">
+                <div class="title"><span class="dot"></span><span>Project brief</span></div>
+                <div class="pill-row">
+                  <span class="pill">booth 204</span>
+                  <span class="pill accent">ready for scoring</span>
+                </div>
+              </div>
+              <div class="detail-shell">
+                <div class="detail-hero">
+                  <div class="hero-media">
+                    <p class="eyebrow">Sustainability track</p>
+                    <h3>EcoTrack AI</h3>
+                    <p class="lead" style="margin-top: 12px; max-width: 42ch; font-size: 16px;">
+                      Real-time carbon footprint analysis using satellite imagery, permit data, and computer vision.
+                    </p>
+                  </div>
+                  <div class="hero-side">
+                    <div class="hero-panel-card">
+                      <div class="section-title">Decision snapshot</div>
+                      <h3>Finalist signal</h3>
+                      <p>Strong originality, credible deployment path, and a clear operator story.</p>
+                    </div>
+                    <div class="hero-panel-card">
+                      <div class="section-title">Judge route</div>
+                      <h3>Open rubric</h3>
+                      <p>2 criteria need calibration before this score can lock.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="decision-strip">
+                  <div class="summary-block">
+                    <div class="section-title">Readiness</div>
+                    <strong>88%</strong>
+                    <p>Demo depth and narrative clarity are both above threshold.</p>
+                  </div>
+                  <div class="summary-block">
+                    <div class="section-title">Track fit</div>
+                    <strong>High</strong>
+                    <p>Problem, data source, and audience align with sustainability scoring goals.</p>
+                  </div>
+                  <div class="summary-block">
+                    <div class="section-title">Risk</div>
+                    <strong>Low</strong>
+                    <p>Primary uncertainty is implementation scale, not concept validity.</p>
+                  </div>
+                </div>
+
+                <div class="evidence-grid">
+                  <div class="evidence-copy">
+                    <div class="hero-panel-card">
+                      <div class="section-title">Problem</div>
+                      <div class="evidence-block">
+                        <p>Local governments lack block-by-block emissions visibility. This team converts satellite imagery and permits into a live carbon signal.</p>
+                      </div>
+                    </div>
+                    <div class="hero-panel-card">
+                      <div class="section-title">What to verify</div>
+                      <div class="pill-row">
+                        <span class="pill accent">novel use of vision</span>
+                        <span class="pill">planner workflow</span>
+                        <span class="pill">evidence depth</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="hero-side">
+                    <div class="hero-panel-card">
+                      <div class="section-title">Team</div>
+                      <h3>3 makers</h3>
+                      <p>Frontend architect, ML engineer, data scientist</p>
+                    </div>
+                    <div class="hero-panel-card">
+                      <div class="section-title">Assets</div>
+                      <p>Video demo, annotated maps, and booth narrative all available for review.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-copy">
+            <div>
+              <p class="eyebrow">Screen 3</p>
+              <h2>Scoring workbench becomes a calibration surface</h2>
+            </div>
+            <p>
+              Rather than a stack of interchangeable cards, the scoring page exposes the rubric as a comparative system.
+              Judges can see what is strong, what is incomplete, and how confident the current draft feels before
+              submitting.
+            </p>
+            <div class="change-list">
+              <div class="change">
+                <strong>Comparative rubric blocks</strong>
+                <span>Each criterion shares a consistent row structure so judges can scan relative strength instead of re-learning each card.</span>
+              </div>
+              <div class="change">
+                <strong>Decision summary rail</strong>
+                <span>The right side now shows draft total, missing sections, and review confidence before the commit action.</span>
+              </div>
+              <div class="change">
+                <strong>Explicit note framing</strong>
+                <span>Qualitative feedback becomes guided evidence capture, not a placeholder-only input field.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mockup">
+            <div class="screen-shell">
+              <div class="topbar">
+                <div class="title"><span class="dot"></span><span>Score calibration</span></div>
+                <div class="pill-row">
+                  <span class="pill">ecoTrack ai</span>
+                  <span class="pill accent">2 criteria need choice</span>
+                </div>
+              </div>
+              <div class="scoring-shell">
+                <div class="rubric-column">
+                  <div class="rubric-block">
+                    <div class="section-title">Innovation</div>
+                    <h3>Originality of the concept and the quality of the insight</h3>
+                    <div class="meter">
+                      <span>1</span>
+                      <span>2</span>
+                      <span>3</span>
+                      <span class="active">4</span>
+                      <span>5</span>
+                    </div>
+                  </div>
+                  <div class="rubric-block">
+                    <div class="section-title">Execution</div>
+                    <h3>Technical depth, completeness, and reliability</h3>
+                    <div class="meter">
+                      <span>1</span>
+                      <span>2</span>
+                      <span class="active">3</span>
+                      <span>4</span>
+                      <span>5</span>
+                    </div>
+                  </div>
+                  <div class="rubric-block">
+                    <div class="section-title">UI and UX</div>
+                    <h3>Clarity, usability, and accessibility under judging pressure</h3>
+                    <div class="meter">
+                      <span>1</span>
+                      <span>2</span>
+                      <span>3</span>
+                      <span class="active">4</span>
+                      <span>5</span>
+                    </div>
+                  </div>
+                  <div class="rubric-block">
+                    <div class="section-title">Evidence notes</div>
+                    <p>Strong operator narrative. Demo clarity is excellent. Need one more proof point on model differentiation.</p>
+                  </div>
+                </div>
+
+                <aside class="score-panel">
+                  <div class="summary-block">
+                    <div class="section-title">Draft total</div>
+                    <strong>83</strong>
+                    <p>Solid finalist range if business value lands at 4 or above.</p>
+                  </div>
+                  <div class="summary-block">
+                    <div class="section-title">Completion</div>
+                    <p>3 of 4 criteria answered</p>
+                    <div class="bar" style="--value: 75%;"></div>
+                  </div>
+                  <div class="summary-block">
+                    <div class="section-title">Confidence</div>
+                    <p>Medium confidence. Business value is still under discussion.</p>
+                  </div>
+                  <div class="summary-block">
+                    <div class="section-title">Next step</div>
+                    <p>Confirm business value, then submit score and park notes for committee review.</p>
+                  </div>
+                </aside>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-copy">
+            <div>
+              <p class="eyebrow">Screen 4</p>
+              <h2>Results dashboard becomes an escalation console</h2>
+            </div>
+            <p>
+              The current results table is readable, but the redesigned version separates ranking from intervention. Tie
+              cases are promoted to top-level blocks while the finalist ladder stays crisp and scan-friendly beneath.
+            </p>
+            <div class="change-list">
+              <div class="change">
+                <strong>Tie-breaks are first-class</strong>
+                <span>Urgent decisions sit above the leaderboard with explicit case framing and next actions.</span>
+              </div>
+              <div class="change">
+                <strong>Leaderboard loses the generic table shell</strong>
+                <span>A ladder format reads faster in review sessions and creates clearer emphasis for finalists and borderline qualifiers.</span>
+              </div>
+              <div class="change">
+                <strong>Status colors stay within one palette</strong>
+                <span>The status system uses accent, muted neutral, and warning warmth instead of introducing purple as a second design language.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mockup">
+            <div class="screen-shell">
+              <div class="topbar">
+                <div class="title"><span class="dot"></span><span>Committee console</span></div>
+                <div class="pill-row">
+                  <span class="pill">40 judged</span>
+                  <span class="pill accent">3 tie-breaks open</span>
+                </div>
+              </div>
+              <div class="results-shell">
+                <div class="board-grid">
+                  <div class="tie-block">
+                    <div>
+                      <div class="section-title">Third place tie</div>
+                      <h3>Project Alpha vs Project Delta</h3>
+                      <p>Both teams landed at 88.5. Difference is driven by business value variance.</p>
+                    </div>
+                    <div class="pill-row">
+                      <span class="pill accent">resolve now</span>
+                      <span class="pill">committee note added</span>
+                    </div>
+                  </div>
+                  <div class="tie-block">
+                    <div>
+                      <div class="section-title">Fifth place tie</div>
+                      <h3>EcoTrack AI vs GreenPulse</h3>
+                      <p>Technical execution is aligned. Review final proof of deployment feasibility.</p>
+                    </div>
+                    <div class="pill-row">
+                      <span class="pill accent">compare evidence</span>
+                      <span class="pill">open scorecards</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ladder">
+                  <div class="ladder-row">
+                    <div class="rank">1</div>
+                    <div>
+                      <h3>NeuralHealth Assistant</h3>
+                      <p>Finalist · strong medical narrative · low score variance</p>
+                    </div>
+                    <div class="score-chip">96.5</div>
+                  </div>
+                  <div class="ladder-row">
+                    <div class="rank">2</div>
+                    <div>
+                      <h3>InsightFlow AI</h3>
+                      <p>Finalist · high polish · deployment story is credible</p>
+                    </div>
+                    <div class="score-chip">92.0</div>
+                  </div>
+                  <div class="ladder-row">
+                    <div class="rank focus">3</div>
+                    <div>
+                      <h3>Project Alpha</h3>
+                      <p>Tie case · needs committee ruling before final lock</p>
+                    </div>
+                    <div class="score-chip hot">88.5</div>
+                  </div>
+                  <div class="ladder-row">
+                    <div class="rank focus">4</div>
+                    <div>
+                      <h3>Project Delta</h3>
+                      <p>Tie case · execution strong, adoption case debated</p>
+                    </div>
+                    <div class="score-chip hot">88.5</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-copy">
+            <div>
+              <p class="eyebrow">Screen 5</p>
+              <h2>Asset upload becomes a readiness workshop</h2>
+            </div>
+            <p>
+              The upload flow already has the right split-screen idea. The redesign strengthens it by turning the left side
+              into a checklist, the center into structured asset capture, and the right side into a judge-facing outcome
+              preview.
+            </p>
+            <div class="change-list">
+              <div class="change">
+                <strong>Checklist before media</strong>
+                <span>Participants see what matters to judges before they start uploading files, which improves intent and completion.</span>
+              </div>
+              <div class="change">
+                <strong>Form framing replaces generic dropzones</strong>
+                <span>Every asset block explains what the judge learns from that asset, not only its file format.</span>
+              </div>
+              <div class="change">
+                <strong>Preview rail becomes interpretive</strong>
+                <span>The right rail shows how the page will read to judges and what narrative gaps still remain.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mockup">
+            <div class="screen-shell">
+              <div class="topbar">
+                <div class="title"><span class="dot"></span><span>Submission polish</span></div>
+                <div class="pill-row">
+                  <span class="pill">participant workspace</span>
+                  <span class="pill accent">72% ready</span>
+                </div>
+              </div>
+              <div class="asset-shell">
+                <aside class="side-rail">
+                  <div class="section-title">Judge checklist</div>
+                  <div class="checklist-item">
+                    <h3>Show the product in context</h3>
+                    <p>Lead with the clearest screen or physical moment, not a logo or empty frame.</p>
+                  </div>
+                  <div class="checklist-item">
+                    <h3>Explain the proof</h3>
+                    <p>Use one screenshot to show traction, one to show depth, and one to show ease of use.</p>
+                  </div>
+                  <div class="checklist-item">
+                    <h3>Make the demo navigable</h3>
+                    <p>Add a short note that tells judges what to look for in the video.</p>
+                  </div>
+                </aside>
+
+                <main class="content-pane">
+                  <div class="asset-grid">
+                    <div class="upload-block large">
+                      <div class="section-title">Hero image</div>
+                      <h3>Upload the one frame that best explains the product.</h3>
+                      <p>Ideal: user interface in context with one clear outcome visible.</p>
+                    </div>
+                    <div class="upload-block large">
+                      <div class="section-title">Video demo</div>
+                      <h3>Paste the walkthrough link and add a 1-line viewing note.</h3>
+                      <p>Tell judges where the strongest evidence appears in the demo.</p>
+                    </div>
+                    <div class="upload-block">
+                      <div class="section-title">Screenshot 1</div>
+                      <p>Show the main flow.</p>
+                    </div>
+                    <div class="upload-block">
+                      <div class="section-title">Screenshot 2</div>
+                      <p>Show proof of depth.</p>
+                    </div>
+                  </div>
+                </main>
+
+                <aside class="preview-panel">
+                  <div class="preview-card">
+                    <div class="section-title">Judge view</div>
+                    <h3>What reviewers will understand immediately</h3>
+                    <div class="preview-frame"></div>
+                  </div>
+                  <div class="preview-card">
+                    <div class="section-title">Readiness</div>
+                    <p>Hero quality is strong. Demo framing still needs a short note on the product's differentiator.</p>
+                    <div class="bar" style="--value: 72%; margin-top: 12px;"></div>
+                  </div>
+                </aside>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>

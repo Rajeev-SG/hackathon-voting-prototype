@@ -1,0 +1,50 @@
+/* shadcn/ui semantic tokens — theme: teal
+   Values are HSL triplets so you can do: hsl(var(--background)) etc. */
+
+@layer base {
+  :root {
+  --background: 0 0% 99%;
+  --foreground: 0 0% 9%;
+  --card: 0 0% 99%;
+  --card-foreground: 0 0% 9%;
+  --popover: 0 0% 99%;
+  --popover-foreground: 0 0% 9%;
+  --muted: 0 0% 97%;
+  --muted-foreground: 0 0% 31%;
+  --accent: 0 0% 97%;
+  --accent-foreground: 0 0% 9%;
+  --border: 0 0% 75%;
+  --input: 0 0% 75%;
+  --primary: 182 78% 30%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 261 23% 52%;
+  --secondary-foreground: 0 0% 100%;
+  --ring: 182 78% 30%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --radius: 0.75rem;
+  }
+
+  .dark {
+  --background: 0 0% 5%;
+  --foreground: 0 0% 89%;
+  --card: 0 0% 9%;
+  --card-foreground: 0 0% 89%;
+  --popover: 0 0% 9%;
+  --popover-foreground: 0 0% 89%;
+  --muted: 0 0% 12%;
+  --muted-foreground: 0 0% 77%;
+  --accent: 0 0% 12%;
+  --accent-foreground: 0 0% 89%;
+  --border: 0 0% 28%;
+  --input: 0 0% 28%;
+  --primary: 181 88% 33%;
+  --primary-foreground: 0 0% 7%;
+  --secondary: 262 33% 60%;
+  --secondary-foreground: 0 0% 7%;
+  --ring: 181 88% 33%;
+  --destructive: 0 74% 42%;
+  --destructive-foreground: 0 0% 100%;
+  --radius: 0.75rem;
+  }
+}

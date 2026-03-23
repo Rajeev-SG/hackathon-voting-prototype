@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JudgeDash - Hackathon Evaluation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0ddff2",
+                        "background-light": "#f5f6f8",
+                        "background-dark": "#0f1423",
+                    },
+                    fontFamily: {
+                        "display": ["'Open Sans'", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.75rem",
+                        "lg": "0.75rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<!-- Top Navigation Bar -->
+<nav class="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
+<div class="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<button class="p-2 -ml-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<h1 class="text-sm font-bold leading-tight">EcoTrack AI</h1>
+<p class="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Booth 12 / Team Earth</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+<span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Synced</span>
+</div>
+</div>
+</div>
+</nav>
+<main class="max-w-3xl mx-auto px-4 py-8 pb-32">
+<!-- Project Snapshot -->
+<section class="mb-10">
+<p class="text-xl font-medium leading-relaxed mb-6 text-slate-700 dark:text-slate-200">
+                An AI-powered dashboard for tracking local carbon footprints with actionable insights.
+            </p>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">Sustainability Track</span>
+<span class="px-3 py-1 rounded-full text-xs font-medium bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">React / Python</span>
+<span class="px-3 py-1 rounded-full text-xs font-medium bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">Prototype</span>
+</div>
+</section>
+<!-- Rubric Stack -->
+<section class="space-y-6">
+<!-- Rubric Card: Innovation -->
+<div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-6">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="text-lg font-bold">Innovation</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Originality of the concept and creative use of AI.</p>
+</div>
+</div>
+<div class="mb-6">
+<div class="flex justify-between text-[10px] uppercase tracking-widest font-bold text-slate-400 dark:text-slate-500 mb-3">
+<span>Not evident</span>
+<span>Exceptional</span>
+</div>
+<div class="grid grid-cols-5 gap-2">
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">1</button>
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">2</button>
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">3</button>
+<button class="h-12 rounded-lg bg-primary border-2 border-primary flex items-center justify-center font-bold text-lg text-white">4</button>
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">5</button>
+</div>
+</div>
+<details class="group">
+<summary class="list-none cursor-pointer flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
+                        WHAT GOOD LOOKS LIKE
+                    </summary>
+<div class="mt-4 text-sm text-slate-400 leading-relaxed pl-6 border-l border-slate-800">
+                        Novel application of machine learning that goes beyond simple API wrappers. Unique problem-solving approach for carbon tracking.
+                    </div>
+</details>
+</div>
+<!-- Rubric Card: Execution -->
+<div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-6">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="text-lg font-bold">Execution</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Technical complexity and functional completeness.</p>
+</div>
+</div>
+<div class="mb-6">
+<div class="flex justify-between text-[10px] uppercase tracking-widest font-bold text-slate-400 dark:text-slate-500 mb-3">
+<span>Not evident</span>
+<span>Exceptional</span>
+</div>
+<div class="grid grid-cols-5 gap-2">
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">1</button>
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">2</button>
+<button class="h-12 rounded-lg border-2 border-primary bg-primary/10 flex items-center justify-center font-bold text-lg text-primary">3</button>
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">4</button>
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">5</button>
+</div>
+</div>
+<details class="group">
+<summary class="list-none cursor-pointer flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
+                        WHAT GOOD LOOKS LIKE
+                    </summary>
+<div class="mt-4 text-sm text-slate-400 leading-relaxed pl-6 border-l border-slate-800">
+                        The prototype works without critical errors. Data flows correctly from backend to frontend. High code quality and architecture.
+                    </div>
+</details>
+</div>
+<!-- Rubric Card: UI/UX -->
+<div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-6">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="text-lg font-bold">UI/UX</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Visual design, usability, and overall user journey.</p>
+</div>
+</div>
+<div class="mb-6">
+<div class="flex justify-between text-[10px] uppercase tracking-widest font-bold text-slate-400 dark:text-slate-500 mb-3">
+<span>Not evident</span>
+<span>Exceptional</span>
+</div>
+<div class="grid grid-cols-5 gap-2">
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">1</button>
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">2</button>
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">3</button>
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">4</button>
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">5</button>
+</div>
+</div>
+<details class="group">
+<summary class="list-none cursor-pointer flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
+                        WHAT GOOD LOOKS LIKE
+                    </summary>
+<div class="mt-4 text-sm text-slate-400 leading-relaxed pl-6 border-l border-slate-800">
+                        Polished visual interface. Accessibility considerations. Intuitive navigation and clear data visualization.
+                    </div>
+</details>
+</div>
+<!-- Rubric Card: Business Value -->
+<div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-6">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="text-lg font-bold">Business Value</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Potential for real-world impact and market viability.</p>
+</div>
+</div>
+<div class="mb-6">
+<div class="flex justify-between text-[10px] uppercase tracking-widest font-bold text-slate-400 dark:text-slate-500 mb-3">
+<span>Not evident</span>
+<span>Exceptional</span>
+</div>
+<div class="grid grid-cols-5 gap-2">
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">1</button>
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">2</button>
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">3</button>
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">4</button>
+<button class="h-12 rounded-lg border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center font-bold text-lg hover:border-primary transition-colors">5</button>
+</div>
+</div>
+<details class="group">
+<summary class="list-none cursor-pointer flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
+                        WHAT GOOD LOOKS LIKE
+                    </summary>
+<div class="mt-4 text-sm text-slate-400 leading-relaxed pl-6 border-l border-slate-800">
+                        Clear monetization strategy or significant social impact potential. Addresses a massive market gap.
+                    </div>
+</details>
+</div>
+</section>
+<!-- Notes Section -->
+<section class="mt-12 space-y-4">
+<h4 class="text-xs font-bold uppercase tracking-widest text-slate-500">Qualitative Feedback</h4>
+<div class="relative">
+<input class="w-full bg-transparent border-0 border-b border-slate-200 dark:border-slate-800 focus:ring-0 focus:border-primary px-0 py-3 text-sm placeholder:text-slate-500" placeholder="Add note..." type="text"/>
+</div>
+<div class="flex flex-wrap gap-2 pt-2">
+<button class="px-3 py-1.5 rounded-full text-xs font-medium border border-slate-200 dark:border-slate-800 hover:border-primary hover:text-primary transition-all flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base">add</span>
+                    Great story
+                </button>
+<button class="px-3 py-1.5 rounded-full text-xs font-medium border border-slate-200 dark:border-slate-800 hover:border-primary hover:text-primary transition-all flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base">add</span>
+                    Needs clarity
+                </button>
+<button class="px-3 py-1.5 rounded-full text-xs font-medium border border-slate-200 dark:border-slate-800 hover:border-primary hover:text-primary transition-all flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base">add</span>
+                    Solid tech
+                </button>
+<button class="px-3 py-1.5 rounded-full text-xs font-medium border border-slate-200 dark:border-slate-800 hover:border-primary hover:text-primary transition-all flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base">add</span>
+                    Polished Demo
+                </button>
+</div>
+</section>
+</main>
+<!-- Bottom Bar -->
+<footer class="fixed bottom-0 left-0 right-0 border-t border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark/95 backdrop-blur-xl">
+<div class="max-w-3xl mx-auto px-4 h-20 flex items-center justify-between">
+<div class="flex flex-col">
+<div class="flex items-center gap-2 mb-1.5">
+<div class="w-24 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[30%]"></div>
+</div>
+<span class="text-[10px] font-bold text-slate-500">12/40</span>
+</div>
+<p class="text-[10px] uppercase tracking-widest text-slate-400">Judging Progress</p>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-6 h-12 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+                    Park
+                </button>
+<button class="px-8 h-12 bg-primary hover:bg-primary/90 rounded-lg text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all flex items-center gap-2">
+                    Submit Score
+                    <span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,84 @@
+@import "../theme-lab/dist/tokens/radix-scales.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: var(--gray-1);
+    --foreground: var(--gray-12);
+    --card: var(--gray-2);
+    --card-foreground: var(--gray-12);
+    --popover: var(--gray-2);
+    --popover-foreground: var(--gray-12);
+    --primary: var(--teal-9);
+    --primary-foreground: var(--gray-1);
+    --secondary: var(--purple-4);
+    --secondary-foreground: var(--gray-12);
+    --muted: var(--gray-3);
+    --muted-foreground: var(--gray-10);
+    --accent: var(--teal-4);
+    --accent-foreground: var(--teal-12);
+    --destructive: var(--purple-10);
+    --destructive-foreground: var(--gray-1);
+    --success: var(--teal-10);
+    --warning: #d98c14;
+    --border: var(--gray-a6);
+    --input: var(--gray-a5);
+    --ring: var(--teal-8);
+    --radius: 1.25rem;
+    --shadow-soft: rgb(5 67 69 / 0.18);
+    --shadow-strong: rgb(5 67 69 / 0.28);
+    --hero-glow: rgb(10 153 156 / 0.18);
+    --grid-line: rgb(71 95 95 / 0.18);
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at top, var(--hero-glow) 0%, transparent 42%),
+      linear-gradient(135deg, var(--gray-1) 0%, var(--gray-2) 35%, var(--gray-1) 100%);
+  }
+}
+
+@layer components {
+  .shell-surface {
+    background: linear-gradient(180deg, var(--teal-a1) 0%, transparent 100%);
+  }
+
+  .glass-panel {
+    background: linear-gradient(180deg, var(--gray-a2) 0%, var(--gray-a1) 100%);
+    backdrop-filter: blur(18px);
+    border: 1px solid var(--border);
+    box-shadow: 0 16px 40px var(--shadow-soft);
+  }
+
+  .content-grid {
+    background-size: 72px 72px;
+    background-image:
+      linear-gradient(90deg, transparent 0, transparent calc(100% - 1px), var(--grid-line) calc(100% - 1px)),
+      linear-gradient(180deg, transparent 0, transparent calc(100% - 1px), var(--grid-line) calc(100% - 1px));
+  }
+
+  .section-heading {
+    @apply font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl;
+  }
+
+  .eyebrow {
+    @apply text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground;
+  }
+}

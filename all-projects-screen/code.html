@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Judge Portal | Project Directory</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Open+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0ddff2",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#102122",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Open Sans", "sans-serif"],
+                        "sans": ["Open Sans", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Navigation Header -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-slate-200 dark:border-slate-800 px-6 lg:px-20 py-4 bg-background-light dark:bg-background-dark sticky top-0 z-50">
+<div class="flex items-center gap-4 text-slate-900 dark:text-slate-100">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-background-dark">
+<span class="material-symbols-outlined font-bold">gavel</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-tight font-display">JudgePortal</h2>
+</div>
+<div class="flex flex-1 justify-end gap-6 items-center">
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Projects</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Leaderboard</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Guidelines</a>
+</nav>
+<div class="flex gap-3">
+<button class="flex items-center justify-center rounded-xl size-10 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-[20px]">light_mode</span>
+</button>
+<button class="flex items-center justify-center rounded-xl size-10 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-[20px]">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex flex-1 justify-center py-8 px-6 lg:px-20">
+<div class="layout-content-container flex flex-col max-w-[1200px] flex-1 gap-8">
+<!-- Title Section -->
+<div class="flex flex-wrap items-end justify-between gap-4">
+<div class="flex flex-col gap-2">
+<h1 class="text-slate-900 dark:text-slate-100 text-4xl font-extrabold tracking-tight font-display">Project Directory</h1>
+<p class="text-slate-500 dark:text-slate-400 text-base">Evaluate and score 42 assigned submissions across all tracks.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center justify-center gap-2 rounded-xl h-11 px-6 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition-all">
+<span class="material-symbols-outlined text-lg">download</span>
+<span>Export CSV</span>
+</button>
+<button class="flex items-center justify-center gap-2 rounded-xl h-11 px-6 bg-primary text-background-dark text-sm font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-lg">fact_check</span>
+<span>Finish Judging</span>
+</button>
+</div>
+</div>
+<!-- Filter Bar -->
+<div class="flex flex-col gap-4">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full h-14 pl-12 pr-4 rounded-xl border-none bg-slate-100 dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-slate-400" placeholder="Search projects by name, team, tech stack, or booth number..."/>
+</div>
+<div class="flex flex-wrap items-center gap-3">
+<div class="flex items-center gap-2 text-slate-400 mr-2">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+<span class="text-xs font-bold uppercase tracking-wider">Filters</span>
+</div>
+<button class="flex h-10 items-center justify-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 text-primary text-sm font-semibold">
+<span>All Tracks</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<button class="flex h-10 items-center justify-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800 px-4 text-slate-600 dark:text-slate-300 text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span>AI &amp; ML</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<button class="flex h-10 items-center justify-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800 px-4 text-slate-600 dark:text-slate-300 text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span>Sustainability</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<button class="flex h-10 items-center justify-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800 px-4 text-slate-600 dark:text-slate-300 text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span>Fintech</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<div class="h-6 w-[1px] bg-slate-300 dark:bg-slate-700 mx-2"></div>
+<button class="flex h-10 items-center justify-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800 px-4 text-slate-600 dark:text-slate-300 text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span>Tech Stack</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Tabs & View Toggle -->
+<div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+<div class="flex gap-8">
+<button class="flex flex-col items-center justify-center border-b-2 border-primary text-primary pb-3 pt-2 font-bold text-sm tracking-wide transition-all">
+                                All Projects
+                            </button>
+<button class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 pb-3 pt-2 font-bold text-sm tracking-wide transition-all">
+                                Not Started
+                            </button>
+<button class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 pb-3 pt-2 font-bold text-sm tracking-wide transition-all">
+                                In Progress
+                            </button>
+<button class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 pb-3 pt-2 font-bold text-sm tracking-wide transition-all">
+                                Scored
+                            </button>
+</div>
+<div class="flex bg-slate-100 dark:bg-slate-800/50 rounded-lg p-1 mb-2">
+<button class="p-1.5 rounded-md bg-white dark:bg-slate-700 shadow-sm text-primary">
+<span class="material-symbols-outlined block">grid_view</span>
+</button>
+<button class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+<span class="material-symbols-outlined block">list</span>
+</button>
+</div>
+</div>
+<!-- Project Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="group flex flex-col bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-2xl hover:shadow-primary/5">
+<div class="h-40 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-slate-900/40 z-10"></div>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Abstract AI neural network visualization with cyan accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBR6SAg-6llULNROQkmH-G2OOxDiY7eynkkiq7_V1GdFWS1bZ_9yaOsihgVV57IWdZKzfnIu1FrQ64zICAEc0_vzxWMNRDKQSUu6PP5lzNFWUcXj1Jx6AS1rNbR2bp-b3ahenKLJ81Wv8RLllxjg9tUj1VJArevvwKFZaXJvPBJzhXhKGdk7ltc5B6Fq8qaJh7qlsCFZhwbfY6_vSuxr5AJVwiJTBuQXO4tZ83poSp6iKkxOk7PX3hx-ck7CCaVxucC3mqw_1DTlWc"/>
+<div class="absolute top-3 right-3 z-20 flex gap-2">
+<span class="bg-slate-900/80 backdrop-blur-md text-white px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest">Booth 104</span>
+</div>
+</div>
+<div class="p-5 flex flex-col gap-4">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-primary uppercase tracking-widest">AI Track</span>
+<div class="flex items-center gap-1.5">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Scored</span>
+</div>
+</div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 font-display">NeuralHealth Assistant</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium">By Team CyberFlow</p>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                                    A real-time AI diagnostic tool for detecting early signs of neurodegenerative diseases using standard mobile cameras.
+                                </p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold">Python</span>
+<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold">PyTorch</span>
+<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold">React Native</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-400 font-bold uppercase">Score</span>
+<span class="text-lg font-black text-primary">9.4<span class="text-slate-400 text-xs font-normal">/10</span></span>
+</div>
+<button class="h-9 px-4 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-bold hover:bg-primary hover:text-background-dark transition-colors">
+                                        View Details
+                                    </button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group flex flex-col bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-2xl hover:shadow-primary/5">
+<div class="h-40 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-slate-900/40 z-10"></div>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Futuristic clean energy power plant at night" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUlthJoFm1Vi49Jay_LMzvUS2HYlEUG5bZGRfhaDpaiU-i6LARXd_6EUPywt9xTfywgWjxFpoMrEqmKMiCQKeMKpbzlx-KLwRwmVlEnOI6fK2h9XWNowsRYcl8x2SlP8iHS7iYjto7vHIWBc6NhObM4fqV3omaa6PfzxVltRzd63seYQmNiNyQmYgpL5_XEPMD2aOYeCCF1rKnP1FCXsQJoueVbdqUgUz1mxVoiKAqzj4mXU5_OlSWqY752oCO291Yh_sJkyLmAyg"/>
+<div class="absolute top-3 right-3 z-20 flex gap-2">
+<span class="bg-slate-900/80 backdrop-blur-md text-white px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest">Booth 312</span>
+</div>
+</div>
+<div class="p-5 flex flex-col gap-4">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-primary uppercase tracking-widest">Sustainability</span>
+<div class="flex items-center gap-1.5">
+<span class="size-2 rounded-full bg-amber-500"></span>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">In Progress</span>
+</div>
+</div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 font-display">EcoTrace Blockchain</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium">By Team GreenCode</p>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                                    Transparent supply chain tracking for sustainable fashion using Ethereum L2 solutions and IoT sensors.
+                                </p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold">Solidity</span>
+<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold">Next.js</span>
+<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold">IoT</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-400 font-bold uppercase">Progress</span>
+<div class="w-24 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mt-2 overflow-hidden">
+<div class="bg-primary h-full w-[65%]"></div>
+</div>
+</div>
+<button class="h-9 px-4 rounded-lg bg-primary text-background-dark text-xs font-bold hover:opacity-90 transition-colors">
+                                        Continue Judging
+                                    </button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group flex flex-col bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-2xl hover:shadow-primary/5">
+<div class="h-40 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-slate-900/40 z-10"></div>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Abstract digital banking interface with data points" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCc2c0tWfLTxYVM8-9G2Gt_qQOV09jhIogTjbUxjXU3jQ2CiZoSbN-7QMUkd9reKvByH2SGVzjVfKtkdiomZb58qy00FPfO_GQLMQp-ukm96aJb8oMjtOKIY_ExYbEgAX9_T31MW0vCuEZw7KmTHqa59JsbkG4n7Me5kfckGf292vgeUEI-2FEPVpgFP4clC-Wb0jk9vj-zl_3Zja7y5_SY0O2kG6UecHKgL8VyzxIO7ZIMEPVZgG-OHkUB0DN_YCcJxHCTDaek_Jc"/>
+<div class="absolute top-3 right-3 z-20 flex gap-2">
+<span class="bg-slate-900/80 backdrop-blur-md text-white px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest">Booth 205</span>
+</div>
+</div>
+<div class="p-5 flex flex-col gap-4">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-primary uppercase tracking-widest">Fintech</span>
+<div class="flex items-center gap-1.5">
+<span class="size-2 rounded-full bg-slate-400"></span>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Not Started</span>
+</div>
+</div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 font-display">MicroLend DAO</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium">By Team Decentral</p>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                                    Peer-to-peer micro-lending platform for small businesses in developing nations using algorithmic risk assessment.
+                                </p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold">Rust</span>
+<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold">Solana</span>
+<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold">GraphQL</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-400 font-bold uppercase">Queue</span>
+<span class="text-sm font-bold text-slate-500 italic">Pending...</span>
+</div>
+<button class="h-9 px-4 rounded-lg bg-slate-900 dark:bg-primary text-white dark:text-background-dark text-xs font-bold hover:opacity-90 transition-colors">
+                                        Start Judging
+                                    </button>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group flex flex-col bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-2xl hover:shadow-primary/5">
+<div class="h-40 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-slate-900/40 z-10"></div>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="High-tech medical lab equipment with cyan lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjnexR8FtNZouyLBRjg9OcDH8GxfKuhM9PQDB1XVYuEFRiSb8rCOiGJTdg3eNozkdy6Ut-VR_9uWfbfo6SJLYhKAPYf88Z4Cm5bHzF54HuSNeizN0aYPg_jj8pWGNM1IKb7H51824LSbgdBFS_ph11E5caQmI8pgG7vA-UDN6rlr46LbccMRNxtsaN7SZjkPKtLB0m2DeXDRwSvQSexUR05h60IPDRn8xwntSn9zNzsFemrtDj5JfmxtiUXLzBHKJNuJGWT06EaRE"/>
+<div class="absolute top-3 right-3 z-20 flex gap-2">
+<span class="bg-slate-900/80 backdrop-blur-md text-white px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest">Booth 411</span>
+</div>
+</div>
+<div class="p-5 flex flex-col gap-4">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-primary uppercase tracking-widest">HealthTech</span>
+<div class="flex items-center gap-1.5">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Scored</span>
+</div>
+</div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 font-display">SyncMed VR</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium">By Team RealityCheck</p>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                                    Virtual reality training simulations for surgeons to practice complex procedures with haptic feedback integration.
+                                </p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold">Unity</span>
+<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold">C#</span>
+<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold">Meta SDK</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-400 font-bold uppercase">Score</span>
+<span class="text-lg font-black text-primary">8.8<span class="text-slate-400 text-xs font-normal">/10</span></span>
+</div>
+<button class="h-9 px-4 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-bold hover:bg-primary hover:text-background-dark transition-colors">
+                                        View Details
+                                    </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between pt-4 pb-12">
+<p class="text-sm text-slate-500 dark:text-slate-400">Showing 4 of 42 projects</p>
+<div class="flex gap-2">
+<button class="flex items-center justify-center size-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="flex items-center justify-center size-10 rounded-xl bg-primary text-background-dark font-bold text-sm">1</button>
+<button class="flex items-center justify-center size-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-sm">2</button>
+<button class="flex items-center justify-center size-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-sm">3</button>
+<button class="flex items-center justify-center size-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Sticky Footer Summary -->
+<footer class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 py-3 px-6 lg:px-20 z-40 hidden md:block">
+<div class="max-w-[1200px] mx-auto flex items-center justify-between">
+<div class="flex gap-12">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Completed</span>
+<span class="text-lg font-bold text-slate-900 dark:text-slate-100">12 / 42</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Avg. Score</span>
+<span class="text-lg font-bold text-primary">8.4</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Booth Progress</span>
+<div class="w-32 h-2 bg-slate-200 dark:bg-slate-800 rounded-full mt-2.5 overflow-hidden">
+<div class="bg-primary h-full w-[28%]"></div>
+</div>
+</div>
+</div>
+<div class="text-slate-400 text-xs font-medium">
+                        Judging Session: Winter Hack 2024 • Track: Engineering Excellence
+                    </div>
+</div>
+</footer>
+</div>
+</div>
+</body></html>

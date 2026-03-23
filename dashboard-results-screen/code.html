@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0ddff2",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#102122",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<title>Results &amp; Summary - Hackathon Judge</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased transition-colors duration-300">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 px-6 lg:px-10 py-3 bg-background-light dark:bg-background-dark sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="size-8 text-primary">
+<span class="material-symbols-outlined text-3xl">trophy</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">Judging Summary</h2>
+</div>
+<div class="flex flex-1 justify-end gap-4 lg:gap-8 items-center">
+<label class="hidden md:flex flex-col min-w-40 h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full overflow-hidden">
+<div class="text-slate-500 dark:text-primary/70 flex border-none bg-slate-100 dark:bg-slate-800 items-center justify-center pl-4">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-slate-100 dark:bg-slate-800 placeholder:text-slate-500 dark:placeholder:text-primary/50 px-4 pl-2 text-base font-normal" placeholder="Search projects..." value=""/>
+</div>
+</label>
+<button class="flex items-center justify-center rounded-xl h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-white hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined">light_mode</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 ring-2 ring-primary/30" data-alt="User profile avatar of the hackathon judge" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBzQ7tpNffAROjCITHt6e2wvSrGsSE6NV1SuAqedz_6jmzXmpIWzHgL_P48t2P3r5GvBUXCgXOwjwfSkPr4BvtIf1q9VrWy31MmT9fohAjgKkB7kUit_nkNbu8ng9BECKW5t_vCXvMF836U2rLwyotrublBwugrz-SRimVL1obRn8Z9EJOEdaty_UoA5VZjR6fiO1W87e2c80E2NRZNhZtClNdfObFeadBMzLNgNeB4XqtlfZOW3nDT5fdDYqwZJrzSSbNzMlfL_IA");'></div>
+</div>
+</header>
+<div class="flex flex-1 flex-col lg:flex-row">
+<!-- Sidebar -->
+<aside class="w-full lg:w-64 flex flex-col justify-between border-r border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark p-4 gap-6">
+<div class="flex flex-col gap-6">
+<div class="flex flex-col px-3">
+<h1 class="text-slate-900 dark:text-white text-base font-bold">Hackathon Judge</h1>
+<p class="text-slate-500 dark:text-primary/70 text-xs font-medium">Judge ID: #4402 • Main Track</p>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-semibold">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined">lightbulb</span>
+<p class="text-sm font-semibold">Projects</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20" href="#">
+<span class="material-symbols-outlined fill-1">bar_chart</span>
+<p class="text-sm font-semibold">Results</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-semibold">Settings</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-4 p-4 rounded-2xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800">
+<div class="flex justify-between items-center">
+<p class="text-slate-900 dark:text-white text-sm font-bold">Judging Status</p>
+<span class="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+</div>
+<div class="flex items-end gap-2">
+<p class="text-slate-900 dark:text-white text-3xl font-black leading-none">40/40</p>
+<p class="text-primary text-sm font-bold mb-1">100%</p>
+</div>
+<div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 100%"></div>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium">All projects submitted</p>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-6 lg:p-10 overflow-y-auto">
+<!-- Header Actions -->
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+<div>
+<h2 class="text-2xl lg:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Scoreboard Summary</h2>
+<p class="text-slate-500 dark:text-slate-400 mt-1">Review and finalize your scores for the Main Track.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex-1 md:flex-none px-6 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
+                                Export PDF
+                            </button>
+<button class="flex-1 md:flex-none px-6 py-2.5 bg-primary text-background-dark rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                                Finalize Submissions
+                            </button>
+</div>
+</div>
+<!-- Alert: Tie-Break Needed -->
+<section class="mb-10">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-amber-500">warning</span>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Action Required: Tie-breaks</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="flex flex-col md:flex-row items-stretch gap-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-5 shadow-sm">
+<div class="flex-1 flex flex-col justify-between gap-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="px-2 py-0.5 rounded bg-amber-200 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider">3rd Place Tie</span>
+</div>
+<p class="text-slate-900 dark:text-white text-base font-bold leading-tight">Project Alpha vs Project Delta</p>
+<p class="text-slate-600 dark:text-slate-400 text-sm mt-1 font-medium">Score: 88.5 / 100</p>
+</div>
+<button class="flex items-center justify-center gap-2 rounded-xl h-10 px-6 bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 transition-all w-full md:w-fit">
+                                        Resolve Tie
+                                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<div class="hidden sm:block w-32 md:w-40 bg-center bg-no-repeat aspect-square bg-cover rounded-xl border border-amber-200 dark:border-amber-500/20" data-alt="Digital circuit board pattern representing a technology project" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDhgImk1RbNNmplu5bnRvB8gYUdkb3zR-VXDZwKtcmLa5HbXTU6GF_yFt8at0RdPBQkUrbol0O07WMa5J4YPgPSg8fYFmnVVNjg7PlPMFiUMcR5Z_xuSe2o0bWrk4zQkgdLMhGC6pr0FBCPuco6ud2WJqJKhD8jlnE50QWoODH3jVB57wa6qQ26WKKKvANiciccsn9ySjI1mheshDmOq16g3dSij_VCy5TDVdQNfXMMgrfzAuJBZOIDgxj-5Kohs3rIbL6jg_7AvUc");'></div>
+</div>
+<div class="flex flex-col md:flex-row items-stretch gap-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-5 shadow-sm">
+<div class="flex-1 flex flex-col justify-between gap-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="px-2 py-0.5 rounded bg-amber-200 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider">5th Place Tie</span>
+</div>
+<p class="text-slate-900 dark:text-white text-base font-bold leading-tight">Eco-Tracker vs Green-Pulse</p>
+<p class="text-slate-600 dark:text-slate-400 text-sm mt-1 font-medium">Score: 82.0 / 100</p>
+</div>
+<button class="flex items-center justify-center gap-2 rounded-xl h-10 px-6 bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 transition-all w-full md:w-fit">
+                                        Resolve Tie
+                                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<div class="hidden sm:block w-32 md:w-40 bg-center bg-no-repeat aspect-square bg-cover rounded-xl border border-amber-200 dark:border-amber-500/20" data-alt="Modern workspace representing a creative software project" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBsCIhuaILbJcg5cbo3wrzcWDlX35W9C3do6cdwMNtATATt3ywvqzdc9gL3eeoguHcWPGpDe-m02HZ_iUl7AKfJ81YUJFakgy2A67dqdF_3ZLXa8ekHcQjcm5qVPs60d7RPX1m7kIoOPgaSHB78sZ83gHcs1YF3vOLKBfWCCg-zbSTFtDf-QXkRgKBd73Y-bfRqFslJ2LbjzDip0oer--QpVKBR2v88C2NYAN2YDgfaQ2JKKkgCEusz--NUs3II_BlB6gC1lg8YPp4");'></div>
+</div>
+</div>
+</section>
+<!-- Results List -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-xl font-bold text-slate-900 dark:text-white">Project Scoreboard</h3>
+<div class="flex gap-2">
+<button class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+<button class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">sort</span>
+</button>
+</div>
+</div>
+<div class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark/50">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">
+<th class="px-6 py-4">Rank</th>
+<th class="px-6 py-4">Project Details</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4">Final Score</th>
+<th class="px-6 py-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Row 1 (Finalist) -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center justify-center size-8 rounded-full bg-primary/20 text-primary font-black text-sm">1</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="size-12 rounded-lg bg-cover bg-center shrink-0 border border-slate-200 dark:border-slate-700" data-alt="Abstract code blocks representation" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC3AHqMJZd5pM4UUjNrw_QVELqga5B-x0T2XFDkSCKNH4MZYw8lJXslVcg-gI0-5kMhHc5CPsAyVn6xZHt7803Y1WFP2ydzN-3sInrEgZYkPXEcnxY6Y7sNjKSLc3ceBkP8M8uMpsdAmgs-u-vx93dswWTvTwopCzBI99VV0LXdUoU0MOIH1nZSfcwZIH-p6MvsaOEsmIGPWQyX_Sk-DR6velqMB7g9dQV8wWAggfB6Jyz8FduJohMNssQzBMYHEzkMN-dCei0Wk6g");'></div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-white">Nebula Wallet</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Team: Stardust Devs</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase tracking-wider">
+<span class="material-symbols-outlined text-[14px]">star</span>
+                                                    Finalist
+                                                </span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-baseline gap-1">
+<span class="text-lg font-black text-slate-900 dark:text-white">96.5</span>
+<span class="text-xs text-slate-400">/ 100</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 (Finalist) -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center justify-center size-8 rounded-full bg-primary/10 text-slate-500 dark:text-slate-400 font-black text-sm">2</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="size-12 rounded-lg bg-cover bg-center shrink-0 border border-slate-200 dark:border-slate-700" data-alt="Data visualization dashboard snippet" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDU8eUk-ZMofXMXDHTomWfHKxFuJfIMXrQ3rTuOdaPU1UIl16TwQgXnWRAH3EBK9ROSDcvix20YncKt0njcj-fRm_431JlfSbTjF5UdFpoLPDN6rjDC1C8ZzX6GlGVqst_2c6OScoQLp6OS_FjxFSSU-tzD9QYJp6_inn7ONEjNfixDDWTEE3QgF5FN5ulgjmHn17tzkxU8wUIqd9_ENIJJgU47kaZqxV4RMqZV2NNfn6prd0ZA9BZvCyRupRZsviBHe-l7irOgGKw");'></div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-white">InsightFlow AI</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Team: Neural Wizards</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase tracking-wider">
+<span class="material-symbols-outlined text-[14px]">star</span>
+                                                    Finalist
+                                                </span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-baseline gap-1">
+<span class="text-lg font-black text-slate-900 dark:text-white">92.0</span>
+<span class="text-xs text-slate-400">/ 100</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 (Tied) -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors bg-amber-500/5">
+<td class="px-6 py-5">
+<div class="flex items-center justify-center size-8 rounded-full bg-amber-500/20 text-amber-500 font-black text-sm">3</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="size-12 rounded-lg bg-cover bg-center shrink-0 border border-slate-200 dark:border-slate-700" data-alt="Mobile app interface design" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAyxJphxHTq68WC32BPy0SZqbn5ImqHsN0VUwgeRZ2ED0F5s_-5HIEmVHBWS0S2OyjxSiHtn-fOWH_E_oCGemxN_VnbYzATQyA8KL3K1mdkzAvz38uVVax1PyhXAeO76PaPZZEsBzVtnPwd-3QQRQiRSjzTPKGTNngAPSKHpcoIdoIGBqPuQlz2yVcJcTN0T7yl762Z_gjOHvKGVk6nwpXdBbYlpuu2rOfNWr0UR-VK1w60JBp4zLvGuoZgRvTEdF2eHi5RW7M0Y3k");'></div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-white">Project Alpha</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Team: Alpha Squadron</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-500 text-[10px] font-black uppercase tracking-wider">
+<span class="material-symbols-outlined text-[14px]">balance</span>
+                                                    Tied (3rd)
+                                                </span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-baseline gap-1">
+<span class="text-lg font-black text-slate-900 dark:text-white">88.5</span>
+<span class="text-xs text-slate-400">/ 100</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-amber-500 hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">edit_square</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 (Tied) -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors bg-amber-500/5">
+<td class="px-6 py-5">
+<div class="flex items-center justify-center size-8 rounded-full bg-amber-500/20 text-amber-500 font-black text-sm">4</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="size-12 rounded-lg bg-cover bg-center shrink-0 border border-slate-200 dark:border-slate-700" data-alt="Global network connectivity pattern" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAO_jMvDjNfdGx3H1I1A-kg6Y9AlASoMLFiNmXbgQneIm0ck7CtM3cRiy_l2r54WlFS516LUty_Bor-MWNOyXC-s27qb1N1l4WFZ2IQ6BHZnwxlXV2WfQlXgxFBFHvekzCP7K-zK0r3QiVNZU9qxWXU3K5sUnvwGsqIZWfy8WvmciZC6PANUZny77Dd9MNqi646mQqnfDXMhjRNV-_O_7ADec3lZtX5myrh1Up8BltHakCMrjOwLu7WvZiwgCcp6_0zY21J3b-oRGI");'></div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-white">Project Delta</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Team: Delta Force</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-500 text-[10px] font-black uppercase tracking-wider">
+<span class="material-symbols-outlined text-[14px]">balance</span>
+                                                    Tied (3rd)
+                                                </span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-baseline gap-1">
+<span class="text-lg font-black text-slate-900 dark:text-white">88.5</span>
+<span class="text-xs text-slate-400">/ 100</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-amber-500 hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">edit_square</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center justify-center size-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-black text-sm">5</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="size-12 rounded-lg bg-cover bg-center shrink-0 border border-slate-200 dark:border-slate-700" data-alt="Finance app analytics screenshot" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAZz-BKfsVQo34Ish_Gvf2TPidyx82i73A8cr2ul4415jeVvF-JpZx6Snf0Yxhm3Mv-Ex-gD-rct5HkXW-pEQ0OmVrZr5HbhQ9JO4wd1LYTa2j7xgmHxSpIK834dXmqvkoMaf1gNjDaFuZZ8DRazbbwhgQ6uFpRtoHTGL2SQhq46Q7YYovZHyrcNDpCtNGDnEWS4tgSefbRstLTataAqRzWksTG8LuUPLmeVqFDR7rBXGr2nX_YCjj0DVEzUUtmt8co8zi5h89PxFc");'></div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-white">Eco-Tracker</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Team: Green Pioneers</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-wider">
+                                                    Qualified
+                                                </span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-baseline gap-1">
+<span class="text-lg font-black text-slate-900 dark:text-white">82.0</span>
+<span class="text-xs text-slate-400">/ 100</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Pagination/Load More -->
+<div class="mt-6 flex items-center justify-between">
+<p class="text-sm text-slate-500 dark:text-slate-400">Showing 1-5 of 40 projects</p>
+<div class="flex gap-2">
+<button class="size-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="size-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-white hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+</div>
+</div>
+</div>
+</body></html>

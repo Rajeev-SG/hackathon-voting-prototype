@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Theme Lab — shadcn + Radix scales</title>
+  <link rel="stylesheet" href="./styles/base.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__left">
+      <div class="logo">Theme Lab</div>
+      <div class="muted">shadcn/ui semantic tokens + Radix-style 12-step scales + Tailwind v3/v4 exports</div>
+    </div>
+
+    <div class="topbar__right">
+      <button id="toggleDark" class="btn btn--ghost" type="button" aria-pressed="false">Toggle dark</button>
+      <button id="reset" class="btn btn--ghost" type="button">Reset</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel">
+      <div class="panel__title">Palette</div>
+
+      <div class="grid2">
+        <div class="field">
+          <label>White</label>
+          <input id="c_white" type="color" />
+          <input id="t_white" class="text" type="text" spellcheck="false" />
+        </div>
+        <div class="field">
+          <label>Black</label>
+          <input id="c_black" type="color" />
+          <input id="t_black" class="text" type="text" spellcheck="false" />
+        </div>
+
+        <div class="field">
+          <label>Gray 100</label>
+          <input id="c_gray100" type="color" />
+          <input id="t_gray100" class="text" type="text" spellcheck="false" />
+        </div>
+        <div class="field">
+          <label>Gray 500</label>
+          <input id="c_gray500" type="color" />
+          <input id="t_gray500" class="text" type="text" spellcheck="false" />
+        </div>
+
+        <div class="field">
+          <label>Gray 600</label>
+          <input id="c_gray600" type="color" />
+          <input id="t_gray600" class="text" type="text" spellcheck="false" />
+        </div>
+        <div class="field">
+          <label>Teal</label>
+          <input id="c_teal" type="color" />
+          <input id="t_teal" class="text" type="text" spellcheck="false" />
+        </div>
+
+        <div class="field">
+          <label>Purple</label>
+          <input id="c_purple" type="color" />
+          <input id="t_purple" class="text" type="text" spellcheck="false" />
+        </div>
+        <div class="field">
+          <label>Radius</label>
+          <input id="radius" class="text" type="text" value="0.75rem" spellcheck="false" />
+          <div class="hint">Used for --radius.</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="panel__title">Theme presets</div>
+      <div class="stack">
+        <label class="radio">
+          <input type="radio" name="theme" value="teal" checked />
+          <span><strong>Teal</strong> primary + Purple secondary</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="theme" value="purple" />
+          <span><strong>Purple</strong> primary + Teal secondary</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="theme" value="duo" />
+          <span><strong>Duo</strong> (Teal primary, Purple used more aggressively in accents)</span>
+        </label>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="panel__title">Exports</div>
+      <div class="stack">
+        <button id="dl_shadcn" class="btn" type="button">Download shadcn theme CSS (current preset)</button>
+        <button id="dl_shadcn_all" class="btn btn--ghost" type="button">Download all shadcn themes (3 files)</button>
+        <button id="dl_radix" class="btn btn--ghost" type="button">Download Radix-style scales CSS</button>
+        <button id="dl_tw3" class="btn btn--ghost" type="button">Download tailwind v3 config snippet</button>
+        <button id="dl_tw4" class="btn btn--ghost" type="button">Download tailwind v4 @theme mapping</button>
+        <button id="dl_palette" class="btn btn--ghost" type="button">Download palette.json</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="panel__title">Generated output (copy/paste)</div>
+      <div class="tabs">
+        <button class="tab is-active" data-tab="shadcn">shadcn theme</button>
+        <button class="tab" data-tab="radix">radix scales</button>
+        <button class="tab" data-tab="tw3">tailwind v3</button>
+        <button class="tab" data-tab="tw4">tailwind v4</button>
+      </div>
+      <textarea id="output" class="code" spellcheck="false"></textarea>
+    </section>
+
+    <section class="preview">
+      <div class="preview__header">
+        <div>
+          <div class="panel__title" style="margin:0">Preview</div>
+          <div class="muted">A small “component gallery” that uses the same semantic tokens shadcn/ui expects.</div>
+        </div>
+      </div>
+
+      <div class="preview__grid">
+        <div class="card">
+          <div class="card__title">Card</div>
+          <div class="card__body">
+            <p class="muted">Background, border, and text are driven by semantic tokens.</p>
+            <div class="row">
+              <button class="btn">Primary</button>
+              <button class="btn btn--secondary">Secondary</button>
+              <button class="btn btn--ghost">Ghost</button>
+              <button class="btn btn--destructive">Destructive</button>
+            </div>
+            <div class="row">
+              <span class="badge">Badge</span>
+              <span class="badge badge--secondary">Secondary</span>
+              <span class="badge badge--outline">Outline</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__title">Form</div>
+          <div class="card__body">
+            <label class="label">Email</label>
+            <input class="input" placeholder="you@company.com" />
+            <label class="label">Message</label>
+            <textarea class="textarea" placeholder="Type something…"></textarea>
+            <div class="row">
+              <button class="btn">Submit</button>
+              <button class="btn btn--ghost">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__title">Table</div>
+          <div class="card__body">
+            <div class="table">
+              <div class="tr th">
+                <div>Project</div><div>Score</div><div>Status</div>
+              </div>
+              <div class="tr">
+                <div>TrackingOS</div><div>9.2</div><div><span class="badge">Shortlist</span></div>
+              </div>
+              <div class="tr">
+                <div>AdTech Radar</div><div>8.8</div><div><span class="badge badge--secondary">Review</span></div>
+              </div>
+              <div class="tr">
+                <div>Extractor</div><div>7.9</div><div><span class="badge badge--outline">Backlog</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__title">Alert</div>
+          <div class="card__body">
+            <div class="alert">
+              <div class="alert__dot"></div>
+              <div>
+                <div class="alert__title">Network is unstable</div>
+                <div class="muted">Your theme should still feel polished even under failure states.</div>
+              </div>
+            </div>
+            <div style="height: 10px"></div>
+            <div class="alert alert--destructive">
+              <div class="alert__dot"></div>
+              <div>
+                <div class="alert__title">Action required</div>
+                <div class="muted">Example destructive surface + border + text contrast.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <div class="muted">Tip: export the Tailwind v4 mapping to get <code>bg-background</code> / <code>text-foreground</code> utilities.</div>
+      </footer>
+    </section>
+  </main>
+
+  <style id="generatedTheme"></style>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

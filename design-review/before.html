@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Before Review - Hackathon Voting Prototype</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+
+      :root {
+        --bg: #0d1115;
+        --bg-soft: #121820;
+        --panel: rgba(20, 27, 33, 0.86);
+        --panel-strong: rgba(15, 22, 27, 0.94);
+        --line: rgba(255, 255, 255, 0.1);
+        --text: #eef1ec;
+        --muted: #a4aea8;
+        --accent: #1cc8d8;
+        --warning: #f0a33d;
+        --danger: #d76b7a;
+        --shadow: 0 26px 70px rgba(0, 0, 0, 0.36);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        color-scheme: dark;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Outfit", system-ui, sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(28, 200, 216, 0.16), transparent 28%),
+          linear-gradient(180deg, #0b0f13 0%, #12171c 100%);
+        color: var(--text);
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .shell {
+        width: min(1220px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 28px 0 60px;
+      }
+
+      .nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 40px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-weight: 700;
+      }
+
+      .brand-mark {
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+        background: var(--accent);
+        box-shadow: 0 0 0 8px rgba(28, 200, 216, 0.15);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .nav-links a {
+        padding: 11px 16px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.03);
+        text-decoration: none;
+        color: var(--muted);
+      }
+
+      .hero,
+      .screen,
+      .finding {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        padding: 34px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+        gap: 26px;
+        margin-bottom: 22px;
+      }
+
+      .eyebrow {
+        margin: 0 0 14px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        line-height: 1.4;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      p,
+      ul {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(40px, 7vw, 74px);
+        line-height: 0.95;
+        letter-spacing: -0.06em;
+        max-width: 10ch;
+      }
+
+      .lead {
+        margin-top: 18px;
+        max-width: 58ch;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.75;
+      }
+
+      .summary {
+        display: grid;
+        gap: 16px;
+      }
+
+      .summary-item {
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+      }
+
+      .summary-item:first-child {
+        padding-top: 0;
+        border-top: 0;
+      }
+
+      .summary-item h2 {
+        font-size: 28px;
+        line-height: 1;
+        letter-spacing: -0.04em;
+      }
+
+      .summary-item p {
+        margin-top: 6px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .findings {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        margin: 18px 0 24px;
+      }
+
+      .finding {
+        padding: 22px;
+      }
+
+      .severity {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 11px;
+        border-radius: 999px;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .severity.high {
+        color: #ffd8dd;
+        background: rgba(215, 107, 122, 0.16);
+      }
+
+      .severity.medium {
+        color: #ffe2b8;
+        background: rgba(240, 163, 61, 0.16);
+      }
+
+      .severity.low {
+        color: #b5f3f8;
+        background: rgba(28, 200, 216, 0.16);
+      }
+
+      .finding h3 {
+        margin-top: 16px;
+        font-size: 21px;
+        letter-spacing: -0.04em;
+      }
+
+      .finding p {
+        margin-top: 12px;
+        color: var(--muted);
+        line-height: 1.75;
+      }
+
+      .screen-list {
+        display: grid;
+        gap: 22px;
+      }
+
+      .screen {
+        display: grid;
+        grid-template-columns: minmax(0, 0.95fr) minmax(300px, 0.8fr);
+        gap: 22px;
+        padding: 22px;
+      }
+
+      .screen-visual {
+        border-radius: 22px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--panel-strong);
+      }
+
+      .screen-visual img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .screen-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .screen-copy h2 {
+        font-size: 30px;
+        line-height: 0.98;
+        letter-spacing: -0.05em;
+      }
+
+      .screen-copy p {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .audit-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .audit-item {
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .audit-item strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 15px;
+      }
+
+      .audit-item span {
+        color: var(--muted);
+        line-height: 1.65;
+        font-size: 14px;
+      }
+
+      .code-ref {
+        display: inline-block;
+        margin-top: 8px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        color: #cdeef1;
+      }
+
+      @media (max-width: 1080px) {
+        .hero,
+        .screen,
+        .findings {
+          grid-template-columns: 1fr;
+        }
+
+        .shell {
+          width: min(1220px, calc(100% - 28px));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="nav">
+        <div class="brand">
+          <span class="brand-mark"></span>
+          <span>Before review</span>
+        </div>
+        <div class="nav-links">
+          <a href="./index.html">Overview</a>
+          <a href="./after.html">Go to after</a>
+        </div>
+      </div>
+
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Current prototype audit</p>
+          <h1>The flows work, but they still look and feel like a polished hackathon demo.</h1>
+          <p class="lead">
+            The app already has route coverage, sensible mock data, and better-than-average spacing. The main issues are
+            repeated generic card treatment, weak type character, conflicting accents, and interaction patterns that do
+            not fully support judging decisions.
+          </p>
+        </div>
+        <aside class="summary">
+          <div class="summary-item">
+            <h2>Theme toggle is cosmetic</h2>
+            <p>
+              `ThemeToggle` flips the `dark` class, but `app/globals.css` does not define alternate theme tokens for that
+              class.
+            </p>
+          </div>
+          <div class="summary-item">
+            <h2>Tie-break data is dropped</h2>
+            <p>
+              `ResultsDashboard` accepts `tieBreaks`, renames them to `_tieBreaks`, and never renders them.
+            </p>
+          </div>
+          <div class="summary-item">
+            <h2>Several controls over-promise</h2>
+            <p>
+              The results toolbar, upload actions, and score actions still resolve to console logs or placeholder flows.
+            </p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="findings">
+        <article class="finding">
+          <span class="severity high">High severity</span>
+          <h3>Theme switching currently does not change the visual system.</h3>
+          <p>
+            `app/layout.tsx` hard-codes `<html class="dark">` while `app/globals.css` only sets `color-scheme: dark` for
+            `.dark`. The button therefore changes icon state and local storage, but it does not swap background, border,
+            or text tokens.
+          </p>
+          <span class="code-ref">app/layout.tsx lines 22-29, app/globals.css lines 8-39, components/theme-toggle.tsx lines 12-38</span>
+        </article>
+
+        <article class="finding">
+          <span class="severity high">High severity</span>
+          <h3>The results route ignores the most important escalation state.</h3>
+          <p>
+            The scoreboard component receives tie-break cases but discards them. That means the most urgent judging task is
+            absent from the code path even though the screen language suggests a decision console should exist.
+          </p>
+          <span class="code-ref">components/results-dashboard.tsx lines 15-21</span>
+        </article>
+
+        <article class="finding">
+          <span class="severity medium">Medium severity</span>
+          <h3>The app mixes one solid accent with an extra purple status system.</h3>
+          <p>
+            The prototype mostly leans on teal, but the base tokens still define secondary and destructive purple values
+            and the scoreboard uses purple qualification badges. That creates the exact multi-accent drift the redesign
+            skill warns against.
+          </p>
+          <span class="code-ref">app/globals.css lines 15-29, components/results-scoreboard-table.tsx lines 44-47</span>
+        </article>
+      </section>
+
+      <div class="screen-list">
+        <section class="screen">
+          <div class="screen-visual">
+            <img src="./assets/all-projects.png" alt="Current project directory screen" />
+          </div>
+          <div class="screen-copy">
+            <div>
+              <p class="eyebrow">Screen 1</p>
+              <h2>Project directory</h2>
+            </div>
+            <p>
+              This screen is functional and already readable, but it leans heavily on generic dashboard tropes: a broad
+              header, a search bar, filter chips, and evenly treated cards. The result is competent, but it does not help
+              judges triage urgent work faster than standard browsing.
+            </p>
+            <div class="audit-list">
+              <div class="audit-item">
+                <strong>Generic card dependency</strong>
+                <span>The main browsing surface depends on repeated image cards, so urgent status cues compete with cover art instead of dominating the decision layer.</span>
+                <span class="code-ref">components/project-directory.tsx lines 57-80, components/project-card.tsx lines 60-135</span>
+              </div>
+              <div class="audit-item">
+                <strong>Nested interaction risk</strong>
+                <span>The card uses a full-surface absolute link and also contains a linked CTA button. That creates stacked click targets and a noisy focus model.</span>
+                <span class="code-ref">components/project-card.tsx lines 66-70, 122-130</span>
+              </div>
+              <div class="audit-item">
+                <strong>Typography lacks contrast</strong>
+                <span>`Inter` plus `Manrope` is serviceable, but it reads as default modern SaaS rather than a distinct judging environment.</span>
+                <span class="code-ref">app/layout.tsx lines 7-15</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <div class="screen-visual">
+            <img src="./assets/project-detail.png" alt="Current project detail screen" />
+          </div>
+          <div class="screen-copy">
+            <div>
+              <p class="eyebrow">Screen 2</p>
+              <h2>Project detail</h2>
+            </div>
+            <p>
+              The detail page has the strongest visual moment in the current prototype, but the layout still puts too much
+              weight on a single hero banner and then falls back to a standard two-column content plus metadata card.
+            </p>
+            <div class="audit-list">
+              <div class="audit-item">
+                <strong>Hero does not support evidence review</strong>
+                <span>The large image creates mood, but judges still need proof: track fit, readiness, strongest differentiators, and decision shortcuts.</span>
+                <span class="code-ref">components/project-overview.tsx lines 28-48, 50-64</span>
+              </div>
+              <div class="audit-item">
+                <strong>Metadata is visually isolated</strong>
+                <span>The sidebar card is generic and compact, which makes team, booth, and status feel secondary even though they shape judging logistics.</span>
+                <span class="code-ref">components/project-overview.tsx lines 96-149</span>
+              </div>
+              <div class="audit-item">
+                <strong>Button hierarchy is conventional</strong>
+                <span>Outline plus filled button is standard, but it does not distinguish “review evidence” from “commit to scoring.”</span>
+                <span class="code-ref">components/project-overview.tsx lines 82-93</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <div class="screen-visual">
+            <img src="./assets/scoring.png" alt="Current scoring workbench screen" />
+          </div>
+          <div class="screen-copy">
+            <div>
+              <p class="eyebrow">Screen 3</p>
+              <h2>Scoring workbench</h2>
+            </div>
+            <p>
+              This flow is structurally solid, but it still reads like form entry instead of a serious evaluation tool.
+              The repeated cards and long vertical stack force judges to scan rather than compare.
+            </p>
+            <div class="audit-list">
+              <div class="audit-item">
+                <strong>Rubric criteria are separated instead of comparable</strong>
+                <span>Every criterion is boxed into the same card structure, so the page lacks an overview layer that helps a judge understand score balance.</span>
+                <span class="code-ref">components/scoring-workbench.tsx lines 78-126</span>
+              </div>
+              <div class="audit-item">
+                <strong>Feedback input is under-labeled</strong>
+                <span>The note field uses a placeholder as its primary instruction and removes the focus ring, which weakens accessibility and form clarity.</span>
+                <span class="code-ref">components/scoring-workbench.tsx lines 129-136</span>
+              </div>
+              <div class="audit-item">
+                <strong>Footer actions feel detached from the rubric</strong>
+                <span>The fixed footer gives progress and buttons, but it does not surface score confidence, missing criteria, or tie-break risk before submission.</span>
+                <span class="code-ref">components/scoring-workbench.tsx lines 157-195</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <div class="screen-visual">
+            <img src="./assets/results.png" alt="Current results dashboard screen" />
+          </div>
+          <div class="screen-copy">
+            <div>
+              <p class="eyebrow">Screen 4</p>
+              <h2>Results dashboard</h2>
+            </div>
+            <p>
+              The screen suggests a serious committee workflow, but the implementation is still mostly a table with a
+              status card. The design needs a stronger difference between “read ranked data” and “resolve edge cases.”
+            </p>
+            <div class="audit-list">
+              <div class="audit-item">
+                <strong>Tie-break urgency is not encoded in the component tree</strong>
+                <span>The mockup language implies escalation cards, but the shipping component drops tie-break cases before rendering.</span>
+                <span class="code-ref">components/results-dashboard.tsx lines 15-21</span>
+              </div>
+              <div class="audit-item">
+                <strong>Actions are icon-only and mostly placeholder</strong>
+                <span>Filter and sort actions are hidden behind isolated icon buttons and currently log to the console instead of changing the table.</span>
+                <span class="code-ref">components/results-dashboard.tsx lines 76-86</span>
+              </div>
+              <div class="audit-item">
+                <strong>Qualified badge breaks palette discipline</strong>
+                <span>The purple qualification chip introduces a second accent family that makes the status system feel less intentional.</span>
+                <span class="code-ref">components/results-scoreboard-table.tsx lines 44-47</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <div class="screen-visual">
+            <img src="./assets/assets.png" alt="Current asset upload screen" />
+          </div>
+          <div class="screen-copy">
+            <div>
+              <p class="eyebrow">Screen 5</p>
+              <h2>Asset upload workspace</h2>
+            </div>
+            <p>
+              The split between form and judge preview is the right idea, but the interaction model still behaves like a
+              demo. The upload zones are clickable blocks, not clearly labeled form controls with explicit validation.
+            </p>
+            <div class="audit-list">
+              <div class="audit-item">
+                <strong>Labels and validation are incomplete</strong>
+                <span>The hero uploader is a button block, the video field has no visible label association, and there are no inline errors or completion guidance.</span>
+                <span class="code-ref">components/asset-upload-workspace.tsx lines 61-101</span>
+              </div>
+              <div class="audit-item">
+                <strong>The preview rail is too passive</strong>
+                <span>The right rail shows skeletons and readiness bars, but it does not explain what the judge will actually understand from each asset.</span>
+                <span class="code-ref">components/asset-upload-workspace.tsx lines 150-215</span>
+              </div>
+              <div class="audit-item">
+                <strong>Bottom CTA is still a placeholder</strong>
+                <span>The live preview button logs to the console. That makes the most confidence-building action feel unfinished.</span>
+                <span class="code-ref">components/asset-upload-workspace.tsx lines 218-225</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hackathon Voting App Design Review</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+
+      :root {
+        --bg: #0f1317;
+        --bg-soft: #151b20;
+        --panel: rgba(19, 25, 31, 0.8);
+        --line: rgba(255, 255, 255, 0.1);
+        --text: #f4efe7;
+        --muted: #a8aea7;
+        --accent: #db7b3b;
+        --accent-soft: rgba(219, 123, 59, 0.18);
+        --success: #84b59f;
+        --shadow: 0 32px 80px rgba(0, 0, 0, 0.36);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        color-scheme: dark;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Outfit", system-ui, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top, rgba(219, 123, 59, 0.16), transparent 32%),
+          linear-gradient(180deg, #0e1114 0%, #12171c 100%);
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .shell {
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 28px 0 56px;
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 56px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+      }
+
+      .brand-mark {
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+        background: var(--accent);
+        box-shadow: 0 0 0 8px var(--accent-soft);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .nav-links a,
+      .cta {
+        padding: 12px 16px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.03);
+        text-decoration: none;
+        color: var(--muted);
+        transition: transform 180ms ease, border-color 180ms ease, color 180ms ease;
+      }
+
+      .nav-links a:hover,
+      .cta:hover {
+        transform: translateY(-1px);
+        border-color: rgba(219, 123, 59, 0.45);
+        color: var(--text);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+        gap: 24px;
+        align-items: stretch;
+        margin-bottom: 28px;
+      }
+
+      .hero-copy,
+      .hero-panel,
+      .card,
+      .note {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+      }
+
+      .hero-copy {
+        padding: 36px;
+      }
+
+      .eyebrow,
+      .kicker {
+        margin: 0 0 14px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        line-height: 1.4;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(42px, 8vw, 84px);
+        line-height: 0.94;
+        letter-spacing: -0.06em;
+        max-width: 9ch;
+        text-wrap: balance;
+      }
+
+      .lead {
+        margin-top: 22px;
+        max-width: 56ch;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.75;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 28px;
+      }
+
+      .cta.primary {
+        border-color: transparent;
+        background: var(--accent);
+        color: #16110e;
+        font-weight: 700;
+      }
+
+      .hero-panel {
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 22px;
+      }
+
+      .metric-list {
+        display: grid;
+        gap: 18px;
+      }
+
+      .metric {
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+      }
+
+      .metric:first-child {
+        padding-top: 0;
+        border-top: 0;
+      }
+
+      .metric-value {
+        font-size: 34px;
+        line-height: 1;
+        font-weight: 700;
+        letter-spacing: -0.05em;
+      }
+
+      .metric-label {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        margin: 18px 0 28px;
+      }
+
+      .card {
+        padding: 24px;
+      }
+
+      .card h2 {
+        font-size: 20px;
+        letter-spacing: -0.04em;
+      }
+
+      .card p {
+        margin-top: 12px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .notes {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .note {
+        padding: 24px;
+      }
+
+      .note p {
+        margin-top: 10px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .link-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      @media (max-width: 980px) {
+        .hero,
+        .grid,
+        .notes {
+          grid-template-columns: 1fr;
+        }
+
+        .shell {
+          width: min(1180px, calc(100% - 28px));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="nav">
+        <div class="brand">
+          <span class="brand-mark"></span>
+          <span>Hackathon voting app review</span>
+        </div>
+        <div class="nav-links">
+          <a href="./before.html">Open before</a>
+          <a href="./after.html">Open after</a>
+        </div>
+      </div>
+
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Skills used</p>
+          <h1>taste-skill, redesign-skill, output-skill</h1>
+          <p class="lead">
+            This review package audits the current Next.js prototype without modifying it. The before page shows the
+            current screens and the code-backed issues. The after page shows standalone HTML mockups that apply the
+            local design skills to the same judging workflow.
+          </p>
+          <div class="actions">
+            <a class="cta primary" href="./before.html">Review current prototype</a>
+            <a class="cta" href="./after.html">Review proposed redesign</a>
+          </div>
+        </div>
+
+        <aside class="hero-panel">
+          <div>
+            <p class="kicker">Audit baseline</p>
+            <div class="metric-list">
+              <div class="metric">
+                <div class="metric-value">5</div>
+                <div class="metric-label">Primary screens reviewed</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">6</div>
+                <div class="metric-label">Structural issues called out</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">0</div>
+                <div class="metric-label">Changes made to the prototype</div>
+              </div>
+            </div>
+          </div>
+          <p class="metric-label">
+            Browser capture on `localhost:3000/projects` returned a 404, so the before baseline uses the checked-in
+            screen captures bundled with the repo plus the current component code.
+          </p>
+        </aside>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <p class="eyebrow">Typography</p>
+          <h2>The app reads as a polished prototype, but not a premium judging product.</h2>
+          <p>
+            `Inter` plus `Manrope`, repeated uppercase labels, and repeated glass panels flatten the hierarchy instead of
+            sharpening it.
+          </p>
+        </article>
+
+        <article class="card">
+          <p class="eyebrow">Interaction</p>
+          <h2>Several controls signal more than they actually do.</h2>
+          <p>
+            The theme toggle only flips a class with no dark or light token swap, the results toolbar buttons only log to
+            the console, and the upload flow is missing explicit field labels and inline validation.
+          </p>
+        </article>
+
+        <article class="card">
+          <p class="eyebrow">Layout</p>
+          <h2>The flows rely on generic card stacking instead of decision-oriented structures.</h2>
+          <p>
+            Directory, scoring, and results all use the same surface treatment even though they serve different cognitive
+            jobs: triage, evaluation, and comparison.
+          </p>
+        </article>
+      </section>
+
+      <section class="notes">
+        <article class="note">
+          <p class="eyebrow">Included files</p>
+          <p>
+            `before.html` documents the current screens, issues, and exact code references.<br />
+            `after.html` presents full-screen redesign mockups for the same routes.
+          </p>
+          <div class="link-row">
+            <a class="cta" href="./before.html">Current-state audit</a>
+            <a class="cta" href="./after.html">Proposed-state mockups</a>
+          </div>
+        </article>
+
+        <article class="note">
+          <p class="eyebrow">Deliberate scope</p>
+          <p>
+            I did not apply the repo-wide UI audit skill because your request explicitly asked to use the local
+            `/design-skills` package. The redesign therefore follows the repo's own taste, redesign, and output rules.
+          </p>
+        </article>
+      </section>
+    </div>
+  </body>
+</html>

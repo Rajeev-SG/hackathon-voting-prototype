@@ -1,0 +1,18 @@
+{
+  "radius": "0.75rem",
+  "palette": {
+    "white": "#FFFFFF",
+    "black": "#222222",
+    "gray100": "#CCCCCC",
+    "gray500": "#888888",
+    "gray600": "#999999",
+    "teal": "#2FC3C7",
+    "purple": "#6F5798",
+    "graySeed": "#888888"
+  },
+  "presets": {
+    "teal": { "primary": "teal", "secondary": "purple" },
+    "purple": { "primary": "purple", "secondary": "teal" },
+    "duo": { "primary": "teal", "secondary": "purple" }
+  }
+}

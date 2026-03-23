@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;family=Open+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0ddff2",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#102122",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "Open Sans", "sans-serif"],
+                        "body": ["Open Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+        }
+        .font-display {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 px-6 md:px-10 py-4 bg-background-light dark:bg-background-dark sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="size-8 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z" fill="currentColor" fill-rule="evenodd"></path>
+<path clip-rule="evenodd" d="M24 8.18819L33.4123 11.574L24 15.2071L14.5877 11.574L24 8.18819ZM9 15.8487L21 20.4805V37.6263L9 32.9945V15.8487ZM27 37.6263V20.4805L39 15.8487V32.9945L27 37.6263ZM25.354 2.29885C24.4788 1.98402 23.5212 1.98402 22.646 2.29885L4.98454 8.65208C3.7939 9.08038 3 10.2097 3 11.475V34.3663C3 36.0196 4.01719 37.5026 5.55962 38.098L22.9197 44.7987C23.6149 45.0671 24.3851 45.0671 25.0803 44.7987L42.4404 38.098C43.9828 37.5026 45 36.0196 45 34.3663V11.475C45 10.2097 44.2061 9.08038 43.0155 8.65208L25.354 2.29885Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-slate-900 dark:text-white text-xl font-display font-bold leading-tight tracking-tight">DevPost Plus</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8 items-center">
+<nav class="hidden md:flex items-center gap-9">
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors text-sm font-medium" href="#">Directory</a>
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors text-sm font-medium" href="#">Hackathons</a>
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors text-sm font-medium" href="#">Teams</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-background-dark text-sm font-bold transition-transform active:scale-95">
+<span>Profile</span>
+</button>
+<div class="bg-slate-200 dark:bg-slate-800 rounded-full size-10 flex items-center justify-center overflow-hidden border border-slate-300 dark:border-slate-700">
+<img class="w-full h-full object-cover" data-alt="User profile avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD524c0XGSUN5tFUpwob8s-WmMSZdGCqQfhF0tDM2wgnc7FzzpwVQhfIMSg7mXL1HCmoXicctrZDIdsNM7LS2Dz29teDZ0ZaXfU-1Q2CaRnCJzaqWY1M6TWexfJlskL6hv7DTOZ3lO0OnpBpu8pQuRVHSSi7nfUUl2CVjiCXQMCiHVpkmqBzKaPKkN4mEXY4CBSLrEYdZ916A-WLHcJqAl-VwVRs7yi_KhKLW2hr7g63ZNELmbKN5mPIj-DE9mdfiepYcTglsn9W-o"/>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 max-w-[1200px] mx-auto w-full px-4 md:px-10 py-8">
+<!-- Breadcrumbs -->
+<nav class="flex items-center gap-2 mb-8 text-sm font-medium">
+<a class="text-slate-500 dark:text-slate-400 hover:text-primary" href="#">Hackathons</a>
+<span class="material-symbols-outlined text-slate-400 text-sm">chevron_right</span>
+<a class="text-slate-500 dark:text-slate-400 hover:text-primary" href="#">Global AI Build 2024</a>
+<span class="material-symbols-outlined text-slate-400 text-sm">chevron_right</span>
+<span class="text-primary">Project Detail</span>
+</nav>
+<!-- Hero Section -->
+<div class="relative group rounded-xl overflow-hidden mb-8 border border-slate-200 dark:border-slate-800 shadow-2xl">
+<div class="w-full h-[400px] bg-slate-800">
+<img class="w-full h-full object-cover" data-alt="Abstract futuristic AI visualization with cyan glowing lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgMwnqcsAP_JyMJXVXaEyrSb3xKBuRLpt3Yhc_0i5YDw8ipThtgaasArmQpm-dnCrHSiP-lK1UViiDkChYYauw1eNRSgz89fwMio99UZgFSwu8tsn5cKB-UMeGD0OnpfuXDs4TwGExTg-kjElLkWk8-fWwaCWHA9YxOOtazfzffO-WcPzZPlPegr06DoP-3SN76jfOm71An6-imD_nbonuuVtKtsqhA17Chq1igCNtzyBTD0a18leS95ZV78rx9i1MpZZFo4qfRxs"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark/90 via-background-dark/20 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-8 w-full flex flex-col md:flex-row justify-between items-end gap-6">
+<div class="flex flex-col gap-2">
+<h1 class="text-slate-100 text-4xl md:text-5xl font-display font-black tracking-tight">EcoTrack AI</h1>
+<p class="text-primary text-lg font-medium">by Team GreenHorizon</p>
+</div>
+<button class="flex min-w-[140px] cursor-pointer items-center justify-center gap-2 rounded-lg h-12 px-6 bg-slate-800/80 backdrop-blur-md border border-slate-700 text-white text-sm font-bold transition-all hover:bg-slate-700">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+<span>Back to Directory</span>
+</button>
+</div>
+</div>
+<!-- One-line pitch -->
+<div class="mb-12">
+<p class="text-xl md:text-2xl text-slate-700 dark:text-slate-300 font-light leading-relaxed border-l-4 border-primary pl-6">
+                        Real-time carbon footprint analysis using satellite imagery and computer vision to empower sustainable urban planning.
+                    </p>
+</div>
+<!-- Two Column Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+<!-- Left Column: Details -->
+<div class="lg:col-span-2 flex flex-col gap-10">
+<!-- Description -->
+<section>
+<h3 class="text-xl font-display font-bold mb-4 text-slate-900 dark:text-white">The Inspiration</h3>
+<div class="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-400 leading-7 space-y-4">
+<p>Climate change remains the defining challenge of our generation. While global emission targets are set at high levels, local governments and urban planners often lack the high-resolution, real-time data needed to identify specific emission hotspots or the impact of green initiatives in their cities.</p>
+<p>EcoTrack AI was born from the idea that we can use the "eyes in the sky" – modern satellite clusters – combined with the power of Large Vision Models to create a living map of our planet's health. We don't just measure; we visualize change over time.</p>
+</div>
+</section>
+<!-- Tech Stack -->
+<section>
+<h3 class="text-xl font-display font-bold mb-4 text-slate-900 dark:text-white">Built With</h3>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm font-semibold border border-primary/20">OpenAI GPT-4V</span>
+<span class="px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm font-semibold border border-primary/20">React</span>
+<span class="px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm font-semibold border border-primary/20">Tailwind CSS</span>
+<span class="px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm font-semibold border border-primary/20">Planet API</span>
+<span class="px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm font-semibold border border-primary/20">Python</span>
+<span class="px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm font-semibold border border-primary/20">FastAPI</span>
+<span class="px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm font-semibold border border-primary/20">PostgreSQL</span>
+</div>
+</section>
+<!-- Links -->
+<section class="flex flex-wrap gap-4 pt-4">
+<a class="flex items-center gap-2 px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-background-dark rounded-lg font-bold transition-opacity hover:opacity-90" href="#">
+<span class="material-symbols-outlined text-lg">code</span>
+                                View Code on GitHub
+                            </a>
+<a class="flex items-center gap-2 px-6 py-3 bg-primary text-background-dark rounded-lg font-bold transition-opacity hover:opacity-90" href="#">
+<span class="material-symbols-outlined text-lg">play_circle</span>
+                                Launch Live Demo
+                            </a>
+</section>
+</div>
+<!-- Right Column: Metadata -->
+<div class="lg:col-span-1">
+<aside class="sticky top-24 flex flex-col gap-6">
+<!-- Metadata Card -->
+<div class="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+<h3 class="text-lg font-display font-bold mb-6 text-slate-900 dark:text-white">Project Metadata</h3>
+<div class="space-y-6">
+<div class="flex items-start gap-4">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">meeting_room</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 uppercase tracking-wider font-bold">Booth Number</p>
+<p class="text-slate-900 dark:text-slate-200 font-medium">Level 2, #204</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">category</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 uppercase tracking-wider font-bold">Hackathon Track</p>
+<p class="text-slate-900 dark:text-slate-200 font-medium">AI &amp; Machine Learning</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">verified</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 uppercase tracking-wider font-bold">Submission Status</p>
+<p class="text-emerald-500 font-medium flex items-center gap-1">
+                                                Finalist
+                                                <span class="material-symbols-outlined text-xs">check_circle</span>
+</p>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
+<h4 class="text-sm font-display font-bold mb-4 text-slate-900 dark:text-white">The Team</h4>
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<img class="size-8 rounded-full border border-slate-700" data-alt="Team member portrait - Alex" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7VZQ79kH54zBEeX4EeD1ND4EjIEvHDISjut9nok53WYt1sniindLthYKyCg3Ch99gcxgG5i8PE7lM4bQGL0G5_BYsDoRNMzcdfSZNNXR9hCRTtlxV4S7-wX4Dj5vqzBm17MJGBLXfH_llh5jvCqSVeO3915RN80Y-X8qJBC4iyrhaawGwRoPXZMxCeec_WBhU8QJqRtNhtb3Fr4Vvhi3fG_taC_iwYBgv3FmqZ8z8V-Ku1JKeHdtrfrG20i6e7lNoeEah96cF9t8"/>
+<div>
+<p class="text-sm font-medium text-slate-900 dark:text-slate-200 leading-none">Alex Rivera</p>
+<p class="text-[10px] text-slate-500">ML Engineer</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<img class="size-8 rounded-full border border-slate-700" data-alt="Team member portrait - Sarah" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7u-tvw9gvkMtSjPLTOwcotj18RzC8HfvbL8tVBosuK9v9sb3Qzmveorm9kAF8GnX60rFvhUr9i22FjsNhGiKMAkPz5kYFckEU0HoYRmZmYefX1EWdJ1NPWkGwGTffVBeyRkk62mvjy5bT8wWle_NwH6fPLfi99kpHv5Lw63sHqswnpeAg29HmHc6LF8rEEMMQVHNC_VcixAfKUuxLpHZ9C3ZHbLt6mweu1W7ZAjlxJF35SCfevl4E26UUuexrsTlbfjYK-eA48fc"/>
+<div>
+<p class="text-sm font-medium text-slate-900 dark:text-slate-200 leading-none">Sarah Chen</p>
+<p class="text-[10px] text-slate-500">Frontend Developer</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<img class="size-8 rounded-full border border-slate-700" data-alt="Team member portrait - David" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoYEf1wUp4aWbTl1W97FAQs0VB3CKeA4by9hHFhZYPGBnHU4skxNS1XrXzwmNOeRYxT6DQcEWOYd8ljXXFIkYdx8o1f9mYELeCnP0N72Rhy_7hrfjMNmoIY3t1zHIDYhj-OdzlHXDAUDl06VYrV2qMR32NE0_eo-wqd4rV73V03zVwaiObG0WFAaxPesuYwcsnMqo1dJtHEgo8HswZsUlpx8Jtq7qdUym2qgw1dBDz2XkIdlPNHHGRroCpj_euAy5_uAV-5mJzhTg"/>
+<div>
+<p class="text-sm font-medium text-slate-900 dark:text-slate-200 leading-none">David Okafor</p>
+<p class="text-[10px] text-slate-500">Data Scientist</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Map Card -->
+<div class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 h-48 relative">
+<img class="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-500" data-alt="Stylized map showing San Francisco convention center area" data-location="San Francisco" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmt2HR1cirZrKCeNCKSLgjmz_ZTRtFz1mX1Ev7bi1KqzGRIoBcVKwmLBym2x2da9kxh0yO65uAIngP3ziXuuMOoJohgDYVUG7COp77xo7hMCwu5jn_Q0aTnges8YZCy8zhUgYtojyF7A4OFsbV9ZryolnZz6wbPX_muaPM8VMd7j-AOIOItMArpUPHORCw_CC0I2bV3prL-7saM54zGI4dUuKRSUU5FomgaiT20XzWt_M2MT1LF4o3QwcdYnzVn3donGwyW2t_bB8"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="bg-primary px-3 py-1 rounded-full text-xs font-bold text-background-dark shadow-lg">
+                                        Booth #204
+                                    </div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="mt-20 border-t border-slate-200 dark:border-slate-800 py-10 px-10 text-center">
+<p class="text-slate-500 text-sm">© 2024 DevPost Plus. Built for the future of building.</p>
+</footer>
+</div>
+</div>
+</body></html>
