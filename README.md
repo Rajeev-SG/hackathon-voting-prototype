@@ -130,6 +130,8 @@ The app uses a practical judging-round rule:
 
 More detail lives in [operating-model.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/operating-model.md).
 
+A fuller operational walkthrough lives in [how-it-works.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/how-it-works.md).
+
 ## Proof commands
 
 Local end-to-end proof:
