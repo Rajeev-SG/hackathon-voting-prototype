@@ -113,6 +113,7 @@ Self-vote blocking is derived from normalized email equality between the signed-
 - Authenticated judges can vote.
 - A judge becomes part of the progress denominator the moment they cast their first score.
 - A judge can edit their score for the same project; the vote row is updated in place.
+- Active scoreboard tabs auto-refresh every 5 seconds during judging, and focused tabs also refresh on visibility or focus return.
 
 ### `FINALIZED`
 
@@ -151,3 +152,9 @@ This keeps the rule coherent without introducing a separate roster-management sy
   - support keyboard-first scoring
   - announce feedback with live regions
   - remain usable on mobile
+
+## Event-day readiness notes
+
+- The production readiness target is a room-sized session of roughly 50 judges or viewers at once, not a viral public launch.
+- The repo includes a cheap public-read probe at `pnpm readiness:public` so the live site can be checked before the event without extra vendor spend.
+- Concurrent write readiness is covered in `tests/readiness.integration.test.ts`, which runs the real vote logic with 50 concurrent judges in project-by-project waves.

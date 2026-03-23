@@ -44,6 +44,34 @@ Result:
 
 - Pass
 
+## Event-day readiness proof
+
+Date: `2026-03-23`
+
+Goal:
+
+- Verify the app is credible for a room-sized judging session without paying for heavyweight load tooling
+
+Command set:
+
+```bash
+pnpm test tests/readiness.integration.test.ts
+pnpm readiness:public -- --url https://vote.rajeevg.com --concurrency 50 --requests 250
+```
+
+What this covers:
+
+- `tests/readiness.integration.test.ts` exercises the real Prisma-backed voting rules with 50 concurrent judges voting in project-by-project waves.
+- The readiness test also proves the self-vote denominator stays correct when some judges are blocked from some entries.
+- `readiness:public` applies 50 concurrent public GETs and 250 total scoreboard requests against production to catch obvious response degradation or broken HTML under spectator traffic.
+- The main Playwright journey now additionally proves that one device sees another device's score change without a manual reload.
+
+Limitations:
+
+- This is a practical readiness pass, not a full synthetic internet-scale soak test.
+- It does not emulate 50 fully interactive browsers continuously animating at once.
+- It does provide strong evidence for the actual risks that matter here: concurrent voting writes, public read pressure, cross-device freshness, and the mobile/desktop user journey.
+
 ## Production proof
 
 Date: `2026-03-23`

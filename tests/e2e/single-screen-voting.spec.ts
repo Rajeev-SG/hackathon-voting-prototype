@@ -261,6 +261,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await openVoteDialog(anonymousPage, "Aurora Atlas");
     await expect(anonymousPage.getByText("Sign in and score this project")).toBeVisible();
     await expect(anonymousPage.getByTestId("submit-vote")).toHaveCount(0);
+    await anonymousPage.getByRole("button", { name: "Close" }).click();
   });
 
   await test.step("A judge signs in by email code and submits keyboard-friendly modal votes", async () => {
@@ -294,6 +295,11 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await expect(signalBloomRow).toContainText("1 vote");
     await expect(signalBloomRow).toContainText("9");
     await expect(signalBloomAction).toContainText("Update");
+    await expect(
+      anonymousPage
+        .getByTestId("scoreboard-row-signal-bloom")
+        .nth(activeResponsiveIndex(testInfo.project.name))
+    ).toContainText("9", { timeout: 12000 });
 
     await openVoteDialog(judgePage, "Harbor Pulse");
     await saveVote(judgePage, 6);
