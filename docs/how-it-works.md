@@ -96,6 +96,7 @@ Every uploaded team-member email is stored against that project.
 - The manager clicks `Begin voting`.
 - Authenticated judges can vote.
 - Public viewers can keep watching the board update live.
+- Active tabs refresh automatically every 5 seconds during judging, and inactive tabs refresh again when they regain focus.
 
 ### Finalized
 
@@ -154,6 +155,19 @@ Production validation:
 ```bash
 E2E_BASE_URL=https://vote.rajeevg.com E2E_JUDGE_AUTH_MODE=ticket pnpm test:e2e
 ```
+
+Event-day readiness validation:
+
+```bash
+pnpm test tests/readiness.integration.test.ts
+pnpm readiness:public -- --url https://vote.rajeevg.com --concurrency 50 --requests 250
+```
+
+What that readiness pack means in practice:
+
+- The write path has been exercised with 50 concurrent judges across a full round.
+- The public scoreboard has been probed at 50-way concurrency without paying for an external load platform.
+- Cross-device freshness is covered by browser proof, where an anonymous viewer sees a judge's updated score without manually reloading.
 
 Manual production proof also matters for auth:
 

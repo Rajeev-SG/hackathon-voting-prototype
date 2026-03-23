@@ -12,6 +12,7 @@ export default defineConfig({
     globals: true,
     exclude: ["tests/e2e/**", "node_modules/**", ".next/**"],
     setupFiles: ["./tests/setup.ts"],
+    fileParallelism: false,
     sequence: {
       concurrent: false
     }

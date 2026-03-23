@@ -160,6 +160,19 @@ The Playwright suite covers:
 - finalization
 - public finalized lock state
 - manager XLSX export
+- anonymous cross-device freshness after another judge updates a score
+
+Cheap event-day readiness checks:
+
+```bash
+pnpm test tests/readiness.integration.test.ts
+pnpm readiness:public -- --url https://vote.rajeevg.com --concurrency 50 --requests 250
+```
+
+These checks prove two different things:
+
+- `tests/readiness.integration.test.ts` simulates 50 concurrent judges scoring a round in waves against the real Prisma-backed vote logic.
+- `readiness:public` sends 250 public scoreboard requests with 50-way concurrency to confirm the live site stays responsive under the expected spectator load without requiring a paid load-testing service.
 
 Proof notes live in [proof.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/proof.md).
 

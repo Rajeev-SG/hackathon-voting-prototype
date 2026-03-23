@@ -13,6 +13,7 @@
     "db:push": "prisma db push",
     "clerk:ticket": "node scripts/create-clerk-sign-in-token.mjs",
     "proof:workbook": "node scripts/generate-proof-workbook.mjs",
+    "readiness:public": "node scripts/load-scoreboard.mjs",
     "test:e2e": "playwright test",
     "test": "vitest run",
     "test:watch": "vitest"

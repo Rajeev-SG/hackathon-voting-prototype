@@ -65,12 +65,40 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
   const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
   const uploadInputRef = React.useRef<HTMLInputElement>(null);
   const copy = statusCopy(snapshot.status);
+  const autoRefreshIntervalMs = snapshot.status === "OPEN" ? 5000 : 15000;
+  const autoRefreshPaused =
+    Boolean(selectedEntry) ||
+    authDialogOpen ||
+    uploadState.status === "uploading" ||
+    pendingAction;
 
   function refreshBoard() {
     startTransition(() => {
       router.refresh();
     });
   }
+
+  React.useEffect(() => {
+    if (autoRefreshPaused) return;
+
+    let intervalId: number | null = null;
+    const refreshIfVisible = () => {
+      if (document.visibilityState !== "visible" || !window.navigator.onLine) return;
+      startTransition(() => {
+        router.refresh();
+      });
+    };
+
+    intervalId = window.setInterval(refreshIfVisible, autoRefreshIntervalMs);
+    window.addEventListener("focus", refreshIfVisible);
+    document.addEventListener("visibilitychange", refreshIfVisible);
+
+    return () => {
+      if (intervalId != null) window.clearInterval(intervalId);
+      window.removeEventListener("focus", refreshIfVisible);
+      document.removeEventListener("visibilitychange", refreshIfVisible);
+    };
+  }, [autoRefreshIntervalMs, autoRefreshPaused, router, startTransition]);
 
   async function postJson(url: string) {
     const response = await fetch(url, {
@@ -189,6 +217,9 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
               </div>
               <Progress value={snapshot.progress.percentage} />
               <p className="text-sm leading-7 text-muted-foreground">{snapshot.progress.helperText}</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                Board refreshes automatically every {Math.round(autoRefreshIntervalMs / 1000)} seconds while this tab is active.
+              </p>
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="rounded-[1.5rem] bg-radix-gray-a-3 p-4">
                   <div className="eyebrow">Entries</div>
