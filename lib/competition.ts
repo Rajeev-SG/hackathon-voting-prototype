@@ -1,26 +1,64 @@
 import { Prisma } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
 import { getViewerIdentity, normalizeEmail } from "@/lib/auth";
-import { deriveCompetitionSnapshot } from "@/lib/competition-logic";
+import { deriveCompetitionSnapshot, type CompetitionSnapshot } from "@/lib/competition-logic";
 import { COMPETITION_STATE_ID, MANAGER_EMAIL, type VotingStatus } from "@/lib/constants";
-import { prisma } from "@/lib/prisma";
+import { prisma, withPrismaRetry } from "@/lib/prisma";
 import { parseEntriesWorkbook } from "@/lib/xlsx";
 
+const PUBLIC_SNAPSHOT_TAG = "competition-public-snapshot";
+const anonymousViewer = {
+  clerkUserId: null,
+  email: null,
+  isAuthenticated: false,
+  isManager: false
+} as const;
+
 async function ensureCompetitionState() {
-  return prisma.competitionState.upsert({
-    where: { id: COMPETITION_STATE_ID },
-    update: {},
-    create: {
-      id: COMPETITION_STATE_ID,
-      managerEmail: MANAGER_EMAIL
+  const existingState = await withPrismaRetry(() =>
+    prisma.competitionState.findUnique({
+      where: { id: COMPETITION_STATE_ID }
+    })
+  );
+
+  if (existingState) {
+    return existingState;
+  }
+
+  try {
+    return await withPrismaRetry(() =>
+      prisma.competitionState.create({
+        data: {
+          id: COMPETITION_STATE_ID,
+          managerEmail: MANAGER_EMAIL
+        }
+      })
+    );
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      const recoveredState = await withPrismaRetry(() =>
+        prisma.competitionState.findUnique({
+          where: { id: COMPETITION_STATE_ID }
+        })
+      );
+
+      if (recoveredState) {
+        return recoveredState;
+      }
     }
-  });
+
+    throw error;
+  }
 }
 
 function safeRevalidateHome() {
   try {
     revalidatePath("/");
+    revalidateTag(PUBLIC_SNAPSHOT_TAG);
   } catch (error) {
     if (
       !(error instanceof Error) ||
@@ -31,21 +69,55 @@ function safeRevalidateHome() {
   }
 }
 
-export async function getCompetitionSnapshot() {
-  const viewer = await getViewerIdentity();
+async function getCompetitionSnapshotData() {
   const [state, entries] = await Promise.all([
     ensureCompetitionState(),
-    prisma.entry.findMany({
-      include: {
-        teamEmails: true,
-        votes: {
-          orderBy: {
-            updatedAt: "desc"
+    withPrismaRetry(() =>
+      prisma.entry.findMany({
+        include: {
+          teamEmails: true,
+          votes: {
+            orderBy: {
+              updatedAt: "desc"
+            }
           }
         }
-      }
-    })
+      })
+    )
   ]);
+
+  return {
+    state,
+    entries
+  };
+}
+
+const getCachedPublicCompetitionSnapshot = unstable_cache(
+  async (): Promise<CompetitionSnapshot> => {
+    const { state, entries } = await getCompetitionSnapshotData();
+
+    return deriveCompetitionSnapshot({
+      status: state.votingStatus,
+      startedAt: state.startedAt,
+      finalizedAt: state.finalizedAt,
+      entries,
+      viewer: anonymousViewer
+    });
+  },
+  ["competition-public-snapshot"],
+  {
+    revalidate: 5,
+    tags: [PUBLIC_SNAPSHOT_TAG]
+  }
+);
+
+export async function getCompetitionSnapshot() {
+  const viewer = await getViewerIdentity();
+  if (!viewer.isAuthenticated) {
+    return getCachedPublicCompetitionSnapshot();
+  }
+
+  const { state, entries } = await getCompetitionSnapshotData();
 
   return deriveCompetitionSnapshot({
     status: state.votingStatus,
@@ -71,10 +143,11 @@ export async function replaceEntriesFromWorkbook(buffer: ArrayBuffer | Buffer) {
     throw new Error("Entries can only be replaced before voting begins.");
   }
 
-  await prisma.$transaction(async (tx) => {
-    await tx.vote.deleteMany();
-    await tx.entryTeamEmail.deleteMany();
-    await tx.entry.deleteMany();
+  await withPrismaRetry(() =>
+    prisma.$transaction(async (tx) => {
+      await tx.vote.deleteMany();
+      await tx.entryTeamEmail.deleteMany();
+      await tx.entry.deleteMany();
 
     for (const row of rows) {
       await tx.entry.create({
@@ -93,15 +166,16 @@ export async function replaceEntriesFromWorkbook(buffer: ArrayBuffer | Buffer) {
       });
     }
 
-    await tx.competitionState.update({
-      where: { id: COMPETITION_STATE_ID },
-      data: {
-        votingStatus: "PREPARING",
-        startedAt: null,
-        finalizedAt: null
-      }
-    });
-  });
+      await tx.competitionState.update({
+        where: { id: COMPETITION_STATE_ID },
+        data: {
+          votingStatus: "PREPARING",
+          startedAt: null,
+          finalizedAt: null
+        }
+      });
+    })
+  );
 
   safeRevalidateHome();
 
@@ -117,19 +191,21 @@ export async function beginVotingRound() {
     throw new Error("Voting has already started or been finalized.");
   }
 
-  const entryCount = await prisma.entry.count();
+  const entryCount = await withPrismaRetry(() => prisma.entry.count());
   if (entryCount === 0) {
     throw new Error("Upload at least one entry before opening voting.");
   }
 
-  await prisma.competitionState.update({
-    where: { id: COMPETITION_STATE_ID },
-    data: {
-      votingStatus: "OPEN",
-      startedAt: new Date(),
-      finalizedAt: null
-    }
-  });
+  await withPrismaRetry(() =>
+    prisma.competitionState.update({
+      where: { id: COMPETITION_STATE_ID },
+      data: {
+        votingStatus: "OPEN",
+        startedAt: new Date(),
+        finalizedAt: null
+      }
+    })
+  );
 
   safeRevalidateHome();
 }
@@ -151,12 +227,14 @@ export async function submitJudgeVote({
 
   const [state, entry] = await Promise.all([
     ensureCompetitionState(),
-    prisma.entry.findUnique({
-      where: { id: entryId },
-      include: {
-        teamEmails: true
-      }
-    })
+    withPrismaRetry(() =>
+      prisma.entry.findUnique({
+        where: { id: entryId },
+        include: {
+          teamEmails: true
+        }
+      })
+    )
   ]);
 
   if (state.votingStatus !== "OPEN") {
@@ -176,24 +254,26 @@ export async function submitJudgeVote({
     throw new Error("Team members cannot vote on their own project.");
   }
 
-  await prisma.vote.upsert({
-    where: {
-      entryId_judgeEmail: {
+  await withPrismaRetry(() =>
+    prisma.vote.upsert({
+      where: {
+        entryId_judgeEmail: {
+          entryId,
+          judgeEmail: normalizedJudgeEmail
+        }
+      },
+      update: {
+        score,
+        judgeUserId
+      },
+      create: {
         entryId,
-        judgeEmail: normalizedJudgeEmail
+        judgeEmail: normalizedJudgeEmail,
+        judgeUserId,
+        score
       }
-    },
-    update: {
-      score,
-      judgeUserId
-    },
-    create: {
-      entryId,
-      judgeEmail: normalizedJudgeEmail,
-      judgeUserId,
-      score
-    }
-  });
+    })
+  );
 
   safeRevalidateHome();
 }
@@ -208,13 +288,15 @@ export async function finalizeVotingRound() {
     throw new Error("Judging is not complete yet.");
   }
 
-  await prisma.competitionState.update({
-    where: { id: COMPETITION_STATE_ID },
-    data: {
-      votingStatus: "FINALIZED",
-      finalizedAt: new Date()
-    }
-  });
+  await withPrismaRetry(() =>
+    prisma.competitionState.update({
+      where: { id: COMPETITION_STATE_ID },
+      data: {
+        votingStatus: "FINALIZED",
+        finalizedAt: new Date()
+      }
+    })
+  );
 
   safeRevalidateHome();
 }
