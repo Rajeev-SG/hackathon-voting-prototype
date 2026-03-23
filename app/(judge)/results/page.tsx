@@ -1,6 +1,5 @@
-import { ResultsDashboard } from "@/components/results-dashboard";
-import { scoreboard, tieBreakCases } from "@/lib/mock-data";
+import { redirect } from "next/navigation";
 
 export default function ResultsPage() {
-  return <ResultsDashboard scoreboard={scoreboard} tieBreaks={tieBreakCases} />;
+  redirect("/");
 }

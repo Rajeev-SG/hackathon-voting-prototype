@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum VotingStatus {
+  PREPARING
+  OPEN
+  FINALIZED
+}
+
+model CompetitionState {
+  id           Int          @id
+  managerEmail String
+  votingStatus VotingStatus @default(PREPARING)
+  startedAt    DateTime?
+  finalizedAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Entry {
+  id            String           @id @default(cuid())
+  slug          String           @unique
+  projectName   String
+  teamName      String?
+  summary       String?
+  metadata      Json?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  teamEmails    EntryTeamEmail[]
+  votes         Vote[]
+}
+
+model EntryTeamEmail {
+  id        String   @id @default(cuid())
+  entryId    String
+  email     String
+  createdAt DateTime @default(now())
+  entry     Entry    @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  @@unique([entryId, email])
+}
+
+model Vote {
+  id          String   @id @default(cuid())
+  entryId      String
+  judgeEmail  String
+  judgeUserId String?
+  score       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  entry       Entry    @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  @@unique([entryId, judgeEmail])
+}
