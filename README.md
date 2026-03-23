@@ -1,160 +1,165 @@
-# Hackathon Voting Prototype
+# Hackathon Voting App
 
-Frontend prototype for a hackathon judging and submission workflow, built with Next.js App Router, TypeScript, Tailwind CSS, and a Shadcn-style component layer.
+Production-oriented single-screen hackathon voting app built with Next.js 14, TypeScript, Tailwind, Clerk, Prisma, and Postgres.
+
+The app keeps the visual language of the original results dashboard, but the product has been simplified to one public scoreboard with an integrated manager control surface and a polished voting modal for judges.
+
+## What the app is now
+
+- One primary public scoreboard at `/`
+- Manager-only XLSX template download and XLSX upload
+- Authenticated judge voting in a modal
+- Automatic self-vote blocking from uploaded team-member emails
+- Live judging progress
+- Manager-only finalization and finalized XLSX export
+- Light and dark mode
+- Flows walkthrough mount via `flows.sh`
 
 ## Stack
 
-- Next.js 14
+- Next.js 14 App Router
 - React 18
 - TypeScript
 - Tailwind CSS
-- Radix-based Shadcn primitives
-- Lucide React
+- shadcn-style Radix primitives
+- Clerk
+- Prisma
+- Postgres
+- `xlsx`
+- Playwright
+- Vitest
 
-## App routes
+## Source-of-truth files
 
-- `/projects` - judge project directory
-- `/projects/[slug]` - project detail
-- `/projects/[slug]/score` - scoring workflow
-- `/results` - scoreboard and tie-break dashboard
-- `/submission/assets` - participant asset upload flow
+- Main screen: [page.tsx](/Users/rajeev/Code/hackathon-voting-prototype/app/page.tsx)
+- Dashboard shell: [results-dashboard.tsx](/Users/rajeev/Code/hackathon-voting-prototype/components/results-dashboard.tsx)
+- Scoreboard table/cards: [results-scoreboard-table.tsx](/Users/rajeev/Code/hackathon-voting-prototype/components/results-scoreboard-table.tsx)
+- Voting modal: [vote-dialog.tsx](/Users/rajeev/Code/hackathon-voting-prototype/components/vote-dialog.tsx)
+- Competition rules: [competition-logic.ts](/Users/rajeev/Code/hackathon-voting-prototype/lib/competition-logic.ts)
+- Workbook parsing/export: [xlsx.ts](/Users/rajeev/Code/hackathon-voting-prototype/lib/xlsx.ts)
+- Prisma schema: [schema.prisma](/Users/rajeev/Code/hackathon-voting-prototype/prisma/schema.prisma)
 
-## Prerequisites
+## Environment
 
-- Node.js 20+
-- npm 10+
-
-## Run locally
+Copy [.env.example](/Users/rajeev/Code/hackathon-voting-prototype/.env.example) into `.env.local` and set:
 
 ```bash
-npm install
-npm run dev
+CLERK_SECRET_KEY=
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+DATABASE_URL=
+POSTGRES_URL=
+PRISMA_DATABASE_URL=
+NEXT_PUBLIC_FLOWS_ORGANIZATION_ID=
+NEXT_PUBLIC_FLOWS_ENVIRONMENT=production
 ```
 
-Then open:
+Notes:
+
+- `DATABASE_URL` is the runtime connection string Prisma uses in the app.
+- `POSTGRES_URL` and `PRISMA_DATABASE_URL` are kept for Vercel/Postgres compatibility.
+- Google SSO should be enabled in Clerk when available.
+- Email-code auth is the required fallback and is covered by automated proof.
+
+## Local run
+
+Install with `pnpm`:
+
+```bash
+pnpm install
+```
+
+Generate Prisma client and apply local migrations if needed:
+
+```bash
+pnpm db:generate
+pnpm db:migrate
+```
+
+Run the app:
+
+```bash
+pnpm dev
+```
+
+Open:
 
 ```text
 http://localhost:3000
 ```
 
-Useful scripts:
+## Verified local commands
+
+These commands were used on the shipped app:
 
 ```bash
-npm run check
-npm run build
+pnpm test
+pnpm build
+pnpm check
+pnpm test:e2e
 ```
 
-## Project structure
-
-```text
-app/                  Next.js App Router pages and layouts
-components/           screen components and UI primitives
-lib/mock-data.ts      typed mock content used across screens
-theme-lab/            provided token exports and design references
-```
-
-## Agentation integration
-
-Official docs:
-
-- Install: https://agentation.dev/install
-- MCP: https://agentation.dev/mcp
-
-Notes from the current docs:
-
-- Agentation is currently desktop-only.
-- The toolbar package install command is `npm install agentation`.
-- The MCP package is `agentation-mcp`.
-- The recommended cross-agent setup command is `npx add-mcp "npx -y agentation-mcp server"`.
-- The verification command is `npx agentation-mcp doctor`.
-
-### 1. Install the toolbar package
+Helpful utility commands:
 
 ```bash
-npm install agentation
+pnpm proof:workbook
+pnpm clerk:ticket -- --email rajeev.gill@omc.com --redirect /
 ```
 
-Start the app:
+## Manager workflow
+
+The manager is exactly `rajeev.gill@omc.com`.
+
+Only that account can:
+
+- download the workbook template
+- upload a workbook
+- begin voting
+- finalize the round
+- export finalized results
+
+## Completion rule
+
+The app uses a practical judging-round rule:
+
+- judges join the denominator when they cast their first vote
+- self-vote-blocked projects are removed from that judge's denominator
+- finalization unlocks when every participating judge has scored every project they are eligible to judge
+
+More detail lives in [operating-model.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/operating-model.md).
+
+## Proof commands
+
+Local end-to-end proof:
 
 ```bash
-npm run dev
+pnpm test:e2e
 ```
 
-Open `http://localhost:3000`, then use the Agentation toolbar in the browser to annotate the UI.
+The Playwright suite covers:
 
-This app now mounts Agentation automatically in development from the root layout. By default it connects to:
+- anonymous public viewing
+- manager template download
+- manager workbook upload
+- manager begin voting
+- email-code judge auth
+- modal keyboard voting
+- self-vote blocking
+- single active vote with edits
+- progress completion
+- finalization
+- public finalized lock state
+- manager XLSX export
 
-```text
-http://localhost:4747
-```
+Proof notes live in [proof.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/proof.md).
 
-Override that with:
+## Auth and deploy notes
 
-```bash
-NEXT_PUBLIC_AGENTATION_ENDPOINT=http://localhost:4747
-```
+- Vercel is the deployment target.
+- Clerk is the auth provider.
+- Postgres is the durable store.
+- Production env vars must be present in Vercel before deploy.
+- If Google OAuth cannot be fully completed from the dashboard without a manual external consent step, the app should still ship with Clerk email-code auth working.
 
-### 2. Connect Agentation to your coding agent with MCP
+## Production URL
 
-Recommended setup from the docs:
-
-```bash
-npx add-mcp "npx -y agentation-mcp server"
-```
-
-This auto-detects supported agents and writes the correct MCP configuration.
-
-Verify the setup:
-
-```bash
-npx agentation-mcp doctor
-```
-
-### 3. Codex manual configuration
-
-If you want to wire Codex manually, add this to `~/.codex/config.toml`:
-
-```toml
-[mcp_servers.agentation]
-command = "npx"
-args = [ "-y", "agentation-mcp", "server" ]
-enabled = true
-```
-
-In this environment, that Agentation MCP block is already present in `~/.codex/config.toml`.
-
-### 4. Typical workflow
-
-1. Run the app with `npm run dev`.
-2. Open the page you want to review.
-3. Annotate elements with Agentation in the browser.
-4. In your coding agent, ask it to review or fix the pending annotations.
-
-Examples:
-
-- `address my feedback`
-- `list my pending annotations`
-- `fix annotation 3`
-
-### 5. What MCP gives the agent
-
-Per the official docs, the MCP server exposes tools for:
-
-- listing annotation sessions
-- reading pending annotations
-- acknowledging feedback
-- replying to annotations
-- resolving or dismissing annotations
-- watching for new annotations in a loop
-
-That removes the copy-paste step and lets the agent work directly from the structured annotation data.
-
-## Theme source
-
-The palette is derived from:
-
-```text
-theme-lab/dist/tokens/radix-scales.css
-```
-
-Semantic theme variables are mapped in `app/globals.css`, and Tailwind scale aliases are defined in `tailwind.config.ts`.
+- Live app: [hackathon-voting-prototype.vercel.app](https://hackathon-voting-prototype.vercel.app)

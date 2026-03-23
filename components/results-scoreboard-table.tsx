@@ -1,188 +1,238 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { MoreVertical } from "lucide-react";
-import type { ColumnDef } from "@tanstack/react-table";
+import { AnimatePresence, motion } from "framer-motion";
+import { Lock, Vote } from "lucide-react";
 
-import type { ScoreboardEntry } from "@/types";
-import { getProjectBySlug } from "@/lib/mock-data";
-import { Badge } from "@/components/ui/badge";
+import type { ScoreboardEntryView, ViewerIdentity } from "@/lib/competition-logic";
 import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/ui/data-table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious
-} from "@/components/ui/pagination";
 
-type ResultRow = ScoreboardEntry & {
-  projectName: string;
-  teamName: string;
-  image: string;
+type ResultsScoreboardTableProps = {
+  entries: ScoreboardEntryView[];
+  status: "PREPARING" | "OPEN" | "FINALIZED";
+  viewer: ViewerIdentity;
+  onSelectEntry: (entry: ScoreboardEntryView) => void;
 };
 
-function statusBadge(entry: ResultRow) {
-  if (entry.status === "finalist") {
-    return <Badge variant="secondary">Finalist</Badge>;
-  }
-
-  if (entry.status === "tied") {
-    return <Badge variant="warning">{entry.label}</Badge>;
-  }
-
-  return (
-    <Badge variant="outline" className="border-radix-purple-a-5 bg-radix-purple-a-4 text-radix-purple-11">
-      Qualified
-    </Badge>
-  );
+function actionLabel({
+  entry,
+  status,
+  viewer
+}: {
+  entry: ScoreboardEntryView;
+  status: "PREPARING" | "OPEN" | "FINALIZED";
+  viewer: ViewerIdentity;
+}) {
+  if (status === "FINALIZED") return "Locked";
+  if (status === "PREPARING") return "Opens soon";
+  if (entry.isSelfVoteBlocked) return "Team member";
+  if (!viewer.isAuthenticated) return "Sign in";
+  return entry.currentUserVote == null ? "Vote" : "Update";
 }
 
-export function ResultsScoreboardTable({ entries }: { entries: ScoreboardEntry[] }) {
-  const router = useRouter();
-  const [page, setPage] = React.useState(1);
-  const perPage = 5;
-
-  const rows: ResultRow[] = entries
-    .map((entry) => {
-      const project = getProjectBySlug(entry.slug);
-      if (!project) return null;
-      return {
-        ...entry,
-        projectName: project.name,
-        teamName: project.teamName,
-        image: project.gallery[0] || project.heroImage
-      };
-    })
-    .filter((row): row is ResultRow => Boolean(row));
-
-  const totalPages = Math.max(1, Math.ceil(rows.length / perPage));
-  const pagedRows = rows.slice((page - 1) * perPage, page * perPage);
-
-  const columns: ColumnDef<ResultRow>[] = [
-    {
-      accessorKey: "rank",
-      header: "Rank",
-      cell: ({ row }) => (
-        <div
-          className={`flex h-9 w-9 items-center justify-center rounded-full font-display text-sm font-black ${
-            row.original.status === "tied" ? "bg-amber-500/15 text-amber-400" : "bg-radix-teal-a-4 text-primary"
-          }`}
-        >
-          {row.original.rank}
-        </div>
-      )
-    },
-    {
-      accessorKey: "projectName",
-      header: "Project Details",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-4">
-          <img
-            alt={`${row.original.projectName} thumbnail`}
-            className="h-12 w-12 rounded-2xl object-cover"
-            src={row.original.image}
-          />
-          <div>
-            <div className="font-semibold">{row.original.projectName}</div>
-            <div className="text-xs text-muted-foreground">Team: {row.original.teamName}</div>
-          </div>
-        </div>
-      )
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => statusBadge(row.original)
-    },
-    {
-      accessorKey: "score",
-      header: "Final Score",
-      cell: ({ row }) => (
-        <div className="font-display text-xl font-black">
-          {row.original.score.toFixed(1)}
-          <span className="ml-1 text-sm font-medium text-muted-foreground">/ 100</span>
-        </div>
-      )
-    },
-    {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => (
-        <div
-          className="flex justify-end"
-          onClick={(event) => {
-            event.stopPropagation();
-          }}
-        >
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/projects/${row.original.slug}`}>View project</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/projects/${row.original.slug}/score`}>Open scorecard</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => console.log("Flag project", row.original.slug)}>
-                Flag for committee
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )
-    }
-  ];
-
+export function ResultsScoreboardTable({
+  entries,
+  status,
+  viewer,
+  onSelectEntry
+}: ResultsScoreboardTableProps) {
   return (
-    <div className="space-y-6">
-      <DataTable
-        columns={columns}
-        data={pagedRows}
-        onRowClick={(row) => router.push(`/projects/${row.slug}`)}
-      />
-      <div className="flex flex-col gap-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
-        <p>
-          Showing {(page - 1) * perPage + 1}-{Math.min(page * perPage, rows.length)} of {rows.length} projects
-        </p>
-        <Pagination className="justify-end">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                disabled={page === 1}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
-              />
-            </PaginationItem>
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
-              <PaginationItem key={pageNumber}>
-                <PaginationLink isActive={page === pageNumber} onClick={() => setPage(pageNumber)}>
-                  {pageNumber}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                disabled={page === totalPages}
-                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+    <>
+      <div className="space-y-3 md:hidden">
+        <AnimatePresence initial={false}>
+          {entries.map((entry) => (
+            <motion.div
+              layout
+              className="glass-panel flex cursor-pointer flex-col gap-4 rounded-[1.7rem] p-4 text-left transition hover:bg-radix-teal-a-2 focus-within:bg-radix-teal-a-2"
+              data-testid={`scoreboard-row-${entry.slug}`}
+              key={entry.id}
+              onClick={() => onSelectEntry(entry)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onSelectEntry(entry);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+            >
+              <div className="flex items-start gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-radix-teal-a-4 font-display text-sm font-black text-primary">
+                  {entry.rank}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-3">
+                    {entry.imageUrl ? (
+                      <img
+                        alt={`${entry.projectName} thumbnail`}
+                        className="h-12 w-12 rounded-2xl object-cover"
+                        src={entry.imageUrl}
+                      />
+                    ) : (
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-radix-purple-a-4 font-display text-lg font-black text-foreground">
+                        {entry.projectName.slice(0, 1)}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <div className="truncate font-semibold text-foreground">{entry.projectName}</div>
+                      <div className="truncate text-sm text-muted-foreground">
+                        {entry.teamName ?? "Team name pending"}
+                      </div>
+                    </div>
+                  </div>
+                  {entry.summary ? (
+                    <div className="mt-3 line-clamp-2 text-xs leading-6 text-muted-foreground">{entry.summary}</div>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-full bg-radix-purple-a-4 px-3 py-1 text-xs font-semibold text-foreground">
+                  {entry.track ?? "Open track"}
+                </span>
+                <span className="rounded-full bg-radix-gray-a-3 px-3 py-1 text-xs font-semibold text-muted-foreground">
+                  {entry.voteCount} vote{entry.voteCount === 1 ? "" : "s"}
+                </span>
+                <span className="rounded-full bg-radix-teal-a-3 px-3 py-1 text-xs font-semibold text-accent-foreground">
+                  {entry.averageScore == null ? "Awaiting scores" : `${entry.averageScore} avg`}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    Aggregate
+                  </div>
+                  <motion.div layout className="font-display text-3xl font-black text-foreground">
+                    {entry.totalScore}
+                  </motion.div>
+                </div>
+                <Button
+                  className="min-w-[118px] justify-center"
+                  data-testid={`scoreboard-action-${entry.slug}`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onSelectEntry(entry);
+                  }}
+                  size="sm"
+                  type="button"
+                  variant={status === "OPEN" && !entry.isSelfVoteBlocked ? "default" : "outline"}
+                >
+                  {status !== "OPEN" || entry.isSelfVoteBlocked ? (
+                    <Lock className="h-4 w-4" />
+                  ) : (
+                    <Vote className="h-4 w-4" />
+                  )}
+                  {actionLabel({ entry, status, viewer })}
+                </Button>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
-    </div>
+
+      <div className="hidden overflow-hidden rounded-[2rem] border border-border bg-radix-gray-a-2 md:block">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] border-separate border-spacing-0">
+            <thead>
+              <tr className="text-left">
+                {["Rank", "Project", "Track", "Votes", "Aggregate", "Action"].map((header) => (
+                  <th
+                    key={header}
+                    className="border-b border-border px-5 py-4 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-muted-foreground"
+                  >
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <AnimatePresence initial={false}>
+              <motion.tbody layout>
+                {entries.map((entry) => (
+                  <motion.tr
+                    data-testid={`scoreboard-row-${entry.slug}`}
+                    layout
+                    key={entry.id}
+                    className="group cursor-pointer transition hover:bg-radix-teal-a-2 focus-within:bg-radix-teal-a-2"
+                    onClick={() => onSelectEntry(entry)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        onSelectEntry(entry);
+                      }
+                    }}
+                    tabIndex={0}
+                  >
+                    <td className="border-b border-border px-5 py-4">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-radix-teal-a-4 font-display text-sm font-black text-primary">
+                        {entry.rank}
+                      </div>
+                    </td>
+                    <td className="border-b border-border px-5 py-4">
+                      <div className="flex items-center gap-4">
+                        {entry.imageUrl ? (
+                          <img
+                            alt={`${entry.projectName} thumbnail`}
+                            className="h-14 w-14 rounded-2xl object-cover"
+                            src={entry.imageUrl}
+                          />
+                        ) : (
+                          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-radix-purple-a-4 font-display text-lg font-black text-foreground">
+                            {entry.projectName.slice(0, 1)}
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-semibold text-foreground">{entry.projectName}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {entry.teamName ?? "Team name pending"}
+                          </div>
+                          {entry.summary ? (
+                            <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">{entry.summary}</div>
+                          ) : null}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="border-b border-border px-5 py-4">
+                      <div className="inline-flex rounded-full bg-radix-purple-a-4 px-3 py-1 text-xs font-semibold text-foreground">
+                        {entry.track ?? "Open track"}
+                      </div>
+                    </td>
+                    <td className="border-b border-border px-5 py-4 text-sm text-muted-foreground">
+                      {entry.voteCount} vote{entry.voteCount === 1 ? "" : "s"}
+                    </td>
+                    <td className="border-b border-border px-5 py-4">
+                      <motion.div layout className="font-display text-2xl font-black text-foreground">
+                        {entry.totalScore}
+                        <span className="ml-2 text-sm font-medium text-muted-foreground">
+                          {entry.averageScore == null ? "No scores yet" : `${entry.averageScore} avg`}
+                        </span>
+                      </motion.div>
+                    </td>
+                    <td
+                      className="border-b border-border px-5 py-4"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <Button
+                        className="min-w-[118px] justify-center"
+                        data-testid={`scoreboard-action-${entry.slug}`}
+                        onClick={() => onSelectEntry(entry)}
+                        size="sm"
+                        variant={status === "OPEN" && !entry.isSelfVoteBlocked ? "default" : "outline"}
+                      >
+                        {status !== "OPEN" || entry.isSelfVoteBlocked ? (
+                          <Lock className="h-4 w-4" />
+                        ) : (
+                          <Vote className="h-4 w-4" />
+                        )}
+                        {actionLabel({ entry, status, viewer })}
+                      </Button>
+                    </td>
+                  </motion.tr>
+                ))}
+              </motion.tbody>
+            </AnimatePresence>
+          </table>
+        </div>
+      </div>
+    </>
   );
 }

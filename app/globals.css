@@ -6,36 +6,61 @@
 
 @layer base {
   :root {
-    --background: var(--gray-1);
-    --foreground: var(--gray-12);
-    --card: var(--gray-2);
-    --card-foreground: var(--gray-12);
-    --popover: var(--gray-2);
-    --popover-foreground: var(--gray-12);
-    --primary: var(--teal-9);
-    --primary-foreground: var(--gray-1);
-    --secondary: var(--purple-4);
-    --secondary-foreground: var(--gray-12);
-    --muted: var(--gray-3);
-    --muted-foreground: var(--gray-10);
-    --accent: var(--teal-4);
-    --accent-foreground: var(--teal-12);
-    --destructive: var(--purple-10);
-    --destructive-foreground: var(--gray-1);
-    --success: var(--teal-10);
+    color-scheme: light;
+    --background: #f4f8f7;
+    --foreground: #133235;
+    --card: rgb(255 255 255 / 0.84);
+    --card-foreground: #133235;
+    --popover: rgb(255 255 255 / 0.96);
+    --popover-foreground: #133235;
+    --primary: #0d999c;
+    --primary-foreground: #f7fbfb;
+    --secondary: #e4e6ff;
+    --secondary-foreground: #172133;
+    --muted: rgb(18 65 70 / 0.08);
+    --muted-foreground: #4a6467;
+    --accent: #b9f0ee;
+    --accent-foreground: #114247;
+    --destructive: #b83f56;
+    --destructive-foreground: #fff4f6;
+    --success: #0c8b8d;
     --warning: #d98c14;
-    --border: var(--gray-a6);
-    --input: var(--gray-a5);
-    --ring: var(--teal-8);
+    --border: rgb(17 79 84 / 0.12);
+    --input: rgb(17 79 84 / 0.12);
+    --ring: #10a4a8;
     --radius: 1.25rem;
-    --shadow-soft: rgb(5 67 69 / 0.18);
-    --shadow-strong: rgb(5 67 69 / 0.28);
+    --shadow-soft: rgb(10 74 80 / 0.12);
+    --shadow-strong: rgb(10 74 80 / 0.18);
     --hero-glow: rgb(10 153 156 / 0.18);
-    --grid-line: rgb(71 95 95 / 0.18);
+    --grid-line: rgb(37 88 90 / 0.08);
   }
 
   .dark {
     color-scheme: dark;
+    --background: #071416;
+    --foreground: #f4fbfb;
+    --card: rgb(11 25 28 / 0.84);
+    --card-foreground: #f4fbfb;
+    --popover: rgb(9 21 24 / 0.98);
+    --popover-foreground: #f4fbfb;
+    --primary: #20d5dc;
+    --primary-foreground: #031012;
+    --secondary: rgb(55 42 87 / 0.66);
+    --secondary-foreground: #f7f3ff;
+    --muted: rgb(255 255 255 / 0.05);
+    --muted-foreground: #99afb3;
+    --accent: rgb(26 210 216 / 0.18);
+    --accent-foreground: #d9ffff;
+    --destructive: #d24f69;
+    --destructive-foreground: #fff3f6;
+    --success: #18b5ba;
+    --border: rgb(255 255 255 / 0.08);
+    --input: rgb(255 255 255 / 0.08);
+    --ring: #20d5dc;
+    --shadow-soft: rgb(3 12 14 / 0.48);
+    --shadow-strong: rgb(1 9 10 / 0.72);
+    --hero-glow: rgb(22 196 201 / 0.15);
+    --grid-line: rgb(255 255 255 / 0.05);
   }
 
   * {
@@ -51,17 +76,19 @@
     min-height: 100vh;
     background-image:
       radial-gradient(circle at top, var(--hero-glow) 0%, transparent 42%),
-      linear-gradient(135deg, var(--gray-1) 0%, var(--gray-2) 35%, var(--gray-1) 100%);
+      linear-gradient(135deg, var(--background) 0%, color-mix(in srgb, var(--background) 84%, white 16%) 35%, var(--background) 100%);
   }
 }
 
 @layer components {
   .shell-surface {
-    background: linear-gradient(180deg, var(--teal-a1) 0%, transparent 100%);
+    background:
+      radial-gradient(circle at top left, color-mix(in srgb, var(--primary) 18%, transparent) 0%, transparent 52%),
+      linear-gradient(180deg, color-mix(in srgb, var(--primary) 10%, transparent) 0%, transparent 100%);
   }
 
   .glass-panel {
-    background: linear-gradient(180deg, var(--gray-a2) 0%, var(--gray-a1) 100%);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, transparent) 0%, color-mix(in srgb, var(--card) 88%, transparent) 100%);
     backdrop-filter: blur(18px);
     border: 1px solid var(--border);
     box-shadow: 0 16px 40px var(--shadow-soft);

@@ -1,14 +1,6 @@
-import { notFound } from "next/navigation";
-
-import { getProjectBySlug } from "@/lib/mock-data";
-import { ProjectOverview } from "@/components/project-overview";
+import { redirect } from "next/navigation";
 
 export default function ProjectDetailPage({ params }: { params: { slug: string } }) {
-  const project = getProjectBySlug(params.slug);
-
-  if (!project) {
-    notFound();
-  }
-
-  return <ProjectOverview project={project} />;
+  void params;
+  redirect("/");
 }

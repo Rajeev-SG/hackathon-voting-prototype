@@ -1,94 +1,410 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { BarChart3, Filter, Search } from "lucide-react";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import {
+  ArrowUpRight,
+  FileSpreadsheet,
+  Flag,
+  LoaderCircle,
+  Play,
+  ShieldCheck,
+  Trophy
+} from "lucide-react";
 
-import type { ScoreboardEntry, TieBreakCase } from "@/types";
-import { getProjectBySlug } from "@/lib/mock-data";
+import type { CompetitionSnapshot, ScoreboardEntryView } from "@/lib/competition-logic";
+import { JudgeAuthDialog } from "@/components/judge-auth-dialog";
 import { ResultsScoreboardTable } from "@/components/results-scoreboard-table";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { VoteDialog } from "@/components/vote-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 
-export function ResultsDashboard({
-  scoreboard,
-  tieBreaks: _tieBreaks
-}: {
-  scoreboard: ScoreboardEntry[];
-  tieBreaks: TieBreakCase[];
-}) {
-  const [query, setQuery] = React.useState("");
-  const deferredQuery = React.useDeferredValue(query);
+function statusCopy(status: CompetitionSnapshot["status"]) {
+  if (status === "PREPARING") {
+    return {
+      eyebrow: "Manager setup",
+      body:
+        "Upload the judging workbook, review the entries, and open the round when the judges are ready."
+    };
+  }
 
-  const filteredEntries = scoreboard.filter((entry) => {
-    const project = getProjectBySlug(entry.slug);
-    if (!project) return false;
-    const target = `${project.name} ${project.teamName} ${project.track}`.toLowerCase();
-    return target.includes(deferredQuery.toLowerCase());
+  if (status === "OPEN") {
+    return {
+      eyebrow: "Judging live",
+      body:
+        "Everyone can watch the aggregate scores move in real time while authenticated judges score projects one by one."
+    };
+  }
+
+  return {
+    eyebrow: "Finalized",
+    body:
+      "Judging is complete. The public scoreboard is now final, and the manager can export the official results workbook."
+  };
+}
+
+export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }) {
+  const router = useRouter();
+  const [selectedEntry, setSelectedEntry] = React.useState<ScoreboardEntryView | null>(null);
+  const [pendingAction, startTransition] = React.useTransition();
+  const [uploadState, setUploadState] = React.useState<{
+    status: "idle" | "uploading" | "success" | "error";
+    message: string | null;
+    issues: Array<{ rowNumber: number; field: string; message: string }>;
+  }>({
+    status: "idle",
+    message: null,
+    issues: []
   });
+  const [isDragOver, setIsDragOver] = React.useState(false);
+  const [actionMessage, setActionMessage] = React.useState<string | null>(null);
+  const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
+  const copy = statusCopy(snapshot.status);
+
+  function refreshBoard() {
+    startTransition(() => {
+      router.refresh();
+    });
+  }
+
+  async function postJson(url: string) {
+    const response = await fetch(url, {
+      method: "POST"
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.error ?? "The action could not be completed.");
+    }
+  }
+
+  async function handleWorkbookUpload(file: File) {
+    setUploadState({
+      status: "uploading",
+      message: "Reading workbook...",
+      issues: []
+    });
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/api/competition/upload", {
+      method: "POST",
+      body: formData
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setUploadState({
+        status: "error",
+        message: payload.error ?? "We could not import that workbook.",
+        issues: payload.issues ?? []
+      });
+      return;
+    }
+
+    setUploadState({
+      status: "success",
+      message: `Imported ${payload.importedCount} project${payload.importedCount === 1 ? "" : "s"}.`,
+      issues: []
+    });
+    refreshBoard();
+  }
 
   return (
     <div className="min-h-screen">
-      <main className="container space-y-10 py-8">
-          <section className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-            <div className="space-y-4">
-              <div className="eyebrow">Final Review</div>
-              <h1 className="section-heading">Scoreboard Summary</h1>
-              <p className="text-base leading-8 text-muted-foreground">
-                Review, search, and finalize your scores before locking the Main Track leaderboard.
-              </p>
-              <div className="flex w-full max-w-xl flex-col gap-3 sm:flex-row sm:items-center">
-                <div className="relative flex-1">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    className="rounded-full pl-11"
-                    placeholder="Search projects..."
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                  />
+      <main className="container space-y-6 py-6 sm:space-y-8 sm:py-8">
+        <section className="glass-panel flex flex-col gap-5 rounded-[2rem] px-5 py-5 sm:px-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-radix-teal-a-4">
+                <Trophy className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <div className="eyebrow">Hackathon voting</div>
+                <div className="font-display text-2xl font-black">Single-screen scoreboard</div>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <ThemeToggle />
+              <SignedOut>
+                <Button data-testid="judge-auth-open" onClick={() => setAuthDialogOpen(true)} size="sm">
+                  Judge sign in
+                </Button>
+              </SignedOut>
+              <SignedIn>
+                {snapshot.viewer.isManager ? (
+                  <span className="rounded-full bg-radix-teal-a-4 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent-foreground">
+                    Manager
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-radix-purple-a-4 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-foreground">
+                    Judge
+                  </span>
+                )}
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
+            </div>
+          </div>
+        </section>
+
+        <section className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
+          <div className="glass-panel shell-surface content-grid overflow-hidden rounded-[2rem] px-6 py-7">
+            <div className="eyebrow">{copy.eyebrow}</div>
+            <h1 className="section-heading mt-3">Hackathon scoreboard</h1>
+            <p className="mt-4 max-w-3xl text-base leading-8 text-muted-foreground">{copy.body}</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <div className="rounded-full bg-radix-teal-a-4 px-4 py-2 text-sm font-semibold text-accent-foreground">
+                Public read-only scoreboard
+              </div>
+              <div className="rounded-full bg-radix-purple-a-4 px-4 py-2 text-sm font-semibold text-foreground">
+                Manager: {snapshot.managerEmail}
+              </div>
+              <div className="rounded-full bg-radix-gray-a-3 px-4 py-2 text-sm font-semibold text-muted-foreground">
+                Self-vote blocking from uploaded team emails
+              </div>
+            </div>
+          </div>
+
+          <Card className="glass-panel rounded-[2rem] border-0 bg-transparent shadow-none">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Judging progress</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-end gap-3">
+                <div className="font-display text-5xl font-black text-primary">{snapshot.progress.percentage}%</div>
+                <div className="pb-2 text-sm font-semibold text-muted-foreground">
+                  {snapshot.progress.castVotes}/
+                  {snapshot.progress.expectedVotes || snapshot.progress.entryCount}
                 </div>
-                <Button asChild>
-                  <Link href="/submission/assets">Upload Project</Link>
-                </Button>
               </div>
-            </div>
-            <div className="flex w-full max-w-md flex-col gap-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Judging Status</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-end gap-2">
-                    <div className="font-display text-4xl font-black text-primary">40/40</div>
-                    <div className="pb-1 text-sm font-semibold text-primary">100%</div>
+              <Progress value={snapshot.progress.percentage} />
+              <p className="text-sm leading-7 text-muted-foreground">{snapshot.progress.helperText}</p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-[1.5rem] bg-radix-gray-a-3 p-4">
+                  <div className="eyebrow">Entries</div>
+                  <div className="mt-2 font-display text-2xl font-black">{snapshot.progress.entryCount}</div>
+                </div>
+                <div className="rounded-[1.5rem] bg-radix-gray-a-3 p-4">
+                  <div className="eyebrow">Judges in round</div>
+                  <div className="mt-2 font-display text-2xl font-black">
+                    {snapshot.progress.participatingJudgeCount}
                   </div>
-                  <Progress value={100} />
-                  <p className="text-sm text-muted-foreground">
-                    All projects submitted and ready for committee review.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
+                </div>
+                <div className="rounded-[1.5rem] bg-radix-gray-a-3 p-4">
+                  <div className="eyebrow">State</div>
+                  <div className="mt-2 font-display text-2xl font-black">{snapshot.status}</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
-          <section className="space-y-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <h2 className="font-display text-2xl font-bold">Project Scoreboard</h2>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="icon" onClick={() => console.log("Filter clicked")}>
-                  <Filter className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => console.log("Sort clicked")}>
-                  <BarChart3 className="h-4 w-4" />
-                </Button>
+        <section className="grid gap-6 xl:grid-cols-[1.45fr_0.85fr]">
+          <div className="space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="eyebrow">Scoreboard</div>
+                <h2 className="font-display text-2xl font-black">Every project, one board</h2>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Click any row to vote or review why that project is locked.
               </div>
             </div>
+            <ResultsScoreboardTable
+              entries={snapshot.entries}
+              onSelectEntry={setSelectedEntry}
+              status={snapshot.status}
+              viewer={snapshot.viewer}
+            />
+          </div>
 
-            <ResultsScoreboardTable entries={filteredEntries} />
-          </section>
+          <div className="space-y-4">
+            <Card className="glass-panel rounded-[2rem] border-0 bg-transparent shadow-none">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">
+                  {snapshot.viewer.isManager ? "Manager controls" : "How judging works"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {snapshot.viewer.isManager ? (
+                  <>
+                    <div className="rounded-[1.5rem] border border-border bg-radix-gray-a-3 p-4">
+                      <div className="flex items-center gap-2 text-sm font-semibold">
+                        <FileSpreadsheet className="h-4 w-4 text-primary" />
+                        XLSX workflow
+                      </div>
+                      <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                        Download the template, fill one row per project, keep project names unique, and include at least one team email per row.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        <Button asChild size="sm" variant="outline">
+                          <a data-testid="manager-download-template" href="/api/template">
+                            Download template
+                            <ArrowUpRight className="h-4 w-4" />
+                          </a>
+                        </Button>
+                        {snapshot.canDownloadFinalizedExport ? (
+                          <Button asChild size="sm">
+                            <a data-testid="manager-export-results" href="/api/export">
+                              Export finalized scores
+                              <ArrowUpRight className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <label
+                      className={`block cursor-pointer rounded-[1.5rem] border border-dashed p-5 transition ${
+                        isDragOver
+                          ? "border-radix-teal-a-7 bg-radix-teal-a-3"
+                          : "border-radix-teal-a-6 bg-radix-teal-a-2 hover:border-radix-teal-a-7 hover:bg-radix-teal-a-3"
+                      }`}
+                      data-testid="manager-upload-dropzone"
+                      onDragLeave={() => setIsDragOver(false)}
+                      onDragOver={(event) => {
+                        event.preventDefault();
+                        setIsDragOver(true);
+                      }}
+                      onDrop={(event) => {
+                        event.preventDefault();
+                        setIsDragOver(false);
+                        if (!snapshot.canUploadSheet || uploadState.status === "uploading") return;
+                        const file = event.dataTransfer.files?.[0];
+                        if (file) void handleWorkbookUpload(file);
+                      }}
+                    >
+                      <input
+                        accept=".xlsx"
+                        className="sr-only"
+                        disabled={!snapshot.canUploadSheet || uploadState.status === "uploading"}
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (file) void handleWorkbookUpload(file);
+                          event.currentTarget.value = "";
+                        }}
+                        type="file"
+                      />
+                      <div className="flex items-center gap-3">
+                        <ShieldCheck className="h-5 w-5 text-primary" />
+                        <div>
+                          <div className="font-semibold text-foreground">Drag, drop, or choose a workbook</div>
+                          <div className="text-sm text-muted-foreground">
+                            Upload is only available before voting begins.
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+
+                    {uploadState.message ? (
+                      <div className="rounded-[1.5rem] border border-border bg-radix-gray-a-3 p-4 text-sm text-muted-foreground">
+                        {uploadState.message}
+                      </div>
+                    ) : null}
+
+                    {uploadState.issues.length ? (
+                      <div className="rounded-[1.5rem] border border-[rgb(204_63_79_/_0.25)] bg-[rgb(204_63_79_/_0.08)] p-4">
+                        <div className="font-semibold text-foreground">Workbook issues</div>
+                        <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                          {uploadState.issues.map((issue) => (
+                            <li key={`${issue.rowNumber}-${issue.field}-${issue.message}`}>
+                              Row {issue.rowNumber}: {issue.message}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Button
+                        data-testid="manager-begin-voting"
+                        disabled={!snapshot.canBeginVoting || pendingAction}
+                        onClick={() =>
+                          void (async () => {
+                            try {
+                              setActionMessage(null);
+                              await postJson("/api/competition/start");
+                              refreshBoard();
+                            } catch (error) {
+                              setActionMessage(
+                                error instanceof Error ? error.message : "We could not begin voting."
+                              );
+                            }
+                          })()
+                        }
+                      >
+                        {pendingAction ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+                        Begin voting
+                      </Button>
+                      <Button
+                        data-testid="manager-finalize"
+                        disabled={!snapshot.canFinalize || pendingAction}
+                        onClick={() =>
+                          void (async () => {
+                            try {
+                              setActionMessage(null);
+                              await postJson("/api/competition/finalize");
+                              refreshBoard();
+                            } catch (error) {
+                              setActionMessage(
+                                error instanceof Error ? error.message : "We could not finalize the round."
+                              );
+                            }
+                          })()
+                        }
+                        variant="secondary"
+                      >
+                        <Flag className="h-4 w-4" />
+                        Finalize scores
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="rounded-[1.5rem] border border-border bg-radix-gray-a-3 p-4 text-sm leading-7 text-muted-foreground">
+                      Anyone can view the board. Judges sign in once, vote from the modal, and can edit their own score until the manager finalizes the round.
+                    </div>
+                    <div className="rounded-[1.5rem] border border-border bg-radix-gray-a-3 p-4 text-sm leading-7 text-muted-foreground">
+                      A judge joins the progress denominator the moment they cast their first vote. Completion means every participating judge has scored every entry.
+                    </div>
+                    <SignedOut>
+                      <Button
+                        className="w-full justify-center"
+                        data-testid="judge-auth-open-secondary"
+                        onClick={() => setAuthDialogOpen(true)}
+                        size="lg"
+                      >
+                        Sign in to judge
+                      </Button>
+                    </SignedOut>
+                  </>
+                )}
+
+                {actionMessage ? (
+                  <div className="rounded-[1.5rem] border border-[rgb(204_63_79_/_0.25)] bg-[rgb(204_63_79_/_0.08)] p-4 text-sm text-foreground">
+                    {actionMessage}
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
+          </div>
+        </section>
       </main>
+
+      <VoteDialog
+        entry={selectedEntry}
+        onOpenChange={(open) => {
+          if (!open) setSelectedEntry(null);
+        }}
+        onVoteSaved={refreshBoard}
+        open={Boolean(selectedEntry)}
+        status={snapshot.status}
+        viewer={snapshot.viewer}
+      />
+      <JudgeAuthDialog onOpenChange={setAuthDialogOpen} open={authDialogOpen} />
     </div>
   );
 }

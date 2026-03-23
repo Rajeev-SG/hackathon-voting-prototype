@@ -1,6 +1,5 @@
-import { projects } from "@/lib/mock-data";
-import { ProjectDirectory } from "@/components/project-directory";
+import { redirect } from "next/navigation";
 
 export default function ProjectsPage() {
-  return <ProjectDirectory projects={projects} />;
+  redirect("/");
 }
