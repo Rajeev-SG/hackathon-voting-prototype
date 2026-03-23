@@ -51,11 +51,7 @@ Prisma models live in [schema.prisma](/Users/rajeev/Code/hackathon-voting-protot
   - project name
   - slug
   - team name
-  - track
-  - booth
   - summary
-  - demo URL
-  - image URL
   - metadata JSON for tolerated extra workbook columns
 
 ### `EntryTeamEmail`
@@ -78,12 +74,7 @@ The generated template includes:
 
 - `Project Name`
 - `Team Name`
-- `Track`
-- `Booth`
 - `Summary`
-- `Demo URL`
-- `Repository URL`
-- `Image URL`
 - `Team Member 1 Email`
 - `Team Member 2 Email`
 - `Team Member 3 Email`
@@ -160,4 +151,3 @@ This keeps the rule coherent without introducing a separate roster-management sy
   - support keyboard-first scoring
   - announce feedback with live regions
   - remain usable on mobile
-

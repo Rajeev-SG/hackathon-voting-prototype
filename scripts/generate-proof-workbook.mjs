@@ -10,11 +10,7 @@ const rows = [
   {
     "Project Name": "Aurora Atlas",
     "Team Name": "North Star",
-    Track: "AI",
-    Booth: "Booth A1",
     Summary: "A live map for outage recovery teams with route intelligence and field coordination notes.",
-    "Demo URL": "https://example.com/aurora",
-    "Repository URL": "https://github.com/example/aurora-atlas",
     "Team Member 1 Email": "founder@aurora.example",
     "Team Member 2 Email": "judge.self+clerk_test@example.com",
     Sponsor: "OpenAI"
@@ -22,11 +18,7 @@ const rows = [
   {
     "Project Name": "Signal Bloom",
     "Team Name": "Bloom Labs",
-    Track: "Climate",
-    Booth: "Booth B2",
     Summary: "A carbon-aware operations planner that turns dense emissions data into simple action prompts.",
-    "Demo URL": "https://example.com/signal-bloom",
-    "Repository URL": "https://github.com/example/signal-bloom",
     "Team Member 1 Email": "builder@signalbloom.example",
     "Team Member 2 Email": "teammate@signalbloom.example",
     Sponsor: "Anthropic"
@@ -34,11 +26,7 @@ const rows = [
   {
     "Project Name": "Harbor Pulse",
     "Team Name": "Harbor Collective",
-    Track: "Fintech",
-    Booth: "Booth C4",
     Summary: "A cash-flow alerting assistant for small teams that need faster decision support during crunch weeks.",
-    "Demo URL": "https://example.com/harbor-pulse",
-    "Repository URL": "https://github.com/example/harbor-pulse",
     "Team Member 1 Email": "captain@harborpulse.example",
     "Team Member 2 Email": "ops@harborpulse.example",
     Sponsor: "Vercel"

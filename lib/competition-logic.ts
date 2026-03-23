@@ -6,11 +6,7 @@ export type EntryRecordForLogic = {
   slug: string;
   projectName: string;
   teamName: string | null;
-  track: string | null;
-  booth: string | null;
   summary: string | null;
-  demoUrl: string | null;
-  imageUrl: string | null;
   teamEmails: { email: string }[];
   votes: {
     judgeEmail: string;
@@ -31,11 +27,7 @@ export type ScoreboardEntryView = {
   slug: string;
   projectName: string;
   teamName: string | null;
-  track: string | null;
-  booth: string | null;
   summary: string | null;
-  demoUrl: string | null;
-  imageUrl: string | null;
   rank: number;
   totalScore: number;
   averageScore: number | null;

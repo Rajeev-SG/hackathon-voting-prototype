@@ -1,9 +1,13 @@
 import { execFileSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
 import { PrismaClient } from "@prisma/client";
 import { expect, test, type Browser, type Page, devices } from "playwright/test";
+import * as XLSX from "xlsx";
+
+import { TEMPLATE_SHEET_NAME } from "@/lib/constants";
 
 const prisma = new PrismaClient();
 
@@ -11,6 +15,7 @@ const MANAGER_EMAIL = "rajeev.gill@omc.com";
 const JUDGE_EMAIL = "judge.one+clerk_test@example.com";
 const SELF_BLOCKED_EMAIL = "judge.self+clerk_test@example.com";
 const REPO_ROOT = process.cwd();
+const JUDGE_AUTH_MODE = process.env.E2E_JUDGE_AUTH_MODE ?? "email-code";
 
 function slugifyProjectName(projectName: string) {
   return projectName
@@ -103,6 +108,45 @@ function createProofWorkbook(outputPath: string) {
   return runNodeScript(path.join(REPO_ROOT, "scripts/generate-proof-workbook.mjs"), [outputPath]);
 }
 
+function createDroppedWorkbookVariant(sourcePath: string, outputPath: string) {
+  const workbook = XLSX.readFile(sourcePath);
+  const sheet = workbook.Sheets[TEMPLATE_SHEET_NAME];
+  const rows = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, { defval: "" });
+
+  const updatedRows = rows.map((row) =>
+    row["Project Name"] === "Harbor Pulse"
+      ? {
+          ...row,
+          "Team Name": "Harbor Collective Reloaded"
+        }
+      : row
+  );
+
+  workbook.Sheets[TEMPLATE_SHEET_NAME] = XLSX.utils.json_to_sheet(updatedRows);
+  XLSX.writeFile(workbook, outputPath);
+}
+
+async function dropWorkbook(page: Page, filePath: string) {
+  const dataTransfer = await page.evaluateHandle(
+    async ({ name, mimeType, base64 }) => {
+      const dataTransfer = new DataTransfer();
+      const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
+      dataTransfer.items.add(new File([bytes], name, { type: mimeType }));
+      return dataTransfer;
+    },
+    {
+      name: path.basename(filePath),
+      mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      base64: fs.readFileSync(filePath).toString("base64")
+    }
+  );
+
+  const dropzone = page.getByTestId("manager-upload-dropzone");
+  await dropzone.dispatchEvent("dragenter", { dataTransfer });
+  await dropzone.dispatchEvent("dragover", { dataTransfer });
+  await dropzone.dispatchEvent("drop", { dataTransfer });
+}
+
 async function signInWithTicket(page: Page, baseURL: string, email: string, expectedRoleLabel: string) {
   const ticketUrl = createSignInTicket(baseURL, email);
   await page.goto(ticketUrl);
@@ -160,7 +204,9 @@ test("manager, judges, and public users complete the single-screen voting flow",
   browser
 }, testInfo) => {
   const workbookPath = testInfo.outputPath("hackathon-proof-workbook.xlsx");
+  const droppedWorkbookPath = testInfo.outputPath("hackathon-proof-workbook-drop.xlsx");
   createProofWorkbook(workbookPath);
+  createDroppedWorkbookVariant(workbookPath, droppedWorkbookPath);
 
   const managerContext = await createRoleContext(browser, testInfo.project.name);
   const managerPage = await managerContext.newPage();
@@ -188,12 +234,22 @@ test("manager, judges, and public users complete the single-screen voting flow",
     ]);
     expect(templateDownload.suggestedFilename()).toContain("hackathon-voting-template");
 
-    await managerPage.locator('input[type="file"]').setInputFiles(workbookPath);
+    const [fileChooser] = await Promise.all([
+      managerPage.waitForEvent("filechooser"),
+      managerPage.getByTestId("manager-upload-button").click()
+    ]);
+    await fileChooser.setFiles(workbookPath);
     await expect(managerPage.getByText("Imported 3 projects.")).toBeVisible();
     const rowIndex = activeResponsiveIndex(testInfo.project.name);
     await expect(managerPage.getByTestId("scoreboard-row-aurora-atlas").nth(rowIndex)).toBeVisible();
     await expect(managerPage.getByTestId("scoreboard-row-signal-bloom").nth(rowIndex)).toBeVisible();
     await expect(managerPage.getByTestId("scoreboard-row-harbor-pulse").nth(rowIndex)).toBeVisible();
+
+    await dropWorkbook(managerPage, droppedWorkbookPath);
+    await expect(managerPage.getByText("Imported 3 projects.")).toBeVisible();
+    await expect(managerPage.getByTestId("scoreboard-row-harbor-pulse").nth(rowIndex)).toContainText(
+      "Harbor Collective Reloaded"
+    );
     await takeShot(managerPage, testInfo.outputPath("manager-after-upload.png"));
 
     await managerPage.getByTestId("manager-begin-voting").click();
@@ -208,7 +264,11 @@ test("manager, judges, and public users complete the single-screen voting flow",
   });
 
   await test.step("A judge signs in by email code and submits keyboard-friendly modal votes", async () => {
-    await signInJudgeWithEmailCode(judgePage, JUDGE_EMAIL);
+    if (JUDGE_AUTH_MODE === "ticket") {
+      await signInWithTicket(judgePage, baseURL!, JUDGE_EMAIL, "Judge");
+    } else {
+      await signInJudgeWithEmailCode(judgePage, JUDGE_EMAIL);
+    }
 
     let voteDialog = await openVoteDialog(judgePage, "Aurora Atlas");
     await expect(voteDialog.getByTestId("score-option-7")).toBeFocused();

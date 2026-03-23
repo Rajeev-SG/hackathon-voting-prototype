@@ -13,12 +13,7 @@ export type ParsedEntryRow = {
   projectName: string;
   slug: string;
   teamName: string | null;
-  track: string | null;
-  booth: string | null;
   summary: string | null;
-  demoUrl: string | null;
-  repositoryUrl: string | null;
-  imageUrl: string | null;
   teamEmails: string[];
   metadata: Record<string, string>;
 };
@@ -44,16 +39,7 @@ function readCell(row: Record<string, unknown>, headers: string[], fallback = ""
 }
 
 function isKnownMetadataHeader(header: string) {
-  return [
-    "project name",
-    "team name",
-    "track",
-    "booth",
-    "summary",
-    "demo url",
-    "repository url",
-    "image url"
-  ].includes(header);
+  return ["project name", "team name", "summary"].includes(header);
 }
 
 export function parseEntriesWorkbook(buffer: ArrayBuffer | Buffer) {
@@ -141,12 +127,7 @@ export function parseEntriesWorkbook(buffer: ArrayBuffer | Buffer) {
       projectName,
       slug: slugifyProjectName(projectName),
       teamName: readCell(row, [headerMap.get("team name") ?? ""]) || null,
-      track: readCell(row, [headerMap.get("track") ?? ""]) || null,
-      booth: readCell(row, [headerMap.get("booth") ?? ""]) || null,
       summary: readCell(row, [headerMap.get("summary") ?? ""]) || null,
-      demoUrl: readCell(row, [headerMap.get("demo url") ?? ""]) || null,
-      repositoryUrl: readCell(row, [headerMap.get("repository url") ?? ""]) || null,
-      imageUrl: readCell(row, [headerMap.get("image url") ?? ""]) || null,
       teamEmails: Array.from(new Set(teamEmails)),
       metadata
     });
@@ -163,12 +144,7 @@ export function buildTemplateWorkbook() {
   const entryHeaders = [
     "Project Name",
     "Team Name",
-    "Track",
-    "Booth",
     "Summary",
-    "Demo URL",
-    "Repository URL",
-    "Image URL",
     ...Array.from({ length: MAX_TEAM_EMAIL_COLUMNS }, (_, index) => `Team Member ${index + 1} Email`),
     "Optional Note"
   ];
@@ -177,12 +153,7 @@ export function buildTemplateWorkbook() {
     [
       "Aurora Atlas",
       "Team North Star",
-      "AI & ML",
-      "Booth 14",
       "An AI assistant for hackathon project triage.",
-      "https://demo.example.com/aurora-atlas",
-      "https://github.com/example/aurora-atlas",
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
       "founder@example.com",
       "designer@example.com",
       "",
@@ -215,8 +186,6 @@ export function buildFinalizedResultsWorkbook(
     rank: number;
     projectName: string;
     teamName: string | null;
-    track: string | null;
-    booth: string | null;
     totalScore: number;
     voteCount: number;
     averageScore: number | null;
@@ -227,8 +196,6 @@ export function buildFinalizedResultsWorkbook(
     Rank: row.rank,
     "Project Name": row.projectName,
     "Team Name": row.teamName ?? "",
-    Track: row.track ?? "",
-    Booth: row.booth ?? "",
     "Aggregate Score": row.totalScore,
     "Vote Count": row.voteCount,
     "Average Score": row.averageScore ?? ""

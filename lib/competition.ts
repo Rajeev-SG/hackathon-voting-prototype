@@ -82,12 +82,7 @@ export async function replaceEntriesFromWorkbook(buffer: ArrayBuffer | Buffer) {
           slug: row.slug,
           projectName: row.projectName,
           teamName: row.teamName,
-          track: row.track,
-          booth: row.booth,
           summary: row.summary,
-          demoUrl: row.demoUrl,
-          repositoryUrl: row.repositoryUrl,
-          imageUrl: row.imageUrl,
           metadata: Object.keys(row.metadata).length ? row.metadata : Prisma.JsonNull,
           teamEmails: {
             create: row.teamEmails.map((email) => ({

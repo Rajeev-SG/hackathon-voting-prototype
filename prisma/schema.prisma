@@ -28,12 +28,7 @@ model Entry {
   slug          String           @unique
   projectName   String
   teamName      String?
-  track         String?
-  booth         String?
   summary       String?
-  demoUrl       String?
-  repositoryUrl String?
-  imageUrl      String?
   metadata      Json?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt

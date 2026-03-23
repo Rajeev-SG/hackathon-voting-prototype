@@ -7,6 +7,7 @@ import {
   ArrowUpRight,
   FileSpreadsheet,
   Flag,
+  FolderUp,
   LoaderCircle,
   Play,
   ShieldCheck,
@@ -62,6 +63,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
   const [isDragOver, setIsDragOver] = React.useState(false);
   const [actionMessage, setActionMessage] = React.useState<string | null>(null);
   const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
+  const uploadInputRef = React.useRef<HTMLInputElement>(null);
   const copy = statusCopy(snapshot.status);
 
   function refreshBoard() {
@@ -111,6 +113,11 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
       issues: []
     });
     refreshBoard();
+  }
+
+  function openWorkbookPicker() {
+    if (!snapshot.canUploadSheet || uploadState.status === "uploading") return;
+    uploadInputRef.current?.click();
   }
 
   return (
@@ -257,13 +264,14 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                       </div>
                     </div>
 
-                    <label
-                      className={`block cursor-pointer rounded-[1.5rem] border border-dashed p-5 transition ${
+                    <div
+                      className={`rounded-[1.5rem] border border-dashed p-5 transition ${
                         isDragOver
                           ? "border-radix-teal-a-7 bg-radix-teal-a-3"
                           : "border-radix-teal-a-6 bg-radix-teal-a-2 hover:border-radix-teal-a-7 hover:bg-radix-teal-a-3"
                       }`}
                       data-testid="manager-upload-dropzone"
+                      onClick={openWorkbookPicker}
                       onDragLeave={() => setIsDragOver(false)}
                       onDragOver={(event) => {
                         event.preventDefault();
@@ -276,11 +284,20 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                         const file = event.dataTransfer.files?.[0];
                         if (file) void handleWorkbookUpload(file);
                       }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          openWorkbookPicker();
+                        }
+                      }}
+                      role="button"
+                      tabIndex={snapshot.canUploadSheet ? 0 : -1}
                     >
                       <input
                         accept=".xlsx"
                         className="sr-only"
                         disabled={!snapshot.canUploadSheet || uploadState.status === "uploading"}
+                        ref={uploadInputRef}
                         onChange={(event) => {
                           const file = event.target.files?.[0];
                           if (file) void handleWorkbookUpload(file);
@@ -288,16 +305,32 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                         }}
                         type="file"
                       />
-                      <div className="flex items-center gap-3">
-                        <ShieldCheck className="h-5 w-5 text-primary" />
-                        <div>
-                          <div className="font-semibold text-foreground">Drag, drop, or choose a workbook</div>
-                          <div className="text-sm text-muted-foreground">
-                            Upload is only available before voting begins.
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-3">
+                          <ShieldCheck className="h-5 w-5 text-primary" />
+                          <div>
+                            <div className="font-semibold text-foreground">Drag, drop, or choose a workbook</div>
+                            <div className="text-sm text-muted-foreground">
+                              Upload is only available before voting begins.
+                            </div>
                           </div>
                         </div>
+                        <Button
+                          data-testid="manager-upload-button"
+                          disabled={!snapshot.canUploadSheet || uploadState.status === "uploading"}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            openWorkbookPicker();
+                          }}
+                          size="sm"
+                          type="button"
+                          variant="outline"
+                        >
+                          <FolderUp className="h-4 w-4" />
+                          Choose XLSX
+                        </Button>
                       </div>
-                    </label>
+                    </div>
 
                     {uploadState.message ? (
                       <div className="rounded-[1.5rem] border border-border bg-radix-gray-a-3 p-4 text-sm text-muted-foreground">

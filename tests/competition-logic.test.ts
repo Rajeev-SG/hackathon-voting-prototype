@@ -21,11 +21,7 @@ describe("competition logic", () => {
           slug: "aurora-atlas",
           projectName: "Aurora Atlas",
           teamName: "Team North Star",
-          track: "AI",
-          booth: "Booth 1",
           summary: "Summary",
-          demoUrl: null,
-          imageUrl: null,
           teamEmails: [{ email: "founder@example.com" }],
           votes: [
             { judgeEmail: "judge.one@example.com", score: 9, updatedAt: new Date("2026-03-23T12:00:00.000Z") },
@@ -37,11 +33,7 @@ describe("competition logic", () => {
           slug: "signal-bloom",
           projectName: "Signal Bloom",
           teamName: "Team Bloom",
-          track: "AI",
-          booth: "Booth 2",
           summary: "Summary",
-          demoUrl: null,
-          imageUrl: null,
           teamEmails: [{ email: "judge.one@example.com" }],
           votes: [
             { judgeEmail: "judge.two@example.com", score: 10, updatedAt: new Date("2026-03-23T12:03:00.000Z") }
@@ -74,11 +66,7 @@ describe("competition logic", () => {
           slug: "aurora-atlas",
           projectName: "Aurora Atlas",
           teamName: "Team North Star",
-          track: "AI",
-          booth: "Booth 1",
           summary: "Summary",
-          demoUrl: null,
-          imageUrl: null,
           teamEmails: [{ email: "founder@example.com" }],
           votes: [{ judgeEmail: "judge.three@example.com", score: 9, updatedAt: new Date("2026-03-23T12:00:00.000Z") }]
         },
@@ -87,11 +75,7 @@ describe("competition logic", () => {
           slug: "signal-bloom",
           projectName: "Signal Bloom",
           teamName: "Team Bloom",
-          track: "AI",
-          booth: "Booth 2",
           summary: "Summary",
-          demoUrl: null,
-          imageUrl: null,
           teamEmails: [{ email: "builder@example.com" }],
           votes: []
         }

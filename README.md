@@ -57,8 +57,11 @@ Notes:
 
 - `DATABASE_URL` is the runtime connection string Prisma uses in the app.
 - `POSTGRES_URL` and `PRISMA_DATABASE_URL` are kept for Vercel/Postgres compatibility.
-- Google SSO should be enabled in Clerk when available.
-- Email-code auth is the required fallback and is covered by automated proof.
+- Production Clerk is configured on `vote.rajeevg.com`.
+- Google SSO is configured on the production Clerk instance.
+- Local automated proof covers the email-code flow directly.
+- Production automated proof uses Clerk sign-in tickets for deterministic runs, and live browser proof covers both Google sign-in and inbox-delivered email-code auth on `vote.rajeevg.com`.
+- Clerk's paid "Custom email templates" feature is still required for deeper production email-template edits. The current live verification email is already branded as `Hackathon Voting App <notifications@vote.rajeevg.com>`, but template-level subject/body customization beyond that remains blocked on the current Clerk plan.
 
 ## Local run
 
@@ -135,6 +138,12 @@ Local end-to-end proof:
 pnpm test:e2e
 ```
 
+Production end-to-end proof:
+
+```bash
+E2E_BASE_URL=https://vote.rajeevg.com E2E_JUDGE_AUTH_MODE=ticket pnpm test:e2e
+```
+
 The Playwright suite covers:
 
 - anonymous public viewing
@@ -158,8 +167,12 @@ Proof notes live in [proof.md](/Users/rajeev/Code/hackathon-voting-prototype/doc
 - Clerk is the auth provider.
 - Postgres is the durable store.
 - Production env vars must be present in Vercel before deploy.
-- If Google OAuth cannot be fully completed from the dashboard without a manual external consent step, the app should still ship with Clerk email-code auth working.
+- Production uses Clerk live keys on `vote.rajeevg.com`; development continues to use test keys locally.
+- Google OAuth is configured for the production Clerk instance and production app domain.
+- The live verification email already arrives branded from `Hackathon Voting App <notifications@vote.rajeevg.com>`.
+- Production verification-email template editing is still limited by the current Clerk plan; deeper subject/body customization requires a Clerk plan upgrade or a custom email-delivery integration.
 
 ## Production URL
 
-- Live app: [hackathon-voting-prototype.vercel.app](https://hackathon-voting-prototype.vercel.app)
+- Live app: [vote.rajeevg.com](https://vote.rajeevg.com)
+- Vercel production alias: [hackathon-voting-prototype.vercel.app](https://hackathon-voting-prototype.vercel.app)

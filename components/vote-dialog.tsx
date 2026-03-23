@@ -101,19 +101,9 @@ export function VoteDialog({
             <div className="relative mt-8 space-y-5">
               <div className="glass-panel rounded-[1.75rem] p-5">
                 <div className="flex flex-wrap gap-2">
-                  {entry.track ? (
-                    <span className="rounded-full bg-radix-teal-a-4 px-3 py-1 text-xs font-semibold text-accent-foreground">
-                      {entry.track}
-                    </span>
-                  ) : null}
                   {entry.teamName ? (
                     <span className="rounded-full bg-radix-gray-a-3 px-3 py-1 text-xs font-semibold text-muted-foreground">
                       {entry.teamName}
-                    </span>
-                  ) : null}
-                  {entry.booth ? (
-                    <span className="rounded-full bg-radix-purple-a-4 px-3 py-1 text-xs font-semibold text-foreground">
-                      {entry.booth}
                     </span>
                   ) : null}
                 </div>
@@ -130,13 +120,7 @@ export function VoteDialog({
                   </div>
                 </div>
                 <p className="mt-4 text-sm leading-7 text-muted-foreground">
-                  {entry.demoUrl ? (
-                    <>
-                      Demo ready at <span className="font-medium text-foreground">{entry.demoUrl}</span>.
-                    </>
-                  ) : (
-                    "Tap a score and submit. The public scoreboard updates right away with smooth rank changes."
-                  )}
+                  Tap a score and submit. The public scoreboard updates right away with smooth rank changes.
                 </p>
               </div>
 
