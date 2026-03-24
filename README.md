@@ -188,17 +188,21 @@ The Playwright suite covers:
 Cheap event-day readiness checks:
 
 ```bash
-pnpm test tests/readiness.integration.test.ts
-pnpm readiness:public -- --url https://vote.rajeevg.com --concurrency 50 --requests 250
+pnpm exec vitest run tests/readiness.integration.test.ts tests/votes.integration.test.ts --reporter=verbose
+pnpm readiness:public -- --url https://vote.rajeevg.com --concurrency 50 --requests 500
+set -a && source .env.vercel-prod && set +a
+pnpm readiness:smoke -- --base-url https://vote.rajeevg.com
 ```
 
 These checks prove two different things:
 
-- `tests/readiness.integration.test.ts` simulates 50 concurrent judges scoring a round in waves against the real Prisma-backed vote logic.
-- `readiness:public` sends 250 public scoreboard requests with 50-way concurrency to confirm the live site stays responsive under the expected spectator load without requiring a paid load-testing service.
+- the Vitest pair covers vote locking, self-vote blocking, project-close behavior, reset behavior, and the 50-judge readiness waves against the real Prisma-backed vote logic
+- `readiness:public` sends 500 public scoreboard requests with 50-way concurrency to confirm the live site stays responsive under the expected spectator load without requiring a paid load-testing service
+- `readiness:smoke` is the manager/judge/public production smoke path that resets to a clean start, uploads the workbook, opens voting, casts a real judge vote, and confirms the public board refreshes
 
 Proof notes live in [proof.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/proof.md).
 Viewport-specific appearance and usability findings live in [viewport-ux-audit.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/viewport-ux-audit.md).
+Event-day operating guidance and recovery steps live in [event-day-runbook.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/event-day-runbook.md).
 Analytics implementation notes live in [google-tagging-stack.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md).
 Analytics audit notes live in [analytics-audit.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/analytics-audit.md).
 Promoted GA dimension and metric definitions live in [google-tagging-stack.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md#promoted-ga-custom-definitions).

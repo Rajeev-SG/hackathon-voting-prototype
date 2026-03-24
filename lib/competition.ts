@@ -16,7 +16,8 @@ const anonymousViewer = {
 } as const;
 const shouldUsePublicSnapshotCache =
   process.env.NODE_ENV === "production" && process.env.DISABLE_PUBLIC_SNAPSHOT_CACHE !== "1";
-const voteContextRetryDelayMs = [0, 100, 250, 500, 1000, 2000];
+const voteContextRetryDelayMs = [0, 100, 250, 500, 1000, 2000, 4000];
+const voteWriteRetryDelayMs = [0, 50, 125, 250, 500];
 
 async function ensureCompetitionState() {
   const existingState = await withPrismaRetry(() =>
@@ -327,29 +328,66 @@ export async function submitJudgeVote({
     throw new Error("Team members cannot vote on their own project.");
   }
 
-  try {
-    await withPrismaRetry(() =>
-      prisma.vote.create({
-        data: {
-          entryId,
-          judgeEmail: normalizedJudgeEmail,
-          judgeUserId,
-          score
-        }
-      })
-    );
-  } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
-      throw new Error("You've already scored this project. Votes lock after submission.");
+  for (const delayMs of voteWriteRetryDelayMs) {
+    if (delayMs > 0) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, delayMs);
+      });
     }
 
-    throw error;
+    try {
+      await withPrismaRetry(() =>
+        prisma.vote.create({
+          data: {
+            entryId,
+            judgeEmail: normalizedJudgeEmail,
+            judgeUserId,
+            score
+          }
+        })
+      );
+      safeRevalidateHome();
+      return;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        throw new Error("You've already scored this project. Votes lock after submission.");
+      }
+
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2003"
+      ) {
+        const latestContext = await resolveVoteSubmissionContext(entryId);
+
+        if (!latestContext.state || latestContext.state.votingStatus !== "OPEN") {
+          throw new Error("Voting is not currently open.");
+        }
+
+        if (!latestContext.entry) {
+          if (delayMs === voteWriteRetryDelayMs.at(-1)) {
+            throw new Error("That project is no longer available. Refresh the board and try again.");
+          }
+
+          continue;
+        }
+
+        if (!latestContext.entry.isVotingOpen) {
+          throw new Error("Voting is currently closed for this project.");
+        }
+
+        if (delayMs !== voteWriteRetryDelayMs.at(-1)) {
+          continue;
+        }
+      }
+
+      throw error;
+    }
   }
 
-  safeRevalidateHome();
+  throw new Error("We could not save that vote right now. Refresh the board and try again.");
 }
 
 export async function setEntryVotingAvailability({
