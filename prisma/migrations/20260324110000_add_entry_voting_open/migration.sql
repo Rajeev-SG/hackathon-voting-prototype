@@ -1,0 +1,2 @@
+ALTER TABLE "Entry"
+ADD COLUMN "isVotingOpen" BOOLEAN NOT NULL DEFAULT true;

@@ -112,6 +112,7 @@ export function VoteDialog({
   const needsAuth = !viewer.isAuthenticated;
   const isBlocked = entry.isSelfVoteBlocked;
   const hasRecordedVote = entry.currentUserVote != null;
+  const isEntryClosed = !entry.isVotingOpen;
   const previewScore = Number(selectedScore || String(entry.currentUserVote ?? 7));
   const preview = describeScore(previewScore);
   const recordedVote = entry.currentUserVote == null ? null : describeScore(entry.currentUserVote);
@@ -207,6 +208,12 @@ export function VoteDialog({
                 </div>
               ) : null}
 
+              {isEntryClosed && !hasRecordedVote && status === "OPEN" ? (
+                <div className="rounded-[1.6rem] border border-[rgb(217_140_20_/_0.28)] bg-[rgb(217_140_20_/_0.08)] p-5 text-sm leading-7 text-foreground">
+                  Voting is paused for this project right now. The manager can reopen it from the scoreboard at any time.
+                </div>
+              ) : null}
+
               {errorMessage ? (
                 <div
                   aria-live="polite"
@@ -237,23 +244,6 @@ export function VoteDialog({
                       : "Finalized results are locked now. Thanks for helping judge the field."}
                   </p>
                 </div>
-              ) : needsAuth ? (
-                <div className="glass-panel flex flex-1 flex-col justify-between rounded-[1.9rem] p-6 sm:p-7">
-                  <JudgeAuthPanel
-                    afterAuthenticate={() => {
-                      onVoteSaved();
-                    }}
-                    description="The board stays public, but signing in unlocks a single decisive score per project. Once you submit, that score is locked for the round."
-                    title="Sign in to cast your vote"
-                  />
-                </div>
-              ) : isBlocked ? (
-                <div className="glass-panel flex flex-1 flex-col justify-center rounded-[1.9rem] p-6 sm:p-7">
-                  <h3 className="font-display text-3xl font-black">You can’t score this one</h3>
-                  <p className="mt-4 max-w-md text-sm leading-7 text-muted-foreground">
-                    We block self-voting automatically so judges never need to second-guess whether a score is allowed.
-                  </p>
-                </div>
               ) : hasRecordedVote ? (
                 <div className="glass-panel flex flex-1 flex-col justify-between rounded-[1.9rem] p-6 sm:p-7">
                   <div>
@@ -279,6 +269,30 @@ export function VoteDialog({
                       </div>
                     </div>
                   </div>
+                </div>
+              ) : isEntryClosed ? (
+                <div className="glass-panel flex flex-1 flex-col justify-center rounded-[1.9rem] p-6 sm:p-7">
+                  <h3 className="font-display text-3xl font-black">Voting is paused</h3>
+                  <p className="mt-4 max-w-md text-sm leading-7 text-muted-foreground">
+                    This project is still visible on the public board, but the manager has closed it to new votes for now.
+                  </p>
+                </div>
+              ) : needsAuth ? (
+                <div className="glass-panel flex flex-1 flex-col justify-between rounded-[1.9rem] p-6 sm:p-7">
+                  <JudgeAuthPanel
+                    afterAuthenticate={() => {
+                      onVoteSaved();
+                    }}
+                    description="The board stays public, but signing in unlocks a single decisive score per project. Once you submit, that score is locked for the round."
+                    title="Sign in to cast your vote"
+                  />
+                </div>
+              ) : isBlocked ? (
+                <div className="glass-panel flex flex-1 flex-col justify-center rounded-[1.9rem] p-6 sm:p-7">
+                  <h3 className="font-display text-3xl font-black">You can’t score this one</h3>
+                  <p className="mt-4 max-w-md text-sm leading-7 text-muted-foreground">
+                    We block self-voting automatically so judges never need to second-guess whether a score is allowed.
+                  </p>
                 </div>
               ) : (
                 <div className="glass-panel flex flex-1 flex-col rounded-[1.9rem] p-5">

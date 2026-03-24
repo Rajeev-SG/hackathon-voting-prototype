@@ -5,6 +5,7 @@ Production-oriented single-screen hackathon voting app built with Next.js 14, Ty
 The app keeps the visual language of the original results dashboard, but the product has been simplified to one public scoreboard with an integrated manager control surface and a polished voting modal for judges.
 
 The current layout is intentionally content-first: the scoreboard and next action are prioritized above the fold, while explanatory rules live in lighter supporting panels instead of dominating the first scan.
+The screen stays single-column across viewports so the scoreboard leads and judging progress follows directly underneath it instead of competing in a side rail.
 
 ## What the app is now
 
@@ -13,6 +14,8 @@ The current layout is intentionally content-first: the scoreboard and next actio
 - Authenticated judge voting in a modal
 - Automatic self-vote blocking from uploaded team-member emails
 - Live judging progress
+- Table and horizontal bar-chart views on the same scoreboard
+- Manager-only per-entry voting open/closed controls
 - Manager-only finalization and finalized XLSX export
 - Manager-only reset button for repeatable dry runs
 - Light and dark mode
@@ -130,7 +133,8 @@ The app uses a practical judging-round rule:
 
 - judges join the denominator when they cast their first vote
 - self-vote-blocked projects are removed from that judge's denominator
-- finalization unlocks when every participating judge has scored every project they are eligible to judge
+- manager-closed projects are removed from the live denominator until reopened
+- finalization unlocks when every participating judge has scored every project that is still open and eligible for them
 
 Each judge can submit one score per project. Once submitted, that score is locked for the rest of the round.
 
@@ -163,7 +167,9 @@ The Playwright suite covers:
 - anonymous public viewing
 - manager template download
 - manager workbook upload
+- manager per-entry open / close control
 - manager begin voting
+- scoreboard table / bar-chart toggle
 - email-code judge auth
 - modal keyboard voting
 - self-vote blocking
@@ -173,6 +179,7 @@ The Playwright suite covers:
 - public finalized lock state
 - manager XLSX export
 - anonymous cross-device freshness after another judge casts a score
+- single-column ordering with judging progress below the scoreboard
 
 Cheap event-day readiness checks:
 

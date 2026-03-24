@@ -25,7 +25,9 @@ Flows proven:
 - Anonymous user can view the scoreboard but not manager controls
 - Manager downloads the XLSX template
 - Manager uploads a workbook and workbook-driven entries appear
+- Manager switches the scoreboard between table and horizontal bar-chart views
 - Manager begins voting
+- Manager closes and reopens an individual project for new voting
 - Judge signs in with email-code auth
 - The mobile email-code auth flow survives a page remount and returns to the verification step instead of resetting to email entry
 - Vote modal supports keyboard selection and submission
@@ -36,6 +38,7 @@ Flows proven:
 - Manager downloads the finalized XLSX export
 - Public finalized state is visible and modal voting is locked
 - The judging-progress state card keeps its label fully contained at mobile and wide desktop widths
+- The scoreboard remains visually ahead of the progress section, and the progress section stays below the board across breakpoints
 
 Artifacts:
 
@@ -53,7 +56,7 @@ Date: `2026-03-24`
 
 Goal:
 
-- Re-check the judging-progress header after the mobile state-card clipping report
+- Re-check the single-column ordering after removing the old side rail and ensure progress stays below the scoreboard cleanly
 
 Local production surface:
 
@@ -73,8 +76,8 @@ Focused proof artifacts:
 Observed result:
 
 - The state card now renders `Preparing` instead of the raw uppercase enum token.
-- Mobile at `430px` keeps the three progress cards readable without clipping or overlap.
-- Wide desktop at `1575px` keeps the right-hand progress rail balanced and free of dead space.
+- Mobile at `430px` keeps the progress cards readable without clipping or overlap.
+- Wide desktop at `1575px` keeps the scoreboard dominant instead of splitting attention with a side rail.
 - DOM measurement on both local production and the live site confirmed the state label stayed inset inside its card with healthy top and bottom space.
 
 Result:
@@ -87,7 +90,7 @@ Date: `2026-03-24`
 
 Goal:
 
-- Prove the judging-progress cards stay contained at the in-between widths where the live site previously clipped
+- Prove the single-column scoreboard keeps the board above the progress section and stays contained at the in-between widths where the live site previously clipped
 
 Local validation:
 
@@ -105,9 +108,10 @@ Viewports covered:
 Proof contract:
 
 - No horizontal page overflow
+- Progress panel appears below the scoreboard section
 - State card remains inside the viewport
 - State label keeps healthy top and bottom inset inside the card
-- Mid-width layouts use a two-up row with a full-width state card instead of forcing three narrow columns
+- Mid-width layouts keep the one-column reading order without accidental side-by-side competition
 
 Artifacts:
 
@@ -129,7 +133,7 @@ Date: `2026-03-24`
 
 Goal:
 
-- Rebalance the screen so the scoreboard and next action dominate above the fold instead of a large explanatory hero
+- Rebalance the screen so the scoreboard and next action dominate above the fold instead of a large explanatory hero or side rail
 
 Guidance used:
 
@@ -151,7 +155,7 @@ Observed local result:
 
 - Wide desktop no longer burns most of the first screen on a tall empty hero.
 - The scoreboard header and first rows now appear in the primary scan area instead of being pushed too far down.
-- Mid-width and mobile now carry only the decision-driving summary above the fold, with the board appearing sooner.
+- Mid-width and mobile now carry only the decision-driving summary above the fold, with the board appearing sooner and progress staying below it.
 - Supporting rules remain present but visually secondary.
 
 Artifacts:
@@ -175,7 +179,7 @@ LAYOUT_PROOF=1 E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test t
 Observed production result:
 
 - Wide desktop keeps the scoreboard and first action in the dominant scan path without the old dead-zone hero feeling.
-- Mid-width and mobile preserve the same reading order and expose the scoreboard sooner.
+- Mid-width and mobile preserve the same reading order, expose the scoreboard sooner, and keep progress below the board.
 - The focused breakpoint proof passed on the live app across the intentional desktop, tablet, mid-width, and mobile combinations.
 
 Production artifacts:
@@ -232,7 +236,8 @@ Viewports exercised:
 Behavior proof:
 
 - Public scoreboard is reachable without auth
-- Manager template download, workbook upload, begin-voting, finalization, and export all complete successfully
+- Manager template download, workbook upload, begin-voting, per-entry close / reopen, finalization, and export all complete successfully
+- Scoreboard table and horizontal bar-chart modes both render correctly
 - The vote modal opens from the scoreboard, accepts keyboard score selection, submits successfully, and then locks the judge out from changing that project
 - Self-vote blocking is enforced from uploaded team emails
 - Finalized public state locks the modal and keeps the scoreboard readable

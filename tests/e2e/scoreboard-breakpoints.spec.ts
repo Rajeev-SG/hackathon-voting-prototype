@@ -8,11 +8,11 @@ const viewports = [
   { name: "wide-desktop", width: 1575, height: 1100, colorScheme: "light" as const }
 ];
 
-test.describe("scoreboard progress rail stays coherent across breakpoints", () => {
+test.describe("single-column scoreboard stays coherent across breakpoints", () => {
   test.skip(!runLayoutProof, "Run this focused breakpoint proof only when explicitly requested.");
 
   for (const viewport of viewports) {
-    test(`${viewport.name} keeps the progress cards contained`, async ({ page }, testInfo) => {
+    test(`${viewport.name} keeps the scoreboard and progress flow coherent`, async ({ page }, testInfo) => {
       if (testInfo.project.name === "desktop-light" && viewport.name === "mobile-tight") {
         test.skip(true, "Mobile-tight layout is covered by the dedicated mobile project.");
       }
@@ -41,15 +41,15 @@ test.describe("scoreboard progress rail stays coherent across breakpoints", () =
 
       expect(pageMetrics.scrollWidth).toBe(pageMetrics.viewportWidth);
 
-      const summaryTop = await page.locator("[data-testid='workflow-summary']").evaluate((element) => {
-        return element.getBoundingClientRect().top;
-      });
       const scoreboardTop = await page.locator("[data-testid='scoreboard-section']").evaluate((element) => {
         return element.getBoundingClientRect().top;
       });
+      const progressTop = await page.locator("[data-testid='progress-panel']").evaluate((element) => {
+        return element.getBoundingClientRect().top;
+      });
 
-      expect(summaryTop).toBeGreaterThanOrEqual(0);
       expect(scoreboardTop).toBeLessThan(viewport.height * 0.82);
+      expect(progressTop).toBeGreaterThan(scoreboardTop);
 
       const stateMetrics = await page.locator("[data-testid='progress-stat-state']").evaluate((element) => {
         const rect = element.getBoundingClientRect();

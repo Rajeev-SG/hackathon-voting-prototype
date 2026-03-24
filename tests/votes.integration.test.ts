@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { COMPETITION_STATE_ID, MANAGER_EMAIL } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
-import { resetCompetitionRound, submitJudgeVote } from "@/lib/competition";
+import { resetCompetitionRound, setEntryVotingAvailability, submitJudgeVote } from "@/lib/competition";
 
 async function resetDatabase() {
   await prisma.vote.deleteMany();
@@ -95,6 +95,32 @@ describe("submitJudgeVote", () => {
         score: 9
       })
     ).rejects.toThrow("Team members cannot vote on their own project.");
+  });
+
+  it("blocks new votes when the manager closes a project", async () => {
+    const entry = await prisma.entry.create({
+      data: {
+        slug: "signal-bloom",
+        projectName: "Signal Bloom",
+        teamEmails: {
+          create: [{ email: "builder@example.com" }]
+        }
+      }
+    });
+
+    await setEntryVotingAvailability({
+      entryId: entry.id,
+      isVotingOpen: false
+    });
+
+    await expect(
+      submitJudgeVote({
+        entryId: entry.id,
+        judgeEmail: "judge@example.com",
+        judgeUserId: "user_2",
+        score: 9
+      })
+    ).rejects.toThrow("Voting is currently closed for this project.");
   });
 
   it("resets the round back to an empty preparing state", async () => {
