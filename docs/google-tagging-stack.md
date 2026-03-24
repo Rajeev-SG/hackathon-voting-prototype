@@ -348,6 +348,9 @@ Verified report shell:
   - BigQuery `voting_funnel_daily`
   - BigQuery `entry_performance`
   - BigQuery `manager_operations_daily`
+- corrected proof note:
+  - an earlier verification pass was wrong because the cited screenshot captured an effectively blank editor state instead of a trustworthy page shell
+  - the shell was re-checked by opening each report page directly and capturing fresh page-level screenshots
 - page intent:
   - `Overview` for headline metrics and event-day timeline
   - `Voting funnel` for auth-to-dialog-to-vote conversion
@@ -356,19 +359,26 @@ Verified report shell:
   - `Experience and devices` for viewport, consent, and engagement analysis
   - `Event taxonomy` for long-tail event inspection and instrumentation QA
 - current shell content:
-  - report canvas already connected to the stable reporting dataset
-  - named pages for each deeper analysis layer
-  - core report-level data sources already attached for the main analysis surfaces
+  - `Overview`, `Voting funnel`, `Entry analysis`, and `Manager operations` now render visible shell copy tied to the attached reporting sources
+  - `Experience and devices` and `Event taxonomy` now render visible shell copy in the same report so the report is no longer blank page-to-page
+  - named pages exist for each deeper analysis layer, with the core report-level data sources already attached for the main analysis surfaces
 
 Evidence:
 
 - [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-shell-ready.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-shell-ready.png)
 - [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-analysis-shell-pages.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-analysis-shell-pages.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-overview-direct.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-overview-direct.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-voting-funnel-direct.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-voting-funnel-direct.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-entry-analysis-direct.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-entry-analysis-direct.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-manager-operations-direct.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-manager-operations-direct.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-experience-devices-direct.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-experience-devices-direct.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-event-taxonomy-direct.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-event-taxonomy-direct.png)
 
 ## Current caveat
 
 The remaining latency-sensitive part is Google’s raw export materialization:
 
 - `ga4_498363924` still had no landed raw `events_*` tables during this audit window
-- the shell is therefore ready but still visually sparse
+- the shell is therefore intentionally scaffolded rather than historically populated
+- `Experience and devices` and `Event taxonomy` are currently visible shell pages first, with deeper source wiring and data richness still dependent on raw export landing and the next reporting pass
 - once those raw tables land, the scheduled procedure already in place will begin populating `hackathon_reporting`, and the existing Looker shell will start filling in

@@ -228,7 +228,7 @@ Production analytics now includes:
   - `projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20`
 - most recent verified run:
   - `projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20/runs/69d4665f-0000-2933-a4f0-ac3eb1460e54`
-- a live Looker Studio shell report:
+- a live Looker Studio report shell with visible page scaffolds:
   - [Hackathon Voting Memory Dashboard](https://lookerstudio.google.com/reporting/e1b671cf-55b4-4c96-a4cd-ec1a0872e072/page/p_z5a814q31d/edit)
 - report shell pages:
   - `Overview`
@@ -237,7 +237,7 @@ Production analytics now includes:
   - `Manager operations`
   - `Experience and devices`
   - `Event taxonomy`
-- current audit status: the linked raw GA export dataset still has no landed `events_*` tables, but the reporting dataset, refresh pipeline, and multi-page Looker shell are ready and verified
+- current audit status: the linked raw GA export dataset still has no landed `events_*` tables, but the reporting dataset, refresh pipeline, and six-page Looker shell are now visibly present and re-proven with direct page screenshots after correcting an earlier invalid blank/editor-state proof
 
 Analytics env vars:
 
