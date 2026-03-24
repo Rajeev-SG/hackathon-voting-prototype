@@ -14,7 +14,8 @@ const anonymousViewer = {
   isAuthenticated: false,
   isManager: false
 } as const;
-const shouldUsePublicSnapshotCache = process.env.NODE_ENV === "production";
+const shouldUsePublicSnapshotCache =
+  process.env.NODE_ENV === "production" && process.env.DISABLE_PUBLIC_SNAPSHOT_CACHE !== "1";
 const voteContextRetryDelayMs = [0, 100, 250, 500, 1000, 2000];
 
 async function ensureCompetitionState() {

@@ -24,6 +24,7 @@ import { JudgeAuthDialog } from "@/components/judge-auth-dialog";
 import { hasPendingJudgeAuthVerification } from "@/components/judge-auth-panel";
 import { ResultsScoreboardTable } from "@/components/results-scoreboard-table";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { VoteDialog } from "@/components/vote-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -104,7 +105,6 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
   const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
   const [mobileSummaryOpen, setMobileSummaryOpen] = React.useState(false);
   const uploadInputRef = React.useRef<HTMLInputElement>(null);
-  const mobileSummaryRef = React.useRef<HTMLDivElement>(null);
   const stateMeta = competitionStateMeta(snapshot.status);
   const isEmpty = snapshot.entries.length === 0;
   const scoreboardMeta = scoreboardCopy(snapshot, isEmpty);
@@ -148,19 +148,6 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
   React.useEffect(() => {
     pushDataLayerEvent("competition_state_snapshot", analyticsContext);
   }, [analyticsContext]);
-
-  React.useEffect(() => {
-    if (!mobileSummaryOpen) return;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      if (!mobileSummaryRef.current?.contains(event.target as Node)) {
-        setMobileSummaryOpen(false);
-      }
-    };
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    return () => document.removeEventListener("pointerdown", handlePointerDown);
-  }, [mobileSummaryOpen]);
 
   function refreshBoard() {
     startTransition(() => {
@@ -291,6 +278,15 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
     uploadInputRef.current?.click();
   }
 
+  function handleMobileSummaryOpenChange(nextOpen: boolean) {
+    pushDataLayerEvent("scoreboard_summary_toggled", {
+      summary_state: nextOpen ? "open" : "closed",
+      trigger_surface: "mobile",
+      ...analyticsContext
+    });
+    setMobileSummaryOpen(nextOpen);
+  }
+
   return (
     <div className="min-h-screen">
       <main className="container space-y-5 py-6 sm:space-y-6 sm:py-8">
@@ -344,6 +340,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
             <Card
               className="glass-panel rounded-[2rem] border-0 bg-transparent shadow-none"
               data-analytics-section="manager_controls"
+              data-testid="manager-controls"
             >
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Manager controls</CardTitle>
@@ -690,7 +687,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
             data-analytics-section="scoreboard"
             data-testid="scoreboard-section"
           >
-            <div className="md:hidden" ref={mobileSummaryRef}>
+            <div className="md:hidden">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="eyebrow">Scoreboard</div>
@@ -714,17 +711,11 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                   </span>
                   {!isEmpty ? (
                     <Button
+                      aria-expanded={mobileSummaryOpen}
+                      aria-haspopup="dialog"
                       className="shrink-0"
                       data-testid="scoreboard-mobile-summary-toggle"
-                      onClick={() => {
-                        const nextOpen = !mobileSummaryOpen;
-                        pushDataLayerEvent("scoreboard_summary_toggled", {
-                          summary_state: nextOpen ? "open" : "closed",
-                          trigger_surface: "mobile",
-                          ...analyticsContext
-                        });
-                        setMobileSummaryOpen(nextOpen);
-                      }}
+                      onClick={() => handleMobileSummaryOpenChange(true)}
                       size="sm"
                       type="button"
                       variant="outline"
@@ -739,38 +730,39 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                 </div>
               </div>
 
-              <AnimatePresence>
-                {mobileSummaryOpen ? (
-                  <motion.div
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    className="absolute inset-x-0 top-full z-30 mt-3 rounded-[1.5rem] border border-border/80 bg-background/95 p-4 shadow-[0_20px_70px_var(--shadow-soft)] backdrop-blur"
-                    data-testid="scoreboard-mobile-summary-panel"
-                    exit={{ opacity: 0, y: -8, scale: 0.98 }}
-                    initial={{ opacity: 0, y: -8, scale: 0.98 }}
-                  >
-                    <p className="text-sm leading-6 text-muted-foreground">{scoreboardMeta.detail}</p>
-                    <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                      <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
-                        {snapshot.progress.entryCount} entr{snapshot.progress.entryCount === 1 ? "y" : "ies"}
-                      </span>
-                      <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
-                        {snapshot.progress.openEntryCount} open now
-                      </span>
-                      {snapshot.status === "OPEN" ? (
-                        <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
-                          {snapshot.progress.participatingJudgeCount} judging now
-                        </span>
-                      ) : null}
-                      {snapshot.viewer.isManager && snapshot.status === "OPEN" ? (
-                        <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
-                          {snapshot.managerTracker.totalRemainingVotes} votes left
-                        </span>
-                      ) : null}
-                    </div>
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
             </div>
+
+            <Dialog onOpenChange={handleMobileSummaryOpenChange} open={mobileSummaryOpen}>
+              <DialogContent
+                className="bottom-0 left-0 right-0 top-auto max-h-[85vh] w-full max-w-none translate-x-0 translate-y-0 overflow-y-auto rounded-b-none rounded-t-[1.75rem] border-x-0 border-b-0 p-0"
+                data-testid="scoreboard-mobile-summary-panel"
+              >
+                <div className="shell-surface px-5 pb-6 pt-5">
+                  <DialogHeader className="pr-10">
+                    <DialogTitle className="text-xl">Scoreboard details</DialogTitle>
+                    <DialogDescription>{scoreboardMeta.detail}</DialogDescription>
+                  </DialogHeader>
+                  <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                      {snapshot.progress.entryCount} entr{snapshot.progress.entryCount === 1 ? "y" : "ies"}
+                    </span>
+                    <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                      {snapshot.progress.openEntryCount} open now
+                    </span>
+                    {snapshot.status === "OPEN" ? (
+                      <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                        {snapshot.progress.participatingJudgeCount} judging now
+                      </span>
+                    ) : null}
+                    {snapshot.viewer.isManager && snapshot.status === "OPEN" ? (
+                      <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                        {snapshot.managerTracker.totalRemainingVotes} votes left
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             <div className="hidden flex-col gap-3 lg:flex-row lg:items-end lg:justify-between md:flex">
               <div className="max-w-2xl">

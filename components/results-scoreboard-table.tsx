@@ -6,6 +6,7 @@ import { BarChart3, ChevronDown, Lock, PauseCircle, PlayCircle, Table2, Vote } f
 
 import type { ScoreboardEntryView, ViewerIdentity } from "@/lib/competition-logic";
 import { pushDataLayerEvent } from "@/lib/analytics";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -233,21 +234,7 @@ export function ResultsScoreboardTable({
 }: ResultsScoreboardTableProps) {
   const [viewMode, setViewMode] = React.useState<"table" | "chart">("table");
   const [mobileViewPanelOpen, setMobileViewPanelOpen] = React.useState(false);
-  const mobileViewPanelRef = React.useRef<HTMLDivElement>(null);
   const showManagerControls = viewer.isManager;
-
-  React.useEffect(() => {
-    if (!mobileViewPanelOpen) return;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      if (!mobileViewPanelRef.current?.contains(event.target as Node)) {
-        setMobileViewPanelOpen(false);
-      }
-    };
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    return () => document.removeEventListener("pointerdown", handlePointerDown);
-  }, [mobileViewPanelOpen]);
 
   function handleViewModeChange(nextViewMode: "table" | "chart", triggerSurface: "mobile" | "desktop") {
     setViewMode(nextViewMode);
@@ -283,7 +270,7 @@ export function ResultsScoreboardTable({
 
   return (
     <div className="relative space-y-4">
-      <div className="md:hidden" ref={mobileViewPanelRef}>
+      <div className="md:hidden">
         <div className="flex items-center justify-between rounded-[1.35rem] border border-border/70 bg-radix-gray-a-2/65 px-3 py-2.5">
           <div>
             <div className="text-sm font-semibold text-foreground">Board view</div>
@@ -292,8 +279,10 @@ export function ResultsScoreboardTable({
             </div>
           </div>
           <Button
+            aria-expanded={mobileViewPanelOpen}
+            aria-haspopup="dialog"
             data-testid="scoreboard-mobile-view-toggle"
-            onClick={() => setMobileViewPanelOpen((open) => !open)}
+            onClick={() => setMobileViewPanelOpen(true)}
             size="sm"
             type="button"
             variant="outline"
@@ -304,55 +293,55 @@ export function ResultsScoreboardTable({
           </Button>
         </div>
 
-        <AnimatePresence>
-          {mobileViewPanelOpen ? (
-            <motion.div
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              className="absolute inset-x-0 top-full z-30 mt-3 rounded-[1.5rem] border border-border/80 bg-background/95 p-4 shadow-[0_20px_70px_var(--shadow-soft)] backdrop-blur"
-              data-testid="scoreboard-mobile-view-panel"
-              exit={{ opacity: 0, y: -8, scale: 0.98 }}
-              initial={{ opacity: 0, y: -8, scale: 0.98 }}
-            >
-              <div className="text-sm font-semibold text-foreground">Choose how the board reads</div>
-              <div className="mt-1 text-sm text-muted-foreground">
-                Switch between the ranked table and the horizontal bar chart without losing your place.
-              </div>
-              <div className="mt-4 inline-flex w-full rounded-full bg-radix-gray-a-3 p-1">
-                <button
-                  className={cn(
-                    "inline-flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition",
-                    viewMode === "table" ? "bg-background text-foreground shadow-soft" : "text-muted-foreground"
-                  )}
-                  data-testid="scoreboard-view-table"
-                  onClick={() => {
-                    handleViewModeChange("table", "mobile");
-                    setMobileViewPanelOpen(false);
-                  }}
-                  type="button"
-                >
-                  <Table2 className="h-4 w-4" />
-                  Table
-                </button>
-                <button
-                  className={cn(
-                    "inline-flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition",
-                    viewMode === "chart" ? "bg-background text-foreground shadow-soft" : "text-muted-foreground"
-                  )}
-                  data-testid="scoreboard-view-chart"
-                  onClick={() => {
-                    handleViewModeChange("chart", "mobile");
-                    setMobileViewPanelOpen(false);
-                  }}
-                  type="button"
-                >
-                  <BarChart3 className="h-4 w-4" />
-                  Bar chart
-                </button>
-              </div>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
       </div>
+
+      <Dialog onOpenChange={setMobileViewPanelOpen} open={mobileViewPanelOpen}>
+        <DialogContent
+          className="bottom-0 left-0 right-0 top-auto max-h-[85vh] w-full max-w-none translate-x-0 translate-y-0 overflow-y-auto rounded-b-none rounded-t-[1.75rem] border-x-0 border-b-0 p-0 md:hidden"
+          data-testid="scoreboard-mobile-view-panel"
+        >
+          <div className="shell-surface px-5 pb-6 pt-5">
+            <DialogHeader className="pr-10">
+              <DialogTitle className="text-xl">Choose board view</DialogTitle>
+              <DialogDescription>
+                Switch between the ranked table and the horizontal bar chart without losing your place.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4 inline-flex w-full rounded-full bg-radix-gray-a-3 p-1">
+              <button
+                className={cn(
+                  "inline-flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition",
+                  viewMode === "table" ? "bg-background text-foreground shadow-soft" : "text-muted-foreground"
+                )}
+                data-testid="scoreboard-view-table"
+                onClick={() => {
+                  handleViewModeChange("table", "mobile");
+                  setMobileViewPanelOpen(false);
+                }}
+                type="button"
+              >
+                <Table2 className="h-4 w-4" />
+                Table
+              </button>
+              <button
+                className={cn(
+                  "inline-flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition",
+                  viewMode === "chart" ? "bg-background text-foreground shadow-soft" : "text-muted-foreground"
+                )}
+                data-testid="scoreboard-view-chart"
+                onClick={() => {
+                  handleViewModeChange("chart", "mobile");
+                  setMobileViewPanelOpen(false);
+                }}
+                type="button"
+              >
+                <BarChart3 className="h-4 w-4" />
+                Bar chart
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="hidden flex-col gap-3 rounded-[1.7rem] border border-border/70 bg-radix-gray-a-2/65 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4 md:flex">
         <div className="min-w-0">

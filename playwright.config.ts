@@ -9,8 +9,8 @@ const isLocalTarget = /127\.0\.0\.1|localhost/.test(baseURL);
 const repoRoot = process.cwd();
 const usesClerkTestKeys = (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "").startsWith("pk_test_");
 const localWebServerCommand = usesClerkTestKeys
-  ? `zsh -lc 'set -a; source .env.local; set +a; pnpm dev --port ${localPort}'`
-  : `zsh -lc 'set -a; source .env.local; set +a; pnpm start --port ${localPort}'`;
+  ? `zsh -lc 'set -a; source .env.local; export DISABLE_PUBLIC_SNAPSHOT_CACHE=1; set +a; pnpm dev --port ${localPort}'`
+  : `zsh -lc 'set -a; source .env.local; export DISABLE_PUBLIC_SNAPSHOT_CACHE=1; set +a; pnpm start --port ${localPort}'`;
 
 export default defineConfig({
   testDir: `${repoRoot}/tests/e2e`,

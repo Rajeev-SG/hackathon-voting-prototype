@@ -4,34 +4,54 @@ Date: `2026-03-24`
 
 Scope:
 
-- public scoreboard layout
-- mobile density and above-the-fold priority
-- board-view controls
-- scoreboard header copy and chips
-- cross-viewport visual rhythm
-- vote-flow usability re-check via fresh Playwright proof
+- mobile scoreboard details and board-view controls
+- above-the-fold priority on the public board
+- single-column hierarchy across mobile, mid-width, tablet, and wide desktop
+- touch, pointer, and keyboard-adjacent reachability for the mobile disclosure surfaces
 
-Method:
+## Audit outcome
 
-- heuristic review using content-priority, scanability, disclosure, and reachability checks
-- fresh local and production Playwright runs after the mobile-density change
-- screenshot review across mobile, mid-width, tablet, and wide desktop
+Overall verdict:
 
-## What changed
+- Pass, after fixing a real mobile interaction defect
 
-The mobile scoreboard now treats supporting chrome as secondary. On small screens:
+What failed before this pass:
 
-- the scoreboard summary details start collapsed
-- the board-view switcher starts collapsed
-- opening either surface uses an overlay panel instead of pushing the table farther down
-- the first scoreboard row stays visible sooner in the initial scan
+- the mobile scoreboard `Details` and `Board view` controls were implemented as custom absolute overlays
+- that pattern was too brittle for event-day confidence
+- once reproduced under focused mobile proof, the disclosure surface could land off-screen and its close affordance could sit outside the viewport
 
-## Screenshots reviewed
+What changed:
 
-- `artifacts/ux-audit/gh-30/prod-mobile-public.png`
-- `artifacts/ux-audit/gh-30/prod-mid-public.png`
-- `artifacts/ux-audit/gh-30/local-tablet-public.png`
-- `artifacts/ux-audit/gh-30/prod-wide-desktop-public.png`
+- the mobile `Details` and `Board view` controls now open as anchored bottom-sheet dialogs rather than ad hoc absolute panels
+- the sheets are scroll-safe, viewport-bounded, and easier to dismiss
+- the signed-out public snapshot cache is disabled for local Playwright proof runs so mobile acceptance evidence is not polluted by stale anonymous state
+- a dedicated mobile-controls acceptance spec now exists in [/Users/rajeev/Code/hackathon-voting-prototype/tests/e2e/mobile-scoreboard-controls.spec.ts](/Users/rajeev/Code/hackathon-voting-prototype/tests/e2e/mobile-scoreboard-controls.spec.ts)
+
+Authoritative implementation paths:
+
+- [/Users/rajeev/Code/hackathon-voting-prototype/components/results-dashboard.tsx](/Users/rajeev/Code/hackathon-voting-prototype/components/results-dashboard.tsx)
+- [/Users/rajeev/Code/hackathon-voting-prototype/components/results-scoreboard-table.tsx](/Users/rajeev/Code/hackathon-voting-prototype/components/results-scoreboard-table.tsx)
+- [/Users/rajeev/Code/hackathon-voting-prototype/components/ui/dialog.tsx](/Users/rajeev/Code/hackathon-voting-prototype/components/ui/dialog.tsx)
+- [/Users/rajeev/Code/hackathon-voting-prototype/lib/competition.ts](/Users/rajeev/Code/hackathon-voting-prototype/lib/competition.ts)
+- [/Users/rajeev/Code/hackathon-voting-prototype/playwright.config.ts](/Users/rajeev/Code/hackathon-voting-prototype/playwright.config.ts)
+
+## Evidence reviewed
+
+Collapsed-state screenshots:
+
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/local-mobile-public.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/local-mobile-public.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/local-wide-desktop-public.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/local-wide-desktop-public.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mobile-public.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mobile-public.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mid-public.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mid-public.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-wide-desktop-public.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-wide-desktop-public.png)
+
+Open-state mobile sheet screenshots:
+
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/local-mobile-summary-open.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/local-mobile-summary-open.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/local-mobile-view-open.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/local-mobile-view-open.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mobile-summary-open.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mobile-summary-open.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mobile-view-open.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mobile-view-open.png)
 
 ## Viewport findings
 
@@ -41,17 +61,18 @@ Verdict:
 
 - Pass
 
-What is working:
+What is working now:
 
-- header/nav stays compact enough that the scoreboard heading and first row arrive much earlier
-- supporting board metadata is hidden by default, which reduces pre-scroll cognitive load
-- the board-view control no longer burns a full card above the table when the user has not asked for it
-- the scoreboard remains readable in the first scan without sacrificing access to detail
+- the scoreboard heading and first row remain in the initial scan
+- both disclosure controls are compact when closed
+- opening either control uses a proper bottom sheet that overlaps the UI instead of pushing the scoreboard down
+- the close affordance and the sheet body remain within the viewport
+- chart/table switching works from the sheet and returns the user to the board in the selected view
 
-Why it is safer:
+Why this is safer:
 
-- the supporting sections use progressive disclosure instead of permanent vertical space
-- those panels open over the UI rather than reflowing the table downward, so the board position stays predictable
+- the dialog-based sheet uses Radix focus and dismissal behavior instead of custom outside-click plumbing
+- the sheet can be closed by the visible close button, the overlay, or escape-like browser interactions
 
 ### Mid-width
 
@@ -61,9 +82,9 @@ Verdict:
 
 What is working:
 
-- the single-column reading order holds
-- the scoreboard intro and controls feel intentional instead of stretched
-- chips, heading, and table/chart controls have enough breathing room without creating a dead zone
+- the one-column reading order holds
+- the board remains dominant over supporting chrome
+- controls do not create a dead zone above the first rows
 
 ### Tablet
 
@@ -73,9 +94,8 @@ Verdict:
 
 What is working:
 
-- the layout still reads top-to-bottom without accidental competition between panels
-- the scoreboard remains the dominant block
-- spacing is calmer than mobile while preserving the same mental model
+- the same mental model survives into the larger canvas
+- disclosure and board controls stay subordinate to the ranking itself
 
 ### Wide desktop
 
@@ -85,61 +105,48 @@ Verdict:
 
 What is working:
 
-- the page no longer spends its strongest real estate on explanatory support copy
-- the scoreboard section stays visually dominant
-- supporting status information is compact and subordinate
+- the board remains the first meaningful destination
+- secondary state chips and controls feel compact instead of theatrical
 
-## Usability audit summary
+## Interaction audit summary
 
-### Information hierarchy
-
-- Pass
-- The app now puts the board ahead of explanatory chrome on every viewport.
-
-### Progressive disclosure
+### Mobile details sheet
 
 - Pass
-- Small screens hide optional detail until the user asks for it.
+- Opened, rendered, and dismissed cleanly on local production and the live site.
 
-### Task continuity
-
-- Pass
-- Opening summary or board-view detail does not shove the scoreboard down the page.
-
-### Cognitive load
+### Mobile board-view sheet
 
 - Pass
-- Users see fewer choices before reaching the board, especially on mobile.
+- Opened cleanly and successfully switched between table and chart on local production and the live site.
 
-### Consistency
-
-- Pass
-- The same single-column hierarchy now survives from mobile through desktop.
-
-### Reachability
+### Public-state consistency
 
 - Pass
-- Fresh Playwright proof confirmed the collapsed sections can still be opened, used, and dismissed, and the scoreboard remains usable afterward.
+- The public board kept the same mobile disclosure behavior after the manager seeded real entries on production.
+
+### Proof-rig trustworthiness
+
+- Improved
+- Local anonymous snapshot caching is now disabled during Playwright proof runs so event-day audits are based on live database state rather than stale signed-out cache.
 
 ## Residual risk
 
-- The mobile experience is materially better, but long project names or unusually large team names can still increase row height and make the first visible row denser than the proof fixture. That is a normal content-variance risk, not a structural layout failure.
+- Content variance is still the main residual risk. Very long project names or unusually long summaries can make the first visible row denser than the proof fixture, but the disclosure surfaces themselves are now structurally robust.
 
 ## Validation used for this audit
 
 ```bash
 pnpm check
 pnpm build
-E2E_BASE_URL=http://localhost:3017 pnpm exec playwright test tests/e2e/single-screen-voting.spec.ts --project=desktop-light --reporter=list
-E2E_BASE_URL=http://localhost:3017 pnpm exec playwright test tests/e2e/single-screen-voting.spec.ts --project=mobile-dark --reporter=list
+E2E_BASE_URL=http://localhost:3017 pnpm exec playwright test tests/e2e/mobile-scoreboard-controls.spec.ts --project=mobile-dark --reporter=list
 LAYOUT_PROOF=1 E2E_BASE_URL=http://localhost:3017 pnpm exec playwright test tests/e2e/scoreboard-breakpoints.spec.ts --reporter=list
+vercel --prod --yes
 curl -I https://vote.rajeevg.com
-E2E_BASE_URL=https://vote.rajeevg.com E2E_JUDGE_AUTH_MODE=ticket pnpm exec playwright test tests/e2e/single-screen-voting.spec.ts --reporter=list
+set -a && source .env.vercel-prod && set +a && E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/mobile-scoreboard-controls.spec.ts --project=mobile-dark --reporter=list
 LAYOUT_PROOF=1 E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/scoreboard-breakpoints.spec.ts --reporter=list
 ```
 
-## Overall verdict
+## Final note
 
-- Pass
-
-The mobile-first density change did what it needed to do: it restored the scoreboard as the first meaningful destination on small screens without hiding useful controls or breaking the desktop experience.
+This audit is stronger than the earlier mobile-density pass because it found and fixed a real reachability bug before sign-off instead of assuming the existing overlay pattern was good enough.
