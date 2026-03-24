@@ -24,6 +24,12 @@ const statusCounts = new Map();
 let completed = 0;
 let failures = 0;
 let pointer = 0;
+const scoreboardSignals = [
+  "Live hackathon scoreboard",
+  "Single-screen scoreboard",
+  "data-testid=\"scoreboard-section\"",
+  "data-testid=\"scoreboard-empty-heading\""
+];
 
 async function runOne(requestNumber) {
   const startedAt = performance.now();
@@ -38,9 +44,9 @@ async function runOne(requestNumber) {
     durations.push(elapsedMs);
     statusCounts.set(response.status, (statusCounts.get(response.status) ?? 0) + 1);
 
-    if (!body.includes("Hackathon scoreboard")) {
+    if (!scoreboardSignals.some((signal) => body.includes(signal))) {
       failures += 1;
-      console.error(`Request ${requestNumber} returned ${response.status} without the scoreboard heading.`);
+      console.error(`Request ${requestNumber} returned ${response.status} without a scoreboard signal.`);
     }
   } catch (error) {
     failures += 1;
