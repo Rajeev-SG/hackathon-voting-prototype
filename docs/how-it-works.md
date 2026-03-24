@@ -7,6 +7,7 @@ The app is intentionally a single-screen product.
 - Public users land on `/` and can always see the live scoreboard.
 - The manager uses the same screen to download the XLSX template, upload entries, begin voting, finalize results, and export the final workbook.
 - The manager also uses the same scoreboard to close or reopen individual projects for new voting.
+- During open judging, the manager gets a remaining-votes tracker that shows exactly which participating judges still owe votes on which open projects.
 - Judges use the same screen to sign in and vote from the modal.
 - Legacy routes such as `/projects`, `/results`, and `/submission/assets` redirect back to `/`.
 
@@ -106,6 +107,7 @@ Every uploaded team-member email is stored against that project.
 - The manager clicks `Begin voting`.
 - Authenticated judges can vote.
 - The manager can pause voting on a specific project without removing it from the public board.
+- The manager can rely on the remaining-votes tracker to see who is still outstanding before closing individual projects or finalizing the round.
 - Public viewers can keep watching the board update live.
 - Active tabs refresh automatically every 5 seconds during judging, and inactive tabs refresh again when they regain focus.
 
@@ -124,6 +126,7 @@ The progress model is intentionally practical for hackathon use.
 - Projects a judge is self-vote-blocked from are removed from that judge's denominator.
 - Projects the manager has closed to new votes are also removed from the live denominator until reopened.
 - Completion means every participating judge has scored every project that is still open and eligible for them.
+- The manager tracker uses exactly that same denominator, so the list of outstanding judges and projects matches the finalization rule instead of a looser UI heuristic.
 
 This keeps the progress bar coherent without introducing heavy judge-roster administration.
 
@@ -149,7 +152,7 @@ See [/Users/rajeev/Code/hackathon-voting-prototype/prisma/schema.prisma](/Users/
 7. If you need a clean rehearsal, click `Reset dry run`, then upload again.
 8. Click `Begin voting` once the judges are ready.
 9. Ask judges to sign in once and vote from the modal.
-10. Watch the progress card until completion reaches `100%`.
+10. Watch the remaining-votes tracker and progress card together until no eligible votes are left.
 11. Click `Finalize`.
 12. Export the finalized workbook.
 

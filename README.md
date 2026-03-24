@@ -14,6 +14,7 @@ The screen stays single-column across viewports so the scoreboard leads and judg
 - Authenticated judge voting in a modal
 - Automatic self-vote blocking from uploaded team-member emails
 - Live judging progress
+- Manager-only remaining-votes tracker that mirrors the real finalization denominator
 - Table and horizontal bar-chart views on the same scoreboard
 - Manager-only per-entry voting open/closed controls
 - Manager-only finalization and finalized XLSX export
@@ -168,10 +169,12 @@ The Playwright suite covers:
 - manager template download
 - manager workbook upload
 - manager per-entry open / close control
+- manager remaining-votes tracker
 - manager begin voting
 - scoreboard table / bar-chart toggle
 - email-code judge auth
 - modal keyboard voting
+- compact modal that fits above the fold on both proof viewports
 - self-vote blocking
 - single locked vote per judge per project
 - progress completion

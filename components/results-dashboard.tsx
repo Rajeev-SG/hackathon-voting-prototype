@@ -12,6 +12,7 @@ import {
   Play,
   RotateCcw,
   ShieldCheck,
+  TimerReset,
   Trophy
 } from "lucide-react";
 
@@ -26,12 +27,42 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
-function statusCopy(status: CompetitionSnapshot["status"]) {
+function statusCopy({
+  status,
+  isManager
+}: {
+  status: CompetitionSnapshot["status"];
+  isManager: boolean;
+}) {
+  if (!isManager) {
+    if (status === "PREPARING") {
+      return {
+        eyebrow: "Public scoreboard",
+        headline: "The field is visible now, and judging opens when the manager is ready.",
+        body: "You can follow the live rankings without signing in. Once the round opens, judges can sign in and score directly from the modal."
+      };
+    }
+
+    if (status === "OPEN") {
+      return {
+        eyebrow: "Voting live",
+        headline: "The scoreboard is the room's shared source of truth.",
+        body: "Signed-in judges can cast one locked score on each project that is still open for voting. Closed projects stay visible, but they stop taking new votes."
+      };
+    }
+
+    return {
+      eyebrow: "Finalized",
+      headline: "The final standings are locked in.",
+      body: "Judging is complete. Everyone sees the same final scoreboard, and no more votes can be added."
+    };
+  }
+
   if (status === "PREPARING") {
     return {
-      eyebrow: "Manager setup",
-      headline: "Load the workbook, tighten the field, then open judging.",
-      body: "The scoreboard is already public. Use the controls below to upload entries, close any project that should stay out of the round, and start only when the room is ready."
+      eyebrow: "Round control",
+      headline: "The public scoreboard is live, and judging opens when the room is ready.",
+      body: "Use the manager controls below to upload entries, close any project that should stay out of the round, and open judging only when the field is exactly right."
     };
   }
 
@@ -123,7 +154,10 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
   const [actionMessage, setActionMessage] = React.useState<string | null>(null);
   const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
   const uploadInputRef = React.useRef<HTMLInputElement>(null);
-  const copy = statusCopy(snapshot.status);
+  const copy = statusCopy({
+    status: snapshot.status,
+    isManager: snapshot.viewer.isManager
+  });
   const stateMeta = progressStateMeta(snapshot.status);
   const isEmpty = snapshot.entries.length === 0;
   const scoreboardMeta = scoreboardCopy(snapshot, isEmpty);
@@ -285,7 +319,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
 
         <section className="space-y-4" data-testid="workflow-summary">
           <div className="glass-panel shell-surface rounded-[2rem] px-5 py-5 sm:px-6 sm:py-6">
-            <div className="max-w-4xl">
+            <div className={cn("max-w-4xl", snapshot.viewer.isManager ? "" : "max-w-3xl")}>
               <div className="eyebrow">{copy.eyebrow}</div>
               <h1 className="mt-3 font-display text-[clamp(2rem,4vw,3.35rem)] font-black tracking-tight text-foreground">
                 Live hackathon scoreboard
@@ -302,6 +336,11 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
               <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
                 {snapshot.progress.openEntryCount} open for voting
               </span>
+              {snapshot.viewer.isManager && snapshot.status === "OPEN" ? (
+                <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                  {snapshot.managerTracker.totalRemainingVotes} votes left
+                </span>
+              ) : null}
               <span
                 className={cn(
                   "rounded-full px-3 py-2",
@@ -403,7 +442,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                         <div className="text-sm text-muted-foreground">
                           {snapshot.canUploadSheet
                             ? "Upload is available now."
-                            : "Upload unlocks again after you reset the round back to manager setup."}
+                            : "Upload unlocks again after you reset the round."}
                         </div>
                       </div>
                     </div>
@@ -637,6 +676,112 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
               <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Board refreshes automatically every {Math.round(autoRefreshIntervalMs / 1000)} seconds while this tab is active.
               </div>
+
+              {snapshot.viewer.isManager ? (
+                <div
+                  className="rounded-[1.7rem] border border-border/80 bg-radix-gray-a-3/70 p-4 sm:p-5"
+                  data-testid="manager-remaining-votes"
+                >
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="max-w-2xl">
+                      <div className="eyebrow">Remaining votes tracker</div>
+                      <div className="mt-2 text-lg font-semibold text-foreground">
+                        {snapshot.status === "OPEN"
+                          ? snapshot.managerTracker.totalRemainingVotes === 0
+                            ? "Everyone who joined the round is fully covered."
+                            : `${snapshot.managerTracker.totalRemainingVotes} vote${snapshot.managerTracker.totalRemainingVotes === 1 ? "" : "s"} still outstanding.`
+                          : "This tracker activates once judging is live."}
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                        {snapshot.managerTracker.helperText}
+                      </p>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-[1.35rem] border border-border/70 bg-background/35 px-4 py-3">
+                        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                          Votes left
+                        </div>
+                        <div className="mt-2 font-display text-3xl font-black text-foreground">
+                          {snapshot.managerTracker.totalRemainingVotes}
+                        </div>
+                      </div>
+                      <div className="rounded-[1.35rem] border border-border/70 bg-background/35 px-4 py-3">
+                        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                          Judges waiting
+                        </div>
+                        <div className="mt-2 font-display text-3xl font-black text-foreground">
+                          {snapshot.managerTracker.judgesStillOutstanding}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {snapshot.managerTracker.judges.length > 0 ? (
+                    <div className="mt-5 space-y-3">
+                      {snapshot.managerTracker.judges.map((judge) => (
+                        <div
+                          key={judge.judgeEmail}
+                          className="rounded-[1.4rem] border border-border/70 bg-background/30 p-4"
+                          data-testid={`manager-judge-coverage-${judge.judgeEmail.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`}
+                        >
+                          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                            <div className="min-w-0">
+                              <div className="truncate text-sm font-semibold text-foreground">{judge.judgeEmail}</div>
+                              <div className="mt-1 text-sm text-muted-foreground">
+                                {judge.completedOpenEntries}/{judge.eligibleOpenEntries} open projects covered
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              <span
+                                className={cn(
+                                  "rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em]",
+                                  judge.remainingOpenEntries === 0
+                                    ? "bg-radix-teal-a-3 text-accent-foreground"
+                                    : "bg-radix-amber-a-3 text-foreground"
+                                )}
+                              >
+                                {judge.remainingOpenEntries === 0
+                                  ? "Complete"
+                                  : `${judge.remainingOpenEntries} left`}
+                              </span>
+                              {judge.lastActivityAt ? (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-radix-gray-a-3 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                                  <TimerReset className="h-3.5 w-3.5" />
+                                  Active
+                                </span>
+                              ) : null}
+                            </div>
+                          </div>
+
+                          {judge.remainingProjectNames.length > 0 ? (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {judge.remainingProjectNames.map((projectName) => (
+                                <span
+                                  key={`${judge.judgeEmail}-${projectName}`}
+                                  className="rounded-full bg-radix-gray-a-3 px-3 py-1.5 text-xs font-semibold text-muted-foreground"
+                                >
+                                  {projectName}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="mt-3 text-sm text-muted-foreground">
+                              No remaining open projects for this judge.
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="mt-5 rounded-[1.4rem] border border-border/70 bg-background/30 p-4 text-sm leading-6 text-muted-foreground">
+                      {snapshot.status === "OPEN"
+                        ? "No one has cast a score yet, so there is no active judge list to track."
+                        : "Once the round is live and the first score comes in, this panel will list exactly who is still outstanding."}
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </CardContent>
           </Card>
         </section>

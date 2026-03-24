@@ -133,6 +133,62 @@ describe("competition logic", () => {
     expect(snapshot.entries.find((entry) => entry.id === "entry-2")?.canVote).toBe(false);
   });
 
+  it("builds a manager tracker that mirrors the live completion denominator", () => {
+    const snapshot = deriveCompetitionSnapshot({
+      status: "OPEN",
+      startedAt: new Date("2026-03-23T12:00:00.000Z"),
+      finalizedAt: null,
+      viewer: {
+        clerkUserId: "user_999",
+        email: "rajeev.gill@omc.com",
+        isAuthenticated: true,
+        isManager: true
+      },
+      entries: [
+        {
+          id: "entry-1",
+          slug: "aurora-atlas",
+          projectName: "Aurora Atlas",
+          teamName: "Team North Star",
+          summary: "Summary",
+          isVotingOpen: true,
+          teamEmails: [{ email: "founder@example.com" }],
+          votes: [{ judgeEmail: "judge.one@example.com", score: 9, updatedAt: new Date("2026-03-23T12:00:00.000Z") }]
+        },
+        {
+          id: "entry-2",
+          slug: "signal-bloom",
+          projectName: "Signal Bloom",
+          teamName: "Team Bloom",
+          summary: "Summary",
+          isVotingOpen: true,
+          teamEmails: [{ email: "judge.two@example.com" }],
+          votes: []
+        },
+        {
+          id: "entry-3",
+          slug: "harbor-pulse",
+          projectName: "Harbor Pulse",
+          teamName: "Team Harbor",
+          summary: "Summary",
+          isVotingOpen: false,
+          teamEmails: [{ email: "crew@example.com" }],
+          votes: []
+        }
+      ]
+    });
+
+    expect(snapshot.managerTracker.totalRemainingVotes).toBe(1);
+    expect(snapshot.managerTracker.judgesStillOutstanding).toBe(1);
+    expect(snapshot.managerTracker.judges[0]).toMatchObject({
+      judgeEmail: "judge.one@example.com",
+      eligibleOpenEntries: 2,
+      completedOpenEntries: 1,
+      remainingOpenEntries: 1,
+      remainingProjectNames: ["Signal Bloom"]
+    });
+  });
+
   it("recognizes the exact manager email", () => {
     expect(isManagerEmail("rajeev.gill@omc.com")).toBe(true);
     expect(isManagerEmail("Rajeev.Gill@omc.com")).toBe(true);
