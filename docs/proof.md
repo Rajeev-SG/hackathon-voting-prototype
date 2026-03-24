@@ -50,6 +50,46 @@ Result:
 
 - Pass
 
+## Readiness hardening proof
+
+Date: `2026-03-24`
+
+Surface:
+
+- local production logic
+- `https://vote.rajeevg.com`
+
+Commands:
+
+```bash
+pnpm exec vitest run tests/xlsx.test.ts tests/competition-logic.test.ts tests/votes.integration.test.ts tests/readiness.integration.test.ts --reporter=verbose
+pnpm exec vitest run tests/readiness.integration.test.ts --reporter=dot
+pnpm exec vitest run tests/readiness.integration.test.ts --reporter=dot
+pnpm exec vitest run tests/readiness.integration.test.ts --reporter=dot
+pnpm check
+pnpm build
+pnpm exec playwright test tests/e2e/single-screen-voting.spec.ts --reporter=list
+pnpm readiness:public -- --url https://vote.rajeevg.com --concurrency 50 --requests 500
+```
+
+Behavior and resilience proof:
+
+- XLSX parsing/export edge cases pass
+- completion, self-vote blocking, one-vote lock, and manager tracker logic pass
+- the 50-judge readiness simulation passed in the full suite
+- the same readiness simulation then passed three consecutive standalone reruns
+- the full desktop and mobile single-screen browser flow still passed after the vote-path hardening
+- the live public-read probe passed against `vote.rajeevg.com` with `50` concurrent requests and `500` total requests, `0` failures, `p50 153.42ms`, `p95 309.21ms`, and `p99 455.01ms`
+
+Why this pass mattered:
+
+- readiness testing had surfaced intermittent `Voting is not currently open` and missing-entry failures right after round-open or entry creation under stress
+- the vote path was hardened to tolerate a short read-after-write consistency window before failing
+
+Result:
+
+- Pass
+
 ## Focused scoreboard polish proof
 
 Date: `2026-03-24`

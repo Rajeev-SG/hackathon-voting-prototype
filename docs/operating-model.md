@@ -168,5 +168,6 @@ This keeps the rule coherent without introducing a separate roster-management sy
 
 - The production readiness target is a room-sized session of roughly 50 judges or viewers at once, not a viral public launch.
 - Signed-out scoreboard requests use a short server cache with explicit invalidation on voting lifecycle changes, which reduces repeated public read pressure on the database while keeping the board fresh.
+- The vote path tolerates a short read-after-write consistency window right after a round opens or a workbook-driven field is created, so immediate first votes are less likely to fail on pooled or remote Postgres infrastructure.
 - The repo includes a cheap public-read probe at `pnpm readiness:public` so the live site can be checked before the event without extra vendor spend.
 - Concurrent write readiness is covered in `tests/readiness.integration.test.ts`, which runs the real vote logic with 50 concurrent judges in project-by-project waves.

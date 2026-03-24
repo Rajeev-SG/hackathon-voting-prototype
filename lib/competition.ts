@@ -15,6 +15,7 @@ const anonymousViewer = {
   isManager: false
 } as const;
 const shouldUsePublicSnapshotCache = process.env.NODE_ENV === "production";
+const voteContextRetryDelayMs = [0, 100, 250, 500, 1000, 2000];
 
 async function ensureCompetitionState() {
   const existingState = await withPrismaRetry(() =>
@@ -91,6 +92,46 @@ async function getCompetitionSnapshotData() {
     state,
     entries
   };
+}
+
+async function resolveVoteSubmissionContext(entryId: string) {
+  let state: Awaited<ReturnType<typeof ensureCompetitionState>> | null = null;
+  let entry:
+    | Awaited<
+        ReturnType<
+          typeof prisma.entry.findUnique<{
+            where: { id: string };
+            include: { teamEmails: true };
+          }>
+        >
+      >
+    | null = null;
+
+  for (const delayMs of voteContextRetryDelayMs) {
+    if (delayMs > 0) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, delayMs);
+      });
+    }
+
+    [state, entry] = await Promise.all([
+      ensureCompetitionState(),
+      withPrismaRetry(() =>
+        prisma.entry.findUnique({
+          where: { id: entryId },
+          include: {
+            teamEmails: true
+          }
+        })
+      )
+    ]);
+
+    if (state.votingStatus === "OPEN" && entry) {
+      return { state, entry };
+    }
+  }
+
+  return { state, entry };
 }
 
 const getCachedPublicCompetitionSnapshot = unstable_cache(
@@ -260,19 +301,11 @@ export async function submitJudgeVote({
     throw new Error("Scores must be whole numbers from 0 to 10.");
   }
 
-  const [state, entry] = await Promise.all([
-    ensureCompetitionState(),
-    withPrismaRetry(() =>
-      prisma.entry.findUnique({
-        where: { id: entryId },
-        include: {
-          teamEmails: true
-        }
-      })
-    )
-  ]);
+  // Short retries cover pooled/remote database lag right after the manager opens the
+  // round or immediately after a workbook-driven entry set is created.
+  const { state, entry } = await resolveVoteSubmissionContext(entryId);
 
-  if (state.votingStatus !== "OPEN") {
+  if (!state || state.votingStatus !== "OPEN") {
     throw new Error("Voting is not currently open.");
   }
 
