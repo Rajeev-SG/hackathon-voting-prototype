@@ -24,6 +24,7 @@ import { VoteDialog } from "@/components/vote-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 function statusCopy(status: CompetitionSnapshot["status"]) {
   if (status === "PREPARING") {
@@ -49,6 +50,31 @@ function statusCopy(status: CompetitionSnapshot["status"]) {
   };
 }
 
+function progressStateMeta(status: CompetitionSnapshot["status"]) {
+  if (status === "PREPARING") {
+    return {
+      label: "Preparing",
+      detail: "Workbook loaded and waiting for the manager to open judging.",
+      accentClassName:
+        "border-[rgb(217_140_20_/_0.2)] bg-[rgb(217_140_20_/_0.08)] text-foreground"
+    };
+  }
+
+  if (status === "OPEN") {
+    return {
+      label: "Voting live",
+      detail: "Judges can cast one locked vote per project while the board updates in public.",
+      accentClassName: "border-radix-teal-a-6 bg-radix-teal-a-3 text-accent-foreground"
+    };
+  }
+
+  return {
+    label: "Finalized",
+    detail: "Scores are locked, public standings are final, and export is ready.",
+    accentClassName: "border-radix-purple-a-5 bg-radix-purple-a-4 text-foreground"
+  };
+}
+
 export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }) {
   const router = useRouter();
   const [selectedEntry, setSelectedEntry] = React.useState<ScoreboardEntryView | null>(null);
@@ -67,6 +93,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
   const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
   const uploadInputRef = React.useRef<HTMLInputElement>(null);
   const copy = statusCopy(snapshot.status);
+  const stateMeta = progressStateMeta(snapshot.status);
   const isEmpty = snapshot.entries.length === 0;
   const autoRefreshIntervalMs = snapshot.status === "OPEN" ? 5000 : 15000;
   const autoRefreshPaused =
@@ -229,20 +256,50 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
               <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
                 Board refreshes automatically every {Math.round(autoRefreshIntervalMs / 1000)} seconds while this tab is active.
               </p>
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[1.5rem] bg-radix-gray-a-3 p-4">
+              <div className="grid gap-3 min-[430px]:grid-cols-3">
+                <div
+                  data-testid="progress-stat-entries"
+                  className="flex min-h-[132px] flex-col justify-between rounded-[1.55rem] border border-border/80 bg-radix-gray-a-3 p-4"
+                >
                   <div className="eyebrow">Entries</div>
-                  <div className="mt-2 font-display text-2xl font-black">{snapshot.progress.entryCount}</div>
+                  <div
+                    data-testid="progress-stat-entries-value"
+                    className="mt-4 font-display text-[1.85rem] font-black leading-[0.95] tracking-tight sm:text-[2rem]"
+                  >
+                    {snapshot.progress.entryCount}
+                  </div>
+                  <p className="mt-4 text-xs leading-5 text-muted-foreground">Projects currently shown on the board.</p>
                 </div>
-                <div className="rounded-[1.5rem] bg-radix-gray-a-3 p-4">
+                <div
+                  data-testid="progress-stat-judges"
+                  className="flex min-h-[132px] flex-col justify-between rounded-[1.55rem] border border-border/80 bg-radix-gray-a-3 p-4"
+                >
                   <div className="eyebrow">Judges in round</div>
-                  <div className="mt-2 font-display text-2xl font-black">
+                  <div
+                    data-testid="progress-stat-judges-value"
+                    className="mt-4 font-display text-[1.85rem] font-black leading-[0.95] tracking-tight sm:text-[2rem]"
+                  >
                     {snapshot.progress.participatingJudgeCount}
                   </div>
+                  <p className="mt-4 text-xs leading-5 text-muted-foreground">
+                    The completion denominator only counts judges who have started scoring.
+                  </p>
                 </div>
-                <div className="rounded-[1.5rem] bg-radix-gray-a-3 p-4">
+                <div
+                  data-testid="progress-stat-state"
+                  className={cn(
+                    "flex min-h-[132px] flex-col justify-between rounded-[1.55rem] border p-4",
+                    stateMeta.accentClassName
+                  )}
+                >
                   <div className="eyebrow">State</div>
-                  <div className="mt-2 font-display text-2xl font-black">{snapshot.status}</div>
+                  <div
+                    data-testid="progress-stat-state-value"
+                    className="mt-4 font-display text-[1.6rem] font-black leading-[1.02] tracking-tight sm:text-[1.85rem]"
+                  >
+                    {stateMeta.label}
+                  </div>
+                  <p className="mt-4 text-xs leading-5 opacity-90">{stateMeta.detail}</p>
                 </div>
               </div>
             </CardContent>

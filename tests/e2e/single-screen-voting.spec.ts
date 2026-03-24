@@ -193,6 +193,34 @@ async function takeShot(page: Page, outputPath: string) {
   });
 }
 
+async function expectProgressStateCardToContainValue(page: Page, expectedText: string) {
+  const card = page.getByTestId("progress-stat-state");
+  const value = page.getByTestId("progress-stat-state-value");
+
+  await expect(card).toBeVisible();
+  await expect(value).toHaveText(expectedText);
+
+  const measurements = await card.evaluate((element) => {
+    const valueElement = element.querySelector<HTMLElement>("[data-testid='progress-stat-state-value']");
+    if (!valueElement) return null;
+
+    const cardRect = element.getBoundingClientRect();
+    const valueRect = valueElement.getBoundingClientRect();
+
+    return {
+      topInset: valueRect.top - cardRect.top,
+      bottomInset: cardRect.bottom - valueRect.bottom,
+      valueHeight: valueRect.height,
+      cardHeight: cardRect.height
+    };
+  });
+
+  expect(measurements).not.toBeNull();
+  expect(measurements!.topInset).toBeGreaterThan(10);
+  expect(measurements!.bottomInset).toBeGreaterThan(10);
+  expect(measurements!.valueHeight).toBeLessThan(measurements!.cardHeight - 20);
+}
+
 test.beforeEach(async ({ baseURL }, testInfo) => {
   await resetCompetitionState();
   await ensureProofUsers(baseURL!);
@@ -225,6 +253,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await anonymousPage.goto("/");
     await expect(anonymousPage.getByRole("heading", { name: "Hackathon scoreboard" })).toBeVisible();
     await expect(anonymousPage.getByText("No projects loaded yet")).toBeVisible();
+    await expectProgressStateCardToContainValue(anonymousPage, "Preparing");
     await expect(anonymousPage.getByTestId("manager-download-template")).toHaveCount(0);
     await expect(anonymousPage.getByTestId("manager-upload-dropzone")).toHaveCount(0);
     await takeShot(anonymousPage, testInfo.outputPath("public-before-setup.png"));

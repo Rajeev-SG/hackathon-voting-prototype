@@ -35,11 +35,47 @@ Flows proven:
 - Manager finalizes the round
 - Manager downloads the finalized XLSX export
 - Public finalized state is visible and modal voting is locked
+- The judging-progress state card keeps its label fully contained at mobile and wide desktop widths
 
 Artifacts:
 
 - Playwright report directory: `artifacts/playwright-report`
 - Playwright screenshots and traces: `artifacts/playwright/`
+- Section-focused local production screenshots for the judging-progress header: `artifacts/manual-proof/`
+
+Result:
+
+- Pass
+
+## Focused scoreboard polish proof
+
+Date: `2026-03-24`
+
+Goal:
+
+- Re-check the judging-progress header after the mobile state-card clipping report
+
+Local production surface:
+
+- `http://127.0.0.1:3002` via `pnpm build` then `pnpm start --port 3002`
+
+Production surface:
+
+- `https://vote.rajeevg.com`
+
+Focused proof artifacts:
+
+- `artifacts/manual-proof/mobile-430-prod-start.png`
+- `artifacts/manual-proof/desktop-1575-prod-start.png`
+- `artifacts/manual-proof/mobile-430-production.png`
+- `artifacts/manual-proof/desktop-1575-production.png`
+
+Observed result:
+
+- The state card now renders `Preparing` instead of the raw uppercase enum token.
+- Mobile at `430px` keeps the three progress cards readable without clipping or overlap.
+- Wide desktop at `1575px` keeps the right-hand progress rail balanced and free of dead space.
+- DOM measurement on both local production and the live site confirmed the state label stayed inset inside its card with healthy top and bottom space.
 
 Result:
 
@@ -103,6 +139,7 @@ Design proof notes:
 - Desktop uses the full width well without horizontal overflow
 - Mobile layout preserves the single-screen journey and keeps the modal legible and tappable
 - The modal remains the visual center of the flow on both viewports
+- The judging-progress state card now uses a friendly label plus helper copy, and fresh section proof confirmed no clipping or overlap in the status area
 
 Artifacts:
 
