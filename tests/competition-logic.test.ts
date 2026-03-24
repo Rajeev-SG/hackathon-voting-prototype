@@ -22,6 +22,7 @@ describe("competition logic", () => {
           projectName: "Aurora Atlas",
           teamName: "Team North Star",
           summary: "Summary",
+          isVotingOpen: true,
           teamEmails: [{ email: "founder@example.com" }],
           votes: [
             { judgeEmail: "judge.one@example.com", score: 9, updatedAt: new Date("2026-03-23T12:00:00.000Z") },
@@ -34,6 +35,7 @@ describe("competition logic", () => {
           projectName: "Signal Bloom",
           teamName: "Team Bloom",
           summary: "Summary",
+          isVotingOpen: true,
           teamEmails: [{ email: "judge.one@example.com" }],
           votes: [
             { judgeEmail: "judge.two@example.com", score: 10, updatedAt: new Date("2026-03-23T12:03:00.000Z") }
@@ -68,6 +70,7 @@ describe("competition logic", () => {
           projectName: "Aurora Atlas",
           teamName: "Team North Star",
           summary: "Summary",
+          isVotingOpen: true,
           teamEmails: [{ email: "founder@example.com" }],
           votes: [{ judgeEmail: "judge.three@example.com", score: 9, updatedAt: new Date("2026-03-23T12:00:00.000Z") }]
         },
@@ -77,6 +80,7 @@ describe("competition logic", () => {
           projectName: "Signal Bloom",
           teamName: "Team Bloom",
           summary: "Summary",
+          isVotingOpen: true,
           teamEmails: [{ email: "builder@example.com" }],
           votes: []
         }
@@ -86,6 +90,47 @@ describe("competition logic", () => {
     expect(snapshot.progress.isComplete).toBe(false);
     expect(snapshot.canFinalize).toBe(false);
     expect(snapshot.progress.percentage).toBe(50);
+  });
+
+  it("excludes manager-closed projects from the live completion denominator", () => {
+    const snapshot = deriveCompetitionSnapshot({
+      status: "OPEN",
+      startedAt: new Date("2026-03-23T12:00:00.000Z"),
+      finalizedAt: null,
+      viewer: {
+        clerkUserId: "user_456",
+        email: "judge.three@example.com",
+        isAuthenticated: true,
+        isManager: false
+      },
+      entries: [
+        {
+          id: "entry-1",
+          slug: "aurora-atlas",
+          projectName: "Aurora Atlas",
+          teamName: "Team North Star",
+          summary: "Summary",
+          isVotingOpen: true,
+          teamEmails: [{ email: "founder@example.com" }],
+          votes: [{ judgeEmail: "judge.three@example.com", score: 9, updatedAt: new Date("2026-03-23T12:00:00.000Z") }]
+        },
+        {
+          id: "entry-2",
+          slug: "signal-bloom",
+          projectName: "Signal Bloom",
+          teamName: "Team Bloom",
+          summary: "Summary",
+          isVotingOpen: false,
+          teamEmails: [{ email: "builder@example.com" }],
+          votes: []
+        }
+      ]
+    });
+
+    expect(snapshot.progress.openEntryCount).toBe(1);
+    expect(snapshot.progress.isComplete).toBe(true);
+    expect(snapshot.progress.percentage).toBe(100);
+    expect(snapshot.entries.find((entry) => entry.id === "entry-2")?.canVote).toBe(false);
   });
 
   it("recognizes the exact manager email", () => {

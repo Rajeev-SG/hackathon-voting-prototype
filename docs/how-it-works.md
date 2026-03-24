@@ -6,6 +6,7 @@ The app is intentionally a single-screen product.
 
 - Public users land on `/` and can always see the live scoreboard.
 - The manager uses the same screen to download the XLSX template, upload entries, begin voting, finalize results, and export the final workbook.
+- The manager also uses the same scoreboard to close or reopen individual projects for new voting.
 - Judges use the same screen to sign in and vote from the modal.
 - Legacy routes such as `/projects`, `/results`, and `/submission/assets` redirect back to `/`.
 
@@ -104,6 +105,7 @@ Every uploaded team-member email is stored against that project.
 
 - The manager clicks `Begin voting`.
 - Authenticated judges can vote.
+- The manager can pause voting on a specific project without removing it from the public board.
 - Public viewers can keep watching the board update live.
 - Active tabs refresh automatically every 5 seconds during judging, and inactive tabs refresh again when they regain focus.
 
@@ -120,7 +122,8 @@ The progress model is intentionally practical for hackathon use.
 
 - A judge joins the denominator when they cast their first vote.
 - Projects a judge is self-vote-blocked from are removed from that judge's denominator.
-- Completion means every participating judge has scored every project they are eligible to judge.
+- Projects the manager has closed to new votes are also removed from the live denominator until reopened.
+- Completion means every participating judge has scored every project that is still open and eligible for them.
 
 This keeps the progress bar coherent without introducing heavy judge-roster administration.
 
@@ -142,12 +145,13 @@ See [/Users/rajeev/Code/hackathon-voting-prototype/prisma/schema.prisma](/Users/
 3. Fill one row per project and keep project names unique.
 4. Upload the XLSX from the manager panel.
 5. Confirm all entries appear on the scoreboard and that there is no placeholder content.
-6. If you need a clean rehearsal, click `Reset dry run`, then upload again.
-7. Click `Begin voting` once the judges are ready.
-8. Ask judges to sign in once and vote from the modal.
-9. Watch the progress card until completion reaches `100%`.
-10. Click `Finalize`.
-11. Export the finalized workbook.
+6. If a project should stay visible but stop taking new votes, use its row-level open / close control on the board.
+7. If you need a clean rehearsal, click `Reset dry run`, then upload again.
+8. Click `Begin voting` once the judges are ready.
+9. Ask judges to sign in once and vote from the modal.
+10. Watch the progress card until completion reaches `100%`.
+11. Click `Finalize`.
+12. Export the finalized workbook.
 
 ## Proof and verification
 

@@ -30,6 +30,7 @@ model Entry {
   teamName      String?
   summary       String?
   metadata      Json?
+  isVotingOpen  Boolean          @default(true)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   teamEmails    EntryTeamEmail[]

@@ -7,6 +7,7 @@ export type EntryRecordForLogic = {
   projectName: string;
   teamName: string | null;
   summary: string | null;
+  isVotingOpen: boolean;
   teamEmails: { email: string }[];
   votes: {
     judgeEmail: string;
@@ -34,6 +35,7 @@ export type ScoreboardEntryView = {
   voteCount: number;
   teamEmails: string[];
   judgeEmails: string[];
+  isVotingOpen: boolean;
   isSelfVoteBlocked: boolean;
   currentUserVote: number | null;
   canVote: boolean;
@@ -46,6 +48,7 @@ export type ProgressSummary = {
   expectedVotes: number;
   participatingJudgeCount: number;
   entryCount: number;
+  openEntryCount: number;
   isComplete: boolean;
   helperText: string;
 };
@@ -85,10 +88,14 @@ export function deriveProgress({
   entries
 }: {
   status: VotingStatus;
-  entries: Pick<EntryRecordForLogic, "teamEmails" | "votes">[];
+  entries: Pick<EntryRecordForLogic, "teamEmails" | "votes" | "isVotingOpen">[];
 }): ProgressSummary {
   const entryCount = entries.length;
+  const openEntries = entries.filter((entry) => entry.isVotingOpen);
+  const openEntryCount = openEntries.length;
   const votes = entries.flatMap((entry) => entry.votes);
+  const openVotes = openEntries.flatMap((entry) => entry.votes);
+  const hasAnyVotes = votes.length > 0;
 
   if (!entryCount) {
     return {
@@ -97,6 +104,7 @@ export function deriveProgress({
       expectedVotes: 0,
       participatingJudgeCount: 0,
       entryCount: 0,
+      openEntryCount: 0,
       isComplete: false,
       helperText: "Upload a workbook to populate the public scoreboard."
     };
@@ -106,21 +114,40 @@ export function deriveProgress({
     return {
       percentage: 0,
       castVotes: 0,
-      expectedVotes: entryCount,
+      expectedVotes: openEntryCount,
       participatingJudgeCount: 0,
       entryCount,
+      openEntryCount,
       isComplete: false,
-      helperText: "Voting has not started yet. The manager can review the upload and begin judging when ready."
+      helperText:
+        openEntryCount > 0
+          ? "Voting has not started yet. The manager can review the upload, close any project that should stay out of the round, and begin judging when ready."
+          : "Every project is currently closed to new votes. Reopen at least one entry before judging starts."
+    };
+  }
+
+  if (openEntryCount === 0) {
+    return {
+      percentage: hasAnyVotes ? 100 : 0,
+      castVotes: 0,
+      expectedVotes: 0,
+      participatingJudgeCount: 0,
+      entryCount,
+      openEntryCount,
+      isComplete: hasAnyVotes,
+      helperText: hasAnyVotes
+        ? "No projects are currently open for new votes. Reopen an entry to keep judging, or finalize if the round is done."
+        : "No projects are currently open for voting. Reopen at least one entry to let judges score."
     };
   }
 
   const participatingJudgeEmails = Array.from(
-    new Set(votes.map((vote) => normalizeEmail(vote.judgeEmail)))
+    new Set(openVotes.map((vote) => normalizeEmail(vote.judgeEmail)))
   );
   const participatingJudgeCount = participatingJudgeEmails.length;
-  const castVotes = votes.length;
+  const castVotes = openVotes.length;
   const expectedVotes = participatingJudgeEmails.reduce((sum, judgeEmail) => {
-    const eligibleEntryCount = entries.filter(
+    const eligibleEntryCount = openEntries.filter(
       (entry) => !isSelfVoteBlocked(entry.teamEmails.map((teamMember) => teamMember.email), judgeEmail)
     ).length;
 
@@ -130,7 +157,7 @@ export function deriveProgress({
   const isComplete =
     expectedVotes > 0 &&
     participatingJudgeEmails.every((judgeEmail) =>
-      entries.every((entry) => {
+      openEntries.every((entry) => {
         const entryEmails = entry.teamEmails.map((teamMember) => teamMember.email);
         if (isSelfVoteBlocked(entryEmails, judgeEmail)) {
           return true;
@@ -143,10 +170,11 @@ export function deriveProgress({
   if (status === "FINALIZED") {
     return {
       percentage: 100,
-      castVotes,
+      castVotes: votes.length,
       expectedVotes,
       participatingJudgeCount,
       entryCount,
+      openEntryCount,
       isComplete: true,
       helperText: "Judging is finalized. Public scores are locked and export is available to the manager."
     };
@@ -156,12 +184,13 @@ export function deriveProgress({
     return {
       percentage: 0,
       castVotes,
-      expectedVotes: entryCount,
+      expectedVotes: openEntryCount,
       participatingJudgeCount: 0,
       entryCount,
+      openEntryCount,
       isComplete: false,
       helperText:
-        "Voting is open. Judges join the completion count when they cast their first score, and completion means every participating judge has scored every project they are eligible to judge."
+        "Voting is open. Judges join the completion count when they cast their first score, and completion means every participating judge has covered every project that is still open for them."
     };
   }
 
@@ -171,10 +200,11 @@ export function deriveProgress({
     expectedVotes,
     participatingJudgeCount,
     entryCount,
+    openEntryCount,
     isComplete,
     helperText: isComplete
-      ? "Every participating judge has scored every project they are eligible to judge. The manager can finalize the results."
-      : "Completion is measured as every participating judge covering every project they are eligible to judge. Self-vote exclusions are removed from the denominator automatically."
+      ? "Every participating judge has scored every project that is still open for them. The manager can finalize the results."
+      : "Completion is measured across projects that are still open for voting. Closed projects stay on the board but drop out of the denominator automatically."
   };
 }
 
@@ -213,6 +243,7 @@ export function deriveCompetitionSnapshot({
         averageScore: voteCount > 0 ? Number((totalScore / voteCount).toFixed(2)) : null,
         teamEmails,
         judgeEmails: Array.from(new Set(entry.votes.map((vote) => normalizeEmail(vote.judgeEmail)))),
+        isVotingOpen: entry.isVotingOpen,
         isSelfVoteBlocked: isSelfVoteBlocked(teamEmails, viewer.email),
         currentUserVote,
         lastVoteAt: entry.votes
@@ -233,6 +264,7 @@ export function deriveCompetitionSnapshot({
       rank: index + 1,
       canVote:
         status === "OPEN" &&
+        entry.isVotingOpen &&
         viewer.isAuthenticated &&
         !entry.isSelfVoteBlocked &&
         entry.currentUserVote == null &&
@@ -249,7 +281,7 @@ export function deriveCompetitionSnapshot({
     progress,
     canDownloadTemplate: viewer.isManager,
     canUploadSheet: viewer.isManager && status === "PREPARING",
-    canBeginVoting: viewer.isManager && status === "PREPARING" && entries.length > 0,
+    canBeginVoting: viewer.isManager && status === "PREPARING" && entries.some((entry) => entry.isVotingOpen),
     canFinalize: viewer.isManager && status === "OPEN" && progress.isComplete,
     canResetRound: viewer.isManager && (entries.length > 0 || status !== "PREPARING"),
     canDownloadFinalizedExport: viewer.isManager && status === "FINALIZED"

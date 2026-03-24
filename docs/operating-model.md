@@ -54,6 +54,7 @@ Prisma models live in [schema.prisma](/Users/rajeev/Code/hackathon-voting-protot
   - team name
   - summary
   - metadata JSON for tolerated extra workbook columns
+  - per-entry `isVotingOpen` state for manager row controls
 
 ### `EntryTeamEmail`
 
@@ -63,7 +64,7 @@ Prisma models live in [schema.prisma](/Users/rajeev/Code/hackathon-voting-protot
 ### `Vote`
 
 - One active row per `entryId + judgeEmail`
-- Re-submitting a score updates the existing row instead of creating duplicates
+- Re-submitting a score is rejected; each judge gets one locked score per project for the round
 
 ## Workbook contract
 
@@ -106,12 +107,14 @@ Self-vote blocking is derived from normalized email equality between the signed-
 
 - Public scoreboard is visible.
 - Manager can download the template and upload a workbook.
+- Manager can close or reopen individual projects before the round starts.
 - Voting actions open the modal but remain locked.
 
 ### `OPEN`
 
 - Public scoreboard stays visible.
 - Authenticated judges can vote.
+- The manager can close or reopen individual projects without removing them from the public board.
 - A judge becomes part of the progress denominator the moment they cast their first score.
 - Each judge can submit exactly one score per project for the active round.
 - After submission, that project is locked for that judge unless the manager resets the whole round.
@@ -132,7 +135,8 @@ Completion is intentionally simple and operationally practical:
 - A judge joins the round once they cast their first score.
 - For each participating judge, the app computes which entries they are eligible to score.
 - Entries blocked by self-vote rules are removed from that judge's denominator.
-- The round is complete when every participating judge has scored every project they are eligible to judge.
+- Entries the manager has closed to new votes are removed from the live denominator until reopened.
+- The round is complete when every participating judge has scored every project that is still open and eligible for them.
 - Finalization is available only when the round is `OPEN` and that completion rule is satisfied.
 
 This keeps the rule coherent without introducing a separate roster-management system.
@@ -149,6 +153,8 @@ This keeps the rule coherent without introducing a separate roster-management sy
 
 - The design system preserves the existing dark teal / glass / results-dashboard visual language.
 - Light mode is supported and intentionally styled instead of falling back to generic defaults.
+- The main screen is intentionally one column on every viewport so the scoreboard owns the page and progress sits below it.
+- The scoreboard can switch between a ranked table and a horizontal bar chart.
 - The vote modal is the emotional center of the product and is designed to:
   - keep project context visible
   - support keyboard-first scoring

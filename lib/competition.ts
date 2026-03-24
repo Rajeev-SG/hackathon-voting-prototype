@@ -157,6 +157,7 @@ export async function replaceEntriesFromWorkbook(buffer: ArrayBuffer | Buffer) {
           projectName: row.projectName,
           teamName: row.teamName,
           summary: row.summary,
+          isVotingOpen: true,
           metadata: Object.keys(row.metadata).length ? row.metadata : Prisma.JsonNull,
           teamEmails: {
             create: row.teamEmails.map((email) => ({
@@ -195,6 +196,17 @@ export async function beginVotingRound() {
   const entryCount = await withPrismaRetry(() => prisma.entry.count());
   if (entryCount === 0) {
     throw new Error("Upload at least one entry before opening voting.");
+  }
+
+  const openEntryCount = await withPrismaRetry(() =>
+    prisma.entry.count({
+      where: {
+        isVotingOpen: true
+      }
+    })
+  );
+  if (openEntryCount === 0) {
+    throw new Error("Reopen at least one project before beginning voting.");
   }
 
   await withPrismaRetry(() =>
@@ -268,6 +280,10 @@ export async function submitJudgeVote({
     throw new Error("That project could not be found.");
   }
 
+  if (!entry.isVotingOpen) {
+    throw new Error("Voting is currently closed for this project.");
+  }
+
   const normalizedJudgeEmail = normalizeEmail(judgeEmail);
   const isBlocked = entry.teamEmails.some(
     (teamMember) => normalizeEmail(teamMember.email) === normalizedJudgeEmail
@@ -298,6 +314,59 @@ export async function submitJudgeVote({
 
     throw error;
   }
+
+  safeRevalidateHome();
+}
+
+export async function setEntryVotingAvailability({
+  entryId,
+  isVotingOpen
+}: {
+  entryId: string;
+  isVotingOpen: boolean;
+}) {
+  const state = await ensureCompetitionState();
+  if (state.votingStatus === "FINALIZED") {
+    throw new Error("Entries cannot be reopened or closed after finalization.");
+  }
+
+  const entry = await withPrismaRetry(() =>
+    prisma.entry.findUnique({
+      where: { id: entryId }
+    })
+  );
+
+  if (!entry) {
+    throw new Error("That project could not be found.");
+  }
+
+  if (entry.isVotingOpen === isVotingOpen) {
+    return;
+  }
+
+  if (state.votingStatus === "PREPARING" && !isVotingOpen) {
+    const otherOpenEntries = await withPrismaRetry(() =>
+      prisma.entry.count({
+        where: {
+          isVotingOpen: true,
+          id: {
+            not: entryId
+          }
+        }
+      })
+    );
+
+    if (otherOpenEntries === 0) {
+      throw new Error("Keep at least one project open before judging starts.");
+    }
+  }
+
+  await withPrismaRetry(() =>
+    prisma.entry.update({
+      where: { id: entryId },
+      data: { isVotingOpen }
+    })
+  );
 
   safeRevalidateHome();
 }

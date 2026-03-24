@@ -262,7 +262,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
   await test.step("Anonymous visitors can see the board but not manager tools", async () => {
     await anonymousPage.goto("/");
     await expect(anonymousPage.getByRole("heading", { name: "Live hackathon scoreboard" })).toBeVisible();
-    await expect(anonymousPage.getByText("No projects loaded yet")).toBeVisible();
+    await expect(anonymousPage.getByTestId("scoreboard-empty-heading")).toBeVisible();
     await expectProgressStateCardToContainValue(anonymousPage, "Preparing");
     await expect(anonymousPage.getByTestId("manager-download-template")).toHaveCount(0);
     await expect(anonymousPage.getByTestId("manager-upload-dropzone")).toHaveCount(0);
@@ -294,14 +294,40 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await expect(managerPage.getByTestId("scoreboard-row-harbor-pulse").nth(rowIndex)).toContainText(
       "Harbor Collective Reloaded"
     );
+
+    await managerPage.getByTestId("scoreboard-view-chart").click();
+    await expect(managerPage.getByTestId("scoreboard-chart-view")).toBeVisible();
+    await takeShot(managerPage, testInfo.outputPath("manager-chart-view.png"));
+    await managerPage.getByTestId("scoreboard-view-table").click();
+    if (testInfo.project.name.includes("mobile")) {
+      await expect(managerPage.getByTestId("scoreboard-row-aurora-atlas").nth(rowIndex)).toBeVisible();
+    } else {
+      await expect(managerPage.getByTestId("scoreboard-table-view")).toBeVisible();
+    }
     await takeShot(managerPage, testInfo.outputPath("manager-after-upload.png"));
 
     await managerPage.getByTestId("manager-begin-voting").click();
-    await expect(managerPage.getByTestId("workflow-summary").getByText("Judging live")).toBeVisible();
+    await expect(managerPage.getByTestId("progress-stat-state-value")).toHaveText("Voting live");
+
+    await managerPage
+      .getByTestId("manager-entry-toggle-harbor-pulse")
+      .nth(activeResponsiveIndex(testInfo.project.name))
+      .click();
+    await expect(managerPage.getByText("Harbor Pulse is now closed to new votes.")).toBeVisible();
+    await expect(
+      managerPage
+        .getByTestId("scoreboard-action-harbor-pulse")
+        .nth(activeResponsiveIndex(testInfo.project.name))
+    ).toContainText("Closed");
   });
 
   await test.step("Anonymous users stay read-only after voting opens", async () => {
     await anonymousPage.goto("/");
+    await openVoteDialog(anonymousPage, "Harbor Pulse");
+    await expect(anonymousPage.getByText("Voting is paused for this project right now.")).toBeVisible();
+    await expect(anonymousPage.getByTestId("submit-vote")).toHaveCount(0);
+    await anonymousPage.getByRole("button", { name: "Close" }).click();
+
     await openVoteDialog(anonymousPage, "Aurora Atlas");
     await expect(anonymousPage.getByText("Sign in to cast your vote")).toBeVisible();
     await expect(anonymousPage.getByTestId("submit-vote")).toHaveCount(0);
@@ -314,6 +340,10 @@ test("manager, judges, and public users complete the single-screen voting flow",
     } else {
       await signInJudgeWithEmailCode(judgePage, JUDGE_EMAIL);
     }
+
+    await openVoteDialog(judgePage, "Harbor Pulse");
+    await expect(judgePage.getByRole("heading", { name: "Voting is paused" })).toBeVisible();
+    await judgePage.getByRole("button", { name: "Close" }).click();
 
     let voteDialog = await openVoteDialog(judgePage, "Aurora Atlas");
     await expect(voteDialog.getByTestId("score-option-7")).toBeFocused();
@@ -352,6 +382,14 @@ test("manager, judges, and public users complete the single-screen voting flow",
         .nth(activeResponsiveIndex(testInfo.project.name))
     ).toContainText("7", { timeout: 12000 });
 
+    await managerPage.goto("/");
+    await managerPage
+      .getByTestId("manager-entry-toggle-harbor-pulse")
+      .nth(activeResponsiveIndex(testInfo.project.name))
+      .click();
+    await expect(managerPage.getByText("Harbor Pulse is now open for judging again.")).toBeVisible();
+
+    await judgePage.goto("/");
     await openVoteDialog(judgePage, "Harbor Pulse");
     await saveVote(judgePage, 6);
 
@@ -382,7 +420,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await expect(managerPage.getByText("5/5")).toBeVisible();
     await expect(
       managerPage.getByText(
-        "Every participating judge has scored every project they are eligible to judge. The manager can finalize the results."
+        "Every participating judge has scored every project that is still open for them. The manager can finalize the results."
       )
     ).toBeVisible();
 
@@ -425,7 +463,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
     managerPage.once("dialog", (dialog) => void dialog.accept());
     await managerPage.getByTestId("manager-reset-round").click();
     await expect(managerPage.getByText("Competition reset. Upload a fresh workbook to start the next dry run.")).toBeVisible();
-    await expect(managerPage.getByText("No projects loaded yet")).toBeVisible();
+    await expect(managerPage.getByTestId("scoreboard-empty-heading")).toBeVisible();
     await expect(managerPage.getByTestId("manager-begin-voting")).toBeDisabled();
     await expect(managerPage.getByTestId("manager-upload-button")).toBeEnabled();
 
@@ -437,10 +475,10 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await expect(managerPage.getByText("Imported 3 projects.")).toBeVisible();
     managerPage.once("dialog", (dialog) => void dialog.accept());
     await managerPage.getByTestId("manager-reset-round").click();
-    await expect(managerPage.getByText("No projects loaded yet")).toBeVisible();
+    await expect(managerPage.getByTestId("scoreboard-empty-heading")).toBeVisible();
 
     await anonymousPage.goto("/");
-    await expect(anonymousPage.getByText("No projects loaded yet")).toBeVisible();
+    await expect(anonymousPage.getByTestId("scoreboard-empty-heading")).toBeVisible();
     await takeShot(managerPage, testInfo.outputPath("manager-reset-empty-state.png"));
   });
 
