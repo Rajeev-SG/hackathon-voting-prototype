@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { ConsentPreferencesButton } from "@/components/consent-preferences-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { beginAnalyticsPageView, getPageAnalyticsContext, pushDataLayerEvent } from "@/lib/analytics";
@@ -108,8 +107,6 @@ export function ConsentManager() {
 
   if (!analyticsEnabled) return null;
 
-  const shouldShowPreferencesButton = consentState && consentState.source !== "default";
-
   return (
     <>
       {isBannerOpen ? (
@@ -152,22 +149,6 @@ export function ConsentManager() {
               </div>
             </CardContent>
           </Card>
-        </div>
-      ) : null}
-
-      {shouldShowPreferencesButton ? (
-        <div className="fixed bottom-6 right-6 z-40 max-md:hidden">
-          <ConsentPreferencesButton
-            aria-label="Privacy settings"
-            className="shadow-sm"
-            data-analytics-event="consent_preferences_reopen"
-            data-analytics-item-name="Privacy settings"
-            data-analytics-item-type="consent_preferences_button"
-            data-analytics-section="floating_privacy_button"
-            size="sm"
-            title="Privacy settings"
-            variant="secondary"
-          />
         </div>
       ) : null}
     </>
