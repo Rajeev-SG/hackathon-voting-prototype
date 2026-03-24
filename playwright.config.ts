@@ -3,13 +3,14 @@ import { defineConfig, devices } from "playwright/test";
 
 process.loadEnvFile?.(".env.local");
 
-const baseURL = process.env.E2E_BASE_URL ?? "http://127.0.0.1:3001";
+const localPort = 3017;
+const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${localPort}`;
 const isLocalTarget = /127\.0\.0\.1|localhost/.test(baseURL);
 const repoRoot = process.cwd();
 const usesClerkTestKeys = (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "").startsWith("pk_test_");
 const localWebServerCommand = usesClerkTestKeys
-  ? "zsh -lc 'set -a; source .env.local; set +a; pnpm dev --port 3001'"
-  : "zsh -lc 'set -a; source .env.local; set +a; pnpm start --port 3001'";
+  ? `zsh -lc 'set -a; source .env.local; set +a; pnpm dev --port ${localPort}'`
+  : `zsh -lc 'set -a; source .env.local; set +a; pnpm start --port ${localPort}'`;
 
 export default defineConfig({
   testDir: `${repoRoot}/tests/e2e`,
@@ -45,7 +46,7 @@ export default defineConfig({
   webServer: isLocalTarget
     ? {
         command: localWebServerCommand,
-        port: 3001,
+        port: localPort,
         reuseExistingServer: true,
         timeout: 120000
       }

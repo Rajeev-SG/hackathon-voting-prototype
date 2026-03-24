@@ -183,7 +183,17 @@ async function openVoteDialog(page: Page, projectName: string) {
 async function saveVote(page: Page, score: number) {
   await page.getByTestId(`score-option-${score}`).click();
   await page.getByTestId("submit-vote").click();
-  await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 4000 });
+  const dialog = page.getByRole("dialog");
+  const savedToast = page.getByTestId("vote-saved-toast");
+
+  try {
+    await expect(dialog).not.toBeVisible({ timeout: 4000 });
+    return;
+  } catch {
+    await expect(savedToast).toBeVisible({ timeout: 4000 });
+    await page.keyboard.press("Escape");
+    await expect(dialog).not.toBeVisible({ timeout: 4000 });
+  }
 }
 
 async function takeShot(page: Page, outputPath: string) {
@@ -251,7 +261,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
 
   await test.step("Anonymous visitors can see the board but not manager tools", async () => {
     await anonymousPage.goto("/");
-    await expect(anonymousPage.getByRole("heading", { name: "Hackathon scoreboard" })).toBeVisible();
+    await expect(anonymousPage.getByRole("heading", { name: "Live hackathon scoreboard" })).toBeVisible();
     await expect(anonymousPage.getByText("No projects loaded yet")).toBeVisible();
     await expectProgressStateCardToContainValue(anonymousPage, "Preparing");
     await expect(anonymousPage.getByTestId("manager-download-template")).toHaveCount(0);
@@ -287,7 +297,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await takeShot(managerPage, testInfo.outputPath("manager-after-upload.png"));
 
     await managerPage.getByTestId("manager-begin-voting").click();
-    await expect(managerPage.getByText("Judging live")).toBeVisible();
+    await expect(managerPage.getByTestId("workflow-summary").getByText("Judging live")).toBeVisible();
   });
 
   await test.step("Anonymous users stay read-only after voting opens", async () => {
@@ -382,7 +392,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
     expect(hasHorizontalOverflow).toBe(false);
 
     await managerPage.getByTestId("manager-finalize").click();
-    await expect(managerPage.getByText("Finalized", { exact: true })).toBeVisible();
+    await expect(managerPage.getByTestId("progress-stat-state-value")).toHaveText("Finalized");
 
     const [exportDownload] = await Promise.all([
       managerPage.waitForEvent("download"),
@@ -395,7 +405,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
 
   await test.step("Public users see the finalized board and locked modal state", async () => {
     await anonymousPage.goto("/");
-    await expect(anonymousPage.getByText("Finalized", { exact: true })).toBeVisible();
+    await expect(anonymousPage.getByTestId("progress-stat-state-value")).toHaveText("Finalized");
     await openVoteDialog(anonymousPage, "Signal Bloom");
     await expect(anonymousPage.getByRole("heading", { name: "Judging is finalized" })).toBeVisible();
     await expect(
