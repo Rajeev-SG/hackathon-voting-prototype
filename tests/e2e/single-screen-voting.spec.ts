@@ -258,7 +258,6 @@ test("manager, judges, and public users complete the single-screen voting flow",
 
   await test.step("Anonymous visitors can see the board but not manager tools", async () => {
     await anonymousPage.goto("/");
-    await expect(anonymousPage.getByRole("heading", { name: "Live hackathon scoreboard" })).toBeVisible();
     await expect(anonymousPage.getByTestId("scoreboard-empty-heading")).toBeVisible();
     await expectCompetitionStateBadge(anonymousPage, "Preparing");
     await expect(anonymousPage.getByText("Manager setup")).toHaveCount(0);

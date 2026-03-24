@@ -32,7 +32,7 @@ test.describe("single-column scoreboard stays coherent across breakpoints", () =
       await page.goto("/");
       const appOrigin = new URL(page.url()).origin;
 
-      await expect(page.getByRole("heading", { name: "Live hackathon scoreboard" })).toBeVisible();
+      await expect(page.getByTestId("scoreboard-section")).toBeVisible();
       await expect(page.getByTestId("competition-state-badge")).toBeVisible();
       await expect(page.getByTestId("progress-panel")).toHaveCount(0);
       await expect(page.getByTestId("workflow-summary")).toHaveCount(0);

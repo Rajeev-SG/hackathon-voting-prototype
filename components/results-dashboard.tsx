@@ -582,53 +582,42 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
           ) : null}
 
           <section className="space-y-3" data-testid="scoreboard-section">
-            <div className="glass-panel rounded-[2rem] px-5 py-5 sm:px-6">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div className="max-w-3xl">
-                  <h1 className="mt-2 font-display text-[clamp(1.8rem,3.8vw,2.8rem)] font-black tracking-tight">
-                    Live hackathon scoreboard
-                  </h1>
-                  <p className="mt-3 text-sm leading-7 text-muted-foreground">{scoreboardMeta.detail}</p>
-                </div>
-                <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
-                    {snapshot.progress.entryCount} entr{snapshot.progress.entryCount === 1 ? "y" : "ies"}
-                  </span>
-                  <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
-                    {snapshot.progress.openEntryCount} open now
-                  </span>
-                  {snapshot.status === "OPEN" ? (
-                    <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
-                      {snapshot.progress.participatingJudgeCount} judging now
-                    </span>
-                  ) : null}
-                  {snapshot.viewer.isManager && snapshot.status === "OPEN" ? (
-                    <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
-                      {snapshot.managerTracker.totalRemainingVotes} votes left
-                    </span>
-                  ) : null}
-                  <span
-                    className={cn(
-                      "rounded-full px-3 py-2",
-                      snapshot.status === "OPEN"
-                        ? "bg-radix-teal-a-3 text-accent-foreground"
-                        : snapshot.status === "FINALIZED"
-                          ? "bg-radix-purple-a-4 text-foreground"
-                          : "bg-radix-amber-a-3 text-foreground"
-                    )}
-                    data-testid="competition-state-badge"
-                  >
-                    {stateMeta.label}
-                  </span>
-                </div>
-              </div>
-            </div>
-
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-2xl">
                 <div className="eyebrow">Scoreboard</div>
-                <h2 className="font-display text-2xl font-black">{scoreboardMeta.title}</h2>
+                <h1 className="font-display text-2xl font-black">{scoreboardMeta.title}</h1>
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">{scoreboardMeta.detail}</p>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                  {snapshot.progress.entryCount} entr{snapshot.progress.entryCount === 1 ? "y" : "ies"}
+                </span>
+                <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                  {snapshot.progress.openEntryCount} open now
+                </span>
+                {snapshot.status === "OPEN" ? (
+                  <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                    {snapshot.progress.participatingJudgeCount} judging now
+                  </span>
+                ) : null}
+                {snapshot.viewer.isManager && snapshot.status === "OPEN" ? (
+                  <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                    {snapshot.managerTracker.totalRemainingVotes} votes left
+                  </span>
+                ) : null}
+                <span
+                  className={cn(
+                    "rounded-full px-3 py-2",
+                    snapshot.status === "OPEN"
+                      ? "bg-radix-teal-a-3 text-accent-foreground"
+                      : snapshot.status === "FINALIZED"
+                        ? "bg-radix-purple-a-4 text-foreground"
+                        : "bg-radix-amber-a-3 text-foreground"
+                  )}
+                  data-testid="competition-state-badge"
+                >
+                  {stateMeta.label}
+                </span>
               </div>
             </div>
 
