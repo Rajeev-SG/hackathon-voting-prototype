@@ -14,6 +14,7 @@ const anonymousViewer = {
   isAuthenticated: false,
   isManager: false
 } as const;
+const shouldUsePublicSnapshotCache = process.env.NODE_ENV === "production";
 
 async function ensureCompetitionState() {
   const existingState = await withPrismaRetry(() =>
@@ -113,7 +114,7 @@ const getCachedPublicCompetitionSnapshot = unstable_cache(
 
 export async function getCompetitionSnapshot() {
   const viewer = await getViewerIdentity();
-  if (!viewer.isAuthenticated) {
+  if (!viewer.isAuthenticated && shouldUsePublicSnapshotCache) {
     return getCachedPublicCompetitionSnapshot();
   }
 
@@ -204,6 +205,28 @@ export async function beginVotingRound() {
         startedAt: new Date(),
         finalizedAt: null
       }
+    })
+  );
+
+  safeRevalidateHome();
+}
+
+export async function resetCompetitionRound() {
+  await ensureCompetitionState();
+
+  await withPrismaRetry(() =>
+    prisma.$transaction(async (tx) => {
+      await tx.vote.deleteMany();
+      await tx.entryTeamEmail.deleteMany();
+      await tx.entry.deleteMany();
+      await tx.competitionState.update({
+        where: { id: COMPETITION_STATE_ID },
+        data: {
+          votingStatus: "PREPARING",
+          startedAt: null,
+          finalizedAt: null
+        }
+      });
     })
   );
 

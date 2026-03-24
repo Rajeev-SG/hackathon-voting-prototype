@@ -62,6 +62,7 @@ export type CompetitionSnapshot = {
   canUploadSheet: boolean;
   canBeginVoting: boolean;
   canFinalize: boolean;
+  canResetRound: boolean;
   canDownloadFinalizedExport: boolean;
 };
 
@@ -249,6 +250,7 @@ export function deriveCompetitionSnapshot({
     canUploadSheet: viewer.isManager && status === "PREPARING",
     canBeginVoting: viewer.isManager && status === "PREPARING" && entries.length > 0,
     canFinalize: viewer.isManager && status === "OPEN" && progress.isComplete,
+    canResetRound: viewer.isManager && (entries.length > 0 || status !== "PREPARING"),
     canDownloadFinalizedExport: viewer.isManager && status === "FINALIZED"
   };
 }

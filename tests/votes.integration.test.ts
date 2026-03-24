@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { COMPETITION_STATE_ID, MANAGER_EMAIL } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
-import { submitJudgeVote } from "@/lib/competition";
+import { resetCompetitionRound, submitJudgeVote } from "@/lib/competition";
 
 async function resetDatabase() {
   await prisma.vote.deleteMany();
@@ -93,5 +93,38 @@ describe("submitJudgeVote", () => {
         score: 9
       })
     ).rejects.toThrow("Team members cannot vote on their own project.");
+  });
+
+  it("resets the round back to an empty preparing state", async () => {
+    const entry = await prisma.entry.create({
+      data: {
+        slug: "harbor-pulse",
+        projectName: "Harbor Pulse",
+        teamEmails: {
+          create: [{ email: "captain@example.com" }]
+        }
+      }
+    });
+
+    await submitJudgeVote({
+      entryId: entry.id,
+      judgeEmail: "judge@example.com",
+      judgeUserId: "user_3",
+      score: 7
+    });
+
+    await resetCompetitionRound();
+
+    expect(await prisma.entry.count()).toBe(0);
+    expect(await prisma.vote.count()).toBe(0);
+    expect(
+      await prisma.competitionState.findUnique({
+        where: { id: COMPETITION_STATE_ID }
+      })
+    ).toMatchObject({
+      votingStatus: "PREPARING",
+      startedAt: null,
+      finalizedAt: null
+    });
   });
 });

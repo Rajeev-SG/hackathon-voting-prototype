@@ -23,6 +23,7 @@ The app is intentionally a single-screen product.
 - Only this user can:
   - download the workbook template
   - upload a workbook
+  - reset the round to an empty workbook-driven state
   - begin voting
   - finalize the round
   - export finalized scores
@@ -70,6 +71,7 @@ Supported template columns:
 
 Important rules:
 
+- The downloaded template is intentionally blank. There are no seeded demo or placeholder projects.
 - `Project Name` must be unique.
 - Each row must contain at least one team email.
 - Unknown non-email columns are tolerated and stored as metadata.
@@ -88,8 +90,14 @@ Every uploaded team-member email is stored against that project.
 ### Preparing
 
 - Public scoreboard is visible.
-- Manager can download the template and upload/update the workbook.
+- Manager can download the blank template and upload or replace the workbook.
 - Voting controls stay locked.
+
+### Resetting for another dry run
+
+- The manager can click `Reset dry run` from the same screen.
+- Reset clears uploaded entries, stored team emails, votes, and the current judging lifecycle state.
+- After reset, the board returns to an intentionally empty state until a new workbook is uploaded.
 
 ### Open
 
@@ -132,12 +140,13 @@ See [/Users/rajeev/Code/hackathon-voting-prototype/prisma/schema.prisma](/Users/
 2. Download the template from `/`.
 3. Fill one row per project and keep project names unique.
 4. Upload the XLSX from the manager panel.
-5. Confirm all entries appear on the scoreboard.
-6. Click `Begin voting` once the judges are ready.
-7. Ask judges to sign in once and vote from the modal.
-8. Watch the progress card until completion reaches `100%`.
-9. Click `Finalize`.
-10. Export the finalized workbook.
+5. Confirm all entries appear on the scoreboard and that there is no placeholder content.
+6. If you need a clean rehearsal, click `Reset dry run`, then upload again.
+7. Click `Begin voting` once the judges are ready.
+8. Ask judges to sign in once and vote from the modal.
+9. Watch the progress card until completion reaches `100%`.
+10. Click `Finalize`.
+11. Export the finalized workbook.
 
 ## Proof and verification
 
