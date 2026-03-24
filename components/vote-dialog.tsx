@@ -13,6 +13,7 @@ import {
   DialogTitle
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { pushDataLayerEvent } from "@/lib/analytics";
 import type { ScoreboardEntryView, ViewerIdentity } from "@/lib/competition-logic";
 
 type VoteDialogProps = {
@@ -69,10 +70,40 @@ export function VoteDialog({
     setState("idle");
   }, [entry?.id, open]);
 
+  React.useEffect(() => {
+    if (!entry || !open) return;
+
+    pushDataLayerEvent("vote_dialog_viewed", {
+      entry_slug: entry.slug,
+      entry_name: entry.projectName,
+      vote_count: entry.voteCount,
+      aggregate_score: entry.totalScore,
+      competition_status: status.toLowerCase(),
+      viewer_role: viewer.isManager ? "manager" : viewer.isAuthenticated ? "judge" : "public",
+      viewer_can_vote: entry.canVote,
+      viewer_has_vote: entry.currentUserVote != null,
+      entry_voting_open: entry.isVotingOpen
+    });
+  }, [entry, open, status, viewer.isAuthenticated, viewer.isManager]);
+
+  function handleScoreChange(nextScore: string) {
+    setSelectedScore(nextScore);
+    pushDataLayerEvent("vote_score_selected", {
+      entry_slug: entry?.slug,
+      score: Number(nextScore),
+      viewer_role: viewer.isManager ? "manager" : viewer.isAuthenticated ? "judge" : "public"
+    });
+  }
+
   async function submitVote() {
     if (!entry || !selectedScore) return;
     setState("submitting");
     setErrorMessage(null);
+    pushDataLayerEvent("vote_submit_started", {
+      entry_slug: entry.slug,
+      entry_name: entry.projectName,
+      score: Number(selectedScore)
+    });
 
     try {
       const response = await fetch("/api/votes", {
@@ -92,10 +123,19 @@ export function VoteDialog({
       }
 
       setState("success");
+      pushDataLayerEvent("vote_submitted", {
+        entry_slug: entry.slug,
+        entry_name: entry.projectName,
+        score: Number(selectedScore)
+      });
       onVoteSaved();
       window.setTimeout(() => onOpenChange(false), 1500);
     } catch (error) {
       setState("error");
+      pushDataLayerEvent("vote_submit_failed", {
+        entry_slug: entry.slug,
+        score: Number(selectedScore)
+      });
       setErrorMessage(error instanceof Error ? error.message : "We could not save that vote.");
     }
   }
@@ -278,7 +318,7 @@ export function VoteDialog({
                 <RadioGroup
                   className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6"
                   value={selectedScore}
-                  onValueChange={setSelectedScore}
+                  onValueChange={handleScoreChange}
                 >
                   {scoreOptions.map((value) => {
                     const tone = describeScore(value);

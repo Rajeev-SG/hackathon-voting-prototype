@@ -199,6 +199,35 @@ These checks prove two different things:
 
 Proof notes live in [proof.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/proof.md).
 Viewport-specific appearance and usability findings live in [viewport-ux-audit.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/viewport-ux-audit.md).
+Analytics implementation notes live in [google-tagging-stack.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md).
+Analytics audit notes live in [analytics-audit.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/analytics-audit.md).
+
+## Analytics stack
+
+Production analytics now includes:
+
+- consent banner and privacy route
+- app-owned `dataLayer` contract for scoreboard, upload, auth, and voting events
+- direct Google tag delivery for the voting-app stream
+- first-party server-side collection via `https://vote.rajeevg.com/metrics`
+- GA4 custom dimensions and metrics for the hackathon app
+- BigQuery export enabled for the voting-app stream
+- current audit status: the linked BigQuery dataset still has no landed export tables, so the final Looker Studio report artifact is not complete yet
+
+Analytics env vars:
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://vote.rajeevg.com
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-HT8Z6KR8CX
+NEXT_PUBLIC_SERVER_CONTAINER_URL=https://vote.rajeevg.com/metrics
+SGTM_UPSTREAM_ORIGIN=https://sgtm-live-6tmqixdp3a-nw.a.run.app
+```
+
+Analytics proof command:
+
+```bash
+E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/analytics-stack.spec.ts --reporter=list
+```
 
 ## Auth and deploy notes
 

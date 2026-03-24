@@ -27,6 +27,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { VoteDialog } from "@/components/vote-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { pushDataLayerEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 function competitionStateMeta(status: CompetitionSnapshot["status"]) {
@@ -107,6 +108,29 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
   const stateMeta = competitionStateMeta(snapshot.status);
   const isEmpty = snapshot.entries.length === 0;
   const scoreboardMeta = scoreboardCopy(snapshot, isEmpty);
+  const analyticsContext = React.useMemo(
+    () => ({
+      competition_status: snapshot.status.toLowerCase(),
+      entry_count: snapshot.progress.entryCount,
+      open_entry_count: snapshot.progress.openEntryCount,
+      participating_judge_count: snapshot.progress.participatingJudgeCount,
+      total_remaining_votes: snapshot.managerTracker.totalRemainingVotes,
+      viewer_role: snapshot.viewer.isManager
+        ? "manager"
+        : snapshot.viewer.isAuthenticated
+          ? "judge"
+          : "public"
+    }),
+    [
+      snapshot.managerTracker.totalRemainingVotes,
+      snapshot.progress.entryCount,
+      snapshot.progress.openEntryCount,
+      snapshot.progress.participatingJudgeCount,
+      snapshot.status,
+      snapshot.viewer.isAuthenticated,
+      snapshot.viewer.isManager
+    ]
+  );
   const autoRefreshIntervalMs = snapshot.status === "OPEN" ? 5000 : 15000;
   const autoRefreshPaused =
     Boolean(selectedEntry) ||
@@ -120,6 +144,10 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
     if (!hasPendingJudgeAuthVerification()) return;
     setAuthDialogOpen(true);
   }, [snapshot.viewer.isAuthenticated]);
+
+  React.useEffect(() => {
+    pushDataLayerEvent("competition_state_snapshot", analyticsContext);
+  }, [analyticsContext]);
 
   React.useEffect(() => {
     if (!mobileSummaryOpen) return;
@@ -181,6 +209,11 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
   }
 
   async function handleWorkbookUpload(file: File) {
+    pushDataLayerEvent("workbook_upload_started", {
+      upload_method: isDragOver ? "drag_drop" : "file_picker",
+      workbook_extension: file.name.split(".").pop()?.toLowerCase() || "unknown",
+      ...analyticsContext
+    });
     setUploadState({
       status: "uploading",
       message: "Reading workbook...",
@@ -197,6 +230,10 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
 
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
+      pushDataLayerEvent("workbook_upload_failed", {
+        issue_count: Array.isArray(payload.issues) ? payload.issues.length : 0,
+        ...analyticsContext
+      });
       setUploadState({
         status: "error",
         message: payload.error ?? "We could not import that workbook.",
@@ -209,6 +246,10 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
       status: "success",
       message: `Imported ${payload.importedCount} project${payload.importedCount === 1 ? "" : "s"}.`,
       issues: []
+    });
+    pushDataLayerEvent("workbook_upload_completed", {
+      imported_project_count: Number(payload.importedCount) || 0,
+      ...analyticsContext
     });
     refreshBoard();
   }
@@ -226,8 +267,18 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
       setActionMessage(
         `${entry.projectName} is now ${entry.isVotingOpen ? "closed to new votes." : "open for judging again."}`
       );
+      pushDataLayerEvent("entry_voting_state_changed", {
+        entry_slug: entry.slug,
+        entry_name: entry.projectName,
+        voting_state: entry.isVotingOpen ? "closed" : "open",
+        ...analyticsContext
+      });
       refreshBoard();
     } catch (error) {
+      pushDataLayerEvent("entry_voting_state_change_failed", {
+        entry_slug: entry.slug,
+        ...analyticsContext
+      });
       setActionMessage(error instanceof Error ? error.message : "We could not update that project.");
     } finally {
       setPendingEntryId(null);
@@ -236,6 +287,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
 
   function openWorkbookPicker() {
     if (!snapshot.canUploadSheet || uploadState.status === "uploading") return;
+    pushDataLayerEvent("workbook_picker_opened", analyticsContext);
     uploadInputRef.current?.click();
   }
 
@@ -256,7 +308,18 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
             <div className="flex flex-wrap items-center gap-3">
               <ThemeToggle />
               <SignedOut>
-                <Button data-testid="judge-auth-open" onClick={() => setAuthDialogOpen(true)} size="sm">
+                <Button
+                  data-analytics-event="judge_auth_dialog_opened"
+                  data-analytics-item-name="Judge sign in"
+                  data-analytics-item-type="auth_button"
+                  data-analytics-section="header"
+                  onClick={() => {
+                    pushDataLayerEvent("judge_auth_dialog_opened", analyticsContext);
+                    setAuthDialogOpen(true);
+                  }}
+                  data-testid="judge-auth-open"
+                  size="sm"
+                >
                   Judge sign in
                 </Button>
               </SignedOut>
@@ -278,7 +341,10 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
 
         <section className="space-y-4">
           {snapshot.viewer.isManager ? (
-            <Card className="glass-panel rounded-[2rem] border-0 bg-transparent shadow-none">
+            <Card
+              className="glass-panel rounded-[2rem] border-0 bg-transparent shadow-none"
+              data-analytics-section="manager_controls"
+            >
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Manager controls</CardTitle>
               </CardHeader>
@@ -295,7 +361,14 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                   </div>
                   <div className="flex flex-wrap gap-3">
                     <Button asChild size="sm" variant="outline">
-                      <a data-testid="manager-download-template" href="/api/template">
+                      <a
+                        data-analytics-event="workbook_template_downloaded"
+                        data-analytics-item-name="Workbook template"
+                        data-analytics-item-type="template_download"
+                        data-analytics-section="manager_controls"
+                        data-testid="manager-download-template"
+                        href="/api/template"
+                      >
                         <FileSpreadsheet className="h-4 w-4" />
                         Download template
                         <ArrowUpRight className="h-4 w-4" />
@@ -303,7 +376,14 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                     </Button>
                     {snapshot.canDownloadFinalizedExport ? (
                       <Button asChild size="sm">
-                        <a data-testid="manager-export-results" href="/api/export">
+                        <a
+                          data-analytics-event="finalized_scores_exported"
+                          data-analytics-item-name="Finalized scores"
+                          data-analytics-item-type="finalized_export"
+                          data-analytics-section="manager_controls"
+                          data-testid="manager-export-results"
+                          href="/api/export"
+                        >
                           Export finalized scores
                           <ArrowUpRight className="h-4 w-4" />
                         </a>
@@ -418,8 +498,10 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                         try {
                           setActionMessage(null);
                           await postJson("/api/competition/start");
+                          pushDataLayerEvent("competition_round_started", analyticsContext);
                           refreshBoard();
                         } catch (error) {
+                          pushDataLayerEvent("competition_round_start_failed", analyticsContext);
                           setActionMessage(error instanceof Error ? error.message : "We could not begin voting.");
                         }
                       })()
@@ -436,8 +518,10 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                         try {
                           setActionMessage(null);
                           await postJson("/api/competition/finalize");
+                          pushDataLayerEvent("competition_round_finalized", analyticsContext);
                           refreshBoard();
                         } catch (error) {
+                          pushDataLayerEvent("competition_round_finalize_failed", analyticsContext);
                           setActionMessage(
                             error instanceof Error ? error.message : "We could not finalize the round."
                           );
@@ -470,9 +554,11 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                             issues: []
                           });
                           await postJson("/api/competition/reset");
+                          pushDataLayerEvent("competition_round_reset", analyticsContext);
                           setActionMessage("Competition reset. Upload a fresh workbook to start the next dry run.");
                           refreshBoard();
                         } catch (error) {
+                          pushDataLayerEvent("competition_round_reset_failed", analyticsContext);
                           setActionMessage(error instanceof Error ? error.message : "We could not reset the round.");
                         }
                       })();
@@ -599,7 +685,11 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
             </Card>
           ) : null}
 
-          <section className="relative space-y-3" data-testid="scoreboard-section">
+          <section
+            className="relative space-y-3"
+            data-analytics-section="scoreboard"
+            data-testid="scoreboard-section"
+          >
             <div className="md:hidden" ref={mobileSummaryRef}>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -626,7 +716,15 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                     <Button
                       className="shrink-0"
                       data-testid="scoreboard-mobile-summary-toggle"
-                      onClick={() => setMobileSummaryOpen((open) => !open)}
+                      onClick={() => {
+                        const nextOpen = !mobileSummaryOpen;
+                        pushDataLayerEvent("scoreboard_summary_toggled", {
+                          summary_state: nextOpen ? "open" : "closed",
+                          trigger_surface: "mobile",
+                          ...analyticsContext
+                        });
+                        setMobileSummaryOpen(nextOpen);
+                      }}
                       size="sm"
                       type="button"
                       variant="outline"
@@ -715,7 +813,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
 
             <ResultsScoreboardTable
               entries={snapshot.entries}
-              onSelectEntry={setSelectedEntry}
+              onSelectEntry={(entry) => setSelectedEntry(entry)}
               onToggleEntryVoting={snapshot.viewer.isManager ? handleEntryVotingToggle : undefined}
               pendingEntryId={pendingEntryId}
               status={snapshot.status}
