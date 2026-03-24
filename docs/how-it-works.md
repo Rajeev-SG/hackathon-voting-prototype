@@ -16,7 +16,7 @@ The app is intentionally a single-screen product.
 ### Public viewer
 
 - No auth required.
-- Can see the scoreboard, judging progress, and finalized state.
+- Can see the scoreboard and finalized or live round state.
 - Cannot upload, begin voting, finalize, or vote.
 
 ### Manager

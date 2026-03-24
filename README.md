@@ -5,7 +5,7 @@ Production-oriented single-screen hackathon voting app built with Next.js 14, Ty
 The app keeps the visual language of the original results dashboard, but the product has been simplified to one public scoreboard with an integrated manager control surface and a polished voting modal for judges.
 
 The current layout is intentionally content-first: the scoreboard and next action are prioritized above the fold, while explanatory rules live in lighter supporting panels instead of dominating the first scan.
-The screen stays single-column across viewports so the scoreboard leads and judging progress follows directly underneath it instead of competing in a side rail.
+The screen stays single-column across viewports so the scoreboard leads the first scan, manager controls only appear for the manager, and round state is reduced to compact status chips instead of bulky side panels.
 
 ## What the app is now
 
@@ -13,7 +13,7 @@ The screen stays single-column across viewports so the scoreboard leads and judg
 - Manager-only XLSX template download and XLSX upload
 - Authenticated judge voting in a modal
 - Automatic self-vote blocking from uploaded team-member emails
-- Live judging progress
+- Compact live status chips on the scoreboard
 - Manager-only remaining-votes tracker that mirrors the real finalization denominator
 - Table and horizontal bar-chart views on the same scoreboard
 - Manager-only per-entry voting open/closed controls
@@ -182,7 +182,7 @@ The Playwright suite covers:
 - public finalized lock state
 - manager XLSX export
 - anonymous cross-device freshness after another judge casts a score
-- single-column ordering with judging progress below the scoreboard
+- single-column ordering with no redundant setup or progress panels
 
 Cheap event-day readiness checks:
 

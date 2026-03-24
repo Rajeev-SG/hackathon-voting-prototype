@@ -222,32 +222,10 @@ async function takeShot(page: Page, outputPath: string) {
   });
 }
 
-async function expectProgressStateCardToContainValue(page: Page, expectedText: string) {
-  const card = page.getByTestId("progress-stat-state");
-  const value = page.getByTestId("progress-stat-state-value");
-
-  await expect(card).toBeVisible();
-  await expect(value).toHaveText(expectedText);
-
-  const measurements = await card.evaluate((element) => {
-    const valueElement = element.querySelector<HTMLElement>("[data-testid='progress-stat-state-value']");
-    if (!valueElement) return null;
-
-    const cardRect = element.getBoundingClientRect();
-    const valueRect = valueElement.getBoundingClientRect();
-
-    return {
-      topInset: valueRect.top - cardRect.top,
-      bottomInset: cardRect.bottom - valueRect.bottom,
-      valueHeight: valueRect.height,
-      cardHeight: cardRect.height
-    };
-  });
-
-  expect(measurements).not.toBeNull();
-  expect(measurements!.topInset).toBeGreaterThan(10);
-  expect(measurements!.bottomInset).toBeGreaterThan(10);
-  expect(measurements!.valueHeight).toBeLessThan(measurements!.cardHeight - 20);
+async function expectCompetitionStateBadge(page: Page, expectedText: string) {
+  const badge = page.getByTestId("competition-state-badge");
+  await expect(badge).toBeVisible();
+  await expect(badge).toHaveText(expectedText);
 }
 
 test.beforeEach(async ({ baseURL }, testInfo) => {
@@ -282,7 +260,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await anonymousPage.goto("/");
     await expect(anonymousPage.getByRole("heading", { name: "Live hackathon scoreboard" })).toBeVisible();
     await expect(anonymousPage.getByTestId("scoreboard-empty-heading")).toBeVisible();
-    await expectProgressStateCardToContainValue(anonymousPage, "Preparing");
+    await expectCompetitionStateBadge(anonymousPage, "Preparing");
     await expect(anonymousPage.getByText("Manager setup")).toHaveCount(0);
     await expect(anonymousPage.getByText("Manager controls")).toHaveCount(0);
     await expect(anonymousPage.getByTestId("manager-download-template")).toHaveCount(0);
@@ -328,7 +306,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await takeShot(managerPage, testInfo.outputPath("manager-after-upload.png"));
 
     await managerPage.getByTestId("manager-begin-voting").click();
-    await expect(managerPage.getByTestId("progress-stat-state-value")).toHaveText("Voting live");
+    await expectCompetitionStateBadge(managerPage, "Voting live");
 
     await managerPage
       .getByTestId("manager-entry-toggle-harbor-pulse")
@@ -454,12 +432,9 @@ test("manager, judges, and public users complete the single-screen voting flow",
 
   await test.step("Progress reaches completion and the manager finalizes the round", async () => {
     await managerPage.goto("/");
-    await expect(managerPage.getByText("5/5")).toBeVisible();
-    await expect(
-      managerPage.getByText(
-        "Every participating judge has scored every project that is still open for them. The manager can finalize the results."
-      )
-    ).toBeVisible();
+    await expect(managerPage.getByText("Everyone who joined the round is fully covered.")).toBeVisible();
+    await expect(managerPage.getByTestId("manager-remaining-votes")).toContainText("Votes left");
+    await expect(managerPage.getByTestId("manager-finalize")).toBeEnabled();
 
     const hasHorizontalOverflow = await managerPage.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth + 1
@@ -467,7 +442,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
     expect(hasHorizontalOverflow).toBe(false);
 
     await managerPage.getByTestId("manager-finalize").click();
-    await expect(managerPage.getByTestId("progress-stat-state-value")).toHaveText("Finalized");
+    await expectCompetitionStateBadge(managerPage, "Finalized");
 
     const [exportDownload] = await Promise.all([
       managerPage.waitForEvent("download"),
@@ -480,7 +455,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
 
   await test.step("Public users see the finalized board and locked modal state", async () => {
     await anonymousPage.goto("/");
-    await expect(anonymousPage.getByTestId("progress-stat-state-value")).toHaveText("Finalized");
+    await expectCompetitionStateBadge(anonymousPage, "Finalized");
     await openVoteDialog(anonymousPage, "Signal Bloom");
     await expect(anonymousPage.getByRole("heading", { name: "Judging is finalized" })).toBeVisible();
     await expect(
