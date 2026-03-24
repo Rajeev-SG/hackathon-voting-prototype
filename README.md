@@ -189,6 +189,7 @@ Proof notes live in [proof.md](/Users/rajeev/Code/hackathon-voting-prototype/doc
 - Production uses Clerk live keys on `vote.rajeevg.com`; development continues to use test keys locally.
 - Google OAuth is configured for the production Clerk instance and production app domain.
 - The live verification email already arrives branded from `Hackathon Voting App <notifications@vote.rajeevg.com>`.
+- If a mobile judge switches to their email app to fetch the one-time code and then returns, the app restores the pending verification step instead of dropping them back on the email-entry form.
 - Production verification-email template editing is still limited by the current Clerk plan; deeper subject/body customization requires a Clerk plan upgrade or a custom email-delivery integration.
 
 ## Production URL

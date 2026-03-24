@@ -2,7 +2,7 @@
 
 ## Local proof
 
-Date: `2026-03-23`
+Date: `2026-03-24`
 
 Surface: local production build via `next start`
 
@@ -24,10 +24,10 @@ Flows proven:
 
 - Anonymous user can view the scoreboard but not manager controls
 - Manager downloads the XLSX template
-- Manager uploads a workbook and seeded entries appear
 - Manager uploads a workbook and workbook-driven entries appear
 - Manager begins voting
 - Judge signs in with email-code auth
+- The mobile email-code auth flow survives a page remount and returns to the verification step instead of resetting to email entry
 - Vote modal supports keyboard selection and submission
 - Judge is locked out from changing a project after submitting the first vote
 - Self-voting is blocked for matching team emails

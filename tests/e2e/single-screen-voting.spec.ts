@@ -162,6 +162,10 @@ async function signInJudgeWithEmailCode(page: Page, email: string) {
   await page.getByRole("textbox", { name: "Email address" }).fill(email);
   await page.getByTestId("send-email-code").click();
   await expect(page.getByRole("textbox", { name: "Verification code" })).toBeVisible();
+  await expect(page.getByText(`Checking in as ${email}`)).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("textbox", { name: "Verification code" })).toBeVisible();
+  await expect(page.getByText(`Checking in as ${email}`)).toBeVisible();
   await page.getByRole("textbox", { name: "Verification code" }).fill("424242");
   await page.getByTestId("verify-email-code").click();
   await expect(page.getByText("Judge", { exact: true })).toBeVisible();

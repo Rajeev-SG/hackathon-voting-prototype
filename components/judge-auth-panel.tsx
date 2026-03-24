@@ -21,6 +21,16 @@ type Notice = {
   text: string;
 };
 
+type PersistedJudgeAuthState = {
+  step: "identify" | "verify";
+  flow: "sign-in" | "sign-up";
+  email: string;
+  emailAddressId: string | null;
+  safeIdentifier: string | null;
+};
+
+export const judgeAuthStorageKey = "hackathon-voting:judge-auth";
+
 function getErrorMessage(error: unknown) {
   if (isClerkAPIResponseError(error) && error.errors[0]?.longMessage) {
     return error.errors[0].longMessage;
@@ -59,23 +69,94 @@ function createGeneratedPassword() {
   return `Judge-${crypto.randomUUID()}-Aa1`;
 }
 
+export function readPersistedJudgeAuthState(): PersistedJudgeAuthState | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(judgeAuthStorageKey);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as Partial<PersistedJudgeAuthState>;
+    if (
+      (parsed.step === "identify" || parsed.step === "verify") &&
+      (parsed.flow === "sign-in" || parsed.flow === "sign-up") &&
+      typeof parsed.email === "string"
+    ) {
+      return {
+        step: parsed.step,
+        flow: parsed.flow,
+        email: parsed.email,
+        emailAddressId: typeof parsed.emailAddressId === "string" ? parsed.emailAddressId : null,
+        safeIdentifier: typeof parsed.safeIdentifier === "string" ? parsed.safeIdentifier : null
+      };
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+export function hasPendingJudgeAuthVerification() {
+  return readPersistedJudgeAuthState()?.step === "verify";
+}
+
+function clearPersistedJudgeAuthState() {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.removeItem(judgeAuthStorageKey);
+}
+
 export function JudgeAuthPanel({
   title = "Sign in to judge",
   description = "Use Google if it's available on this Clerk instance, or request a one-time email code to keep judging simple on the day.",
   afterAuthenticate,
   className
 }: JudgeAuthPanelProps) {
+  const persistedState = React.useMemo(() => readPersistedJudgeAuthState(), []);
   const router = useRouter();
   const { isLoaded, signIn, setActive } = useSignIn();
   const { signUp } = useSignUp();
-  const [step, setStep] = React.useState<"identify" | "verify">("identify");
-  const [flow, setFlow] = React.useState<"sign-in" | "sign-up">("sign-in");
-  const [email, setEmail] = React.useState("");
+  const [step, setStep] = React.useState<"identify" | "verify">(persistedState?.step ?? "identify");
+  const [flow, setFlow] = React.useState<"sign-in" | "sign-up">(persistedState?.flow ?? "sign-in");
+  const [email, setEmail] = React.useState(persistedState?.email ?? "");
   const [code, setCode] = React.useState("");
   const [notice, setNotice] = React.useState<Notice | null>(null);
   const [pending, setPending] = React.useState<"idle" | "email" | "verify" | "google">("idle");
-  const [emailAddressId, setEmailAddressId] = React.useState<string | null>(null);
-  const [safeIdentifier, setSafeIdentifier] = React.useState<string | null>(null);
+  const [emailAddressId, setEmailAddressId] = React.useState<string | null>(
+    persistedState?.emailAddressId ?? null
+  );
+  const [safeIdentifier, setSafeIdentifier] = React.useState<string | null>(
+    persistedState?.safeIdentifier ?? null
+  );
+
+  React.useEffect(() => {
+    if (step !== "verify") return;
+    if (notice) return;
+
+    setNotice({
+      tone: "info",
+      text: `Enter the latest 6-digit code we emailed to ${safeIdentifier ?? email}.`
+    });
+  }, [email, notice, safeIdentifier, step]);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (step === "identify" && !email.trim()) {
+      clearPersistedJudgeAuthState();
+      return;
+    }
+
+    const stateToPersist: PersistedJudgeAuthState = {
+      step,
+      flow,
+      email,
+      emailAddressId,
+      safeIdentifier
+    };
+
+    window.sessionStorage.setItem(judgeAuthStorageKey, JSON.stringify(stateToPersist));
+  }, [email, emailAddressId, flow, safeIdentifier, step]);
 
   async function requestEmailCode() {
     if (!isLoaded || !signIn || !signUp) return;
@@ -187,6 +268,7 @@ export function JudgeAuthPanel({
         await setActive({
           session: attempt.createdSessionId
         });
+        clearPersistedJudgeAuthState();
 
         setNotice({
           tone: "success",
@@ -205,6 +287,7 @@ export function JudgeAuthPanel({
         await setActive({
           session: attempt.createdSessionId
         });
+        clearPersistedJudgeAuthState();
 
         setNotice({
           tone: "success",
@@ -282,8 +365,10 @@ export function JudgeAuthPanel({
   }
 
   function startOver() {
+    clearPersistedJudgeAuthState();
     setFlow("sign-in");
     setStep("identify");
+    setEmail("");
     setCode("");
     setEmailAddressId(null);
     setSafeIdentifier(null);
