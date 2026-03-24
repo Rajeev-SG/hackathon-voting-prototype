@@ -34,7 +34,13 @@ The target setup included:
 
 - Pass
 
-The production collection stack is live and evidenced. The remaining caveat is that Google has not yet materialized raw `events_*` export tables in the linked GA export dataset during this audit window. To remove that dependency from the reporting shell, the stack now includes a separate `hackathon_reporting` dataset, a stored procedure, and a successful scheduled-query refresh config that keeps the Looker shell ready as soon as raw export tables begin landing.
+Important correction:
+
+- the earlier Looker proof should not have passed as originally written
+- the cited artifact was misleading because it effectively showed a blank or editor-state canvas rather than a trustworthy visible shell
+- this audit now relies on direct page-by-page screenshots captured after the report shells were made visibly non-empty
+
+The production collection stack is live and evidenced. The remaining caveat is that Google has not yet materialized raw `events_*` export tables in the linked GA export dataset during this audit window. To remove that dependency from the reporting shell, the stack now includes a separate `hackathon_reporting` dataset, a stored procedure, and a successful scheduled-query refresh config that keeps the Looker shell ready as soon as raw export tables begin landing. The Looker section below has been corrected to distinguish visible shell proof from fully populated historical reporting.
 
 ## What was verified with live evidence
 
@@ -208,6 +214,19 @@ Verified:
 - screenshot evidence:
   - [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-shell-ready.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-shell-ready.png)
   - [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-analysis-shell-pages.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-analysis-shell-pages.png)
+  - [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-overview-direct.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-overview-direct.png)
+  - [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-voting-funnel-direct.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-voting-funnel-direct.png)
+  - [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-entry-analysis-direct.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-entry-analysis-direct.png)
+  - [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-manager-operations-direct.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-manager-operations-direct.png)
+  - [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-experience-devices-direct.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-experience-devices-direct.png)
+  - [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-event-taxonomy-direct.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/proof-event-taxonomy-direct.png)
+
+Corrected interpretation:
+
+- the report now has visible shells on all six pages
+- the earlier pass claim was invalid because the prior evidence did not prove that
+- `Overview`, `Voting funnel`, `Entry analysis`, and `Manager operations` are the pages with attached reporting sources already verified in this pass
+- `Experience and devices` and `Event taxonomy` are currently visible shell scaffolds, not fully wired rich reporting pages yet
 
 ## Problems found during implementation
 

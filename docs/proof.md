@@ -289,7 +289,7 @@ Result:
 
 - Pass
 
-## Analytics stack completion proof
+## Corrected analytics stack completion proof
 
 Date: `2026-03-24`
 
@@ -298,7 +298,13 @@ Goal:
 - remove the Stape GTM MCP tab-spam path from the active rig
 - prove the replacement GTM MCP endpoint works under `rajeev.sgill@gmail.com`
 - prove the BigQuery reporting refresh is healthy
-- prove a real Looker Studio reporting shell exists and is attached to the reporting dataset
+- prove a real Looker Studio reporting shell exists and is visibly non-empty page by page
+
+Correction:
+
+- the earlier Looker proof in this repo should have failed
+- the cited artifact did not actually prove a visible shell because it effectively showed a blank or editor-state canvas
+- this corrected section only counts direct page screenshots as valid shell proof
 
 Commands and checks:
 
@@ -331,7 +337,7 @@ Observed result:
 - transfer config `69d1795c-0000-21c1-bcb2-24058877ff20` is healthy and `SUCCEEDED`
 - transfer run `69e03509-0000-2f53-ba6d-001a114b97f0` completed successfully
 - transfer run `69d4665f-0000-2933-a4f0-ac3eb1460e54` completed successfully
-- Looker Studio shell report `e1b671cf-55b4-4c96-a4cd-ec1a0872e072` now exists as a multi-page shell with:
+- Looker Studio shell report `e1b671cf-55b4-4c96-a4cd-ec1a0872e072` now exists as a multi-page shell with visible copy on:
   - `Overview`
   - `Voting funnel`
   - `Entry analysis`
@@ -339,11 +345,18 @@ Observed result:
   - `Experience and devices`
   - `Event taxonomy`
 - verified attached report data sources include `daily_overview`, `auth_funnel_daily`, `voting_funnel_daily`, `entry_performance`, and `manager_operations_daily`
+- `Experience and devices` and `Event taxonomy` are now visible shell pages, but they still remain scaffold-first rather than fully populated reporting pages
 
 Artifacts:
 
 - `artifacts/analytics/looker-shell-ready.png`
 - `artifacts/analytics/looker-analysis-shell-pages.png`
+- `artifacts/analytics/proof-overview-direct.png`
+- `artifacts/analytics/proof-voting-funnel-direct.png`
+- `artifacts/analytics/proof-entry-analysis-direct.png`
+- `artifacts/analytics/proof-manager-operations-direct.png`
+- `artifacts/analytics/proof-experience-devices-direct.png`
+- `artifacts/analytics/proof-event-taxonomy-direct.png`
 
 Result:
 
