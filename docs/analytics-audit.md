@@ -132,10 +132,14 @@ Verified:
 - `bq show --format=prettyjson personal-gws-1:ga4_498363924` returns the linked EU dataset owned by `rajeev.sgill@gmail.com`
 - reporting dataset `personal-gws-1:hackathon_reporting` exists in `EU`
 - reporting tables exist:
+  - `auth_funnel_daily`
   - `daily_overview`
   - `event_breakdown`
   - `entry_performance`
+  - `experience_overview_daily`
+  - `manager_operations_daily`
   - `round_snapshots`
+  - `voting_funnel_daily`
 - stored procedure exists:
   - ``personal-gws-1.hackathon_reporting.refresh_reporting_tables``
 - scheduled query transfer exists and is now healthy:
@@ -145,6 +149,8 @@ Verified:
   - state `SUCCEEDED`
 - a forced transfer run completed successfully:
   - `projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20/runs/69e03509-0000-2f53-ba6d-001a114b97f0`
+- the latest scheduled transfer run also completed successfully:
+  - `projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20/runs/69d4665f-0000-2933-a4f0-ac3eb1460e54`
 - transfer log confirms:
   - `Job scheduled_query_69e03509-0000-2f53-ba6d-001a114b97f0 (table ) completed successfully.`
 
@@ -181,14 +187,27 @@ Verified:
 - report title:
   - `Hackathon Voting Memory Dashboard`
 - report edit URL:
-  - `https://lookerstudio.google.com/reporting/e1b671cf-55b4-4c96-a4cd-ec1a0872e072/page/bc8sF/edit`
-- the shell is connected to the BigQuery reporting dataset via `daily_overview`
+  - `https://lookerstudio.google.com/reporting/e1b671cf-55b4-4c96-a4cd-ec1a0872e072/page/p_z5a814q31d/edit`
+- the shell now spans multiple pages in one report:
+  - `Overview`
+  - `Voting funnel`
+  - `Entry analysis`
+  - `Manager operations`
+  - `Experience and devices`
+  - `Event taxonomy`
+- verified attached report data sources:
+  - `daily_overview`
+  - `auth_funnel_daily`
+  - `voting_funnel_daily`
+  - `entry_performance`
+  - `manager_operations_daily`
 - the shell already contains:
-  - scoreboard-level scorecards
-  - a time-series chart scaffold
-  - a live BigQuery-backed report surface that will populate when reporting rows arrive
+  - a live BigQuery-backed report surface for the main analysis layers
+  - page-level structure for deeper analysis beyond the standard GA UI
+  - a stable shell that will become historically rich as soon as raw export rows land
 - screenshot evidence:
   - [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-shell-ready.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-shell-ready.png)
+  - [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-analysis-shell-pages.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-analysis-shell-pages.png)
 
 ## Problems found during implementation
 

@@ -318,14 +318,32 @@ Observed result:
 - the GTM Editor OAuth flow completed in the `rajeev.sgill@gmail.com` profile and established a working MCP proxy
 - GA realtime still showed live voting-app events on property `498363924`
 - reporting dataset `personal-gws-1:hackathon_reporting` exists in `EU`
+- reporting dataset now contains:
+  - `auth_funnel_daily`
+  - `daily_overview`
+  - `entry_performance`
+  - `event_breakdown`
+  - `experience_overview_daily`
+  - `manager_operations_daily`
+  - `round_snapshots`
+  - `voting_funnel_daily`
 - reporting procedure `refresh_reporting_tables` exists
 - transfer config `69d1795c-0000-21c1-bcb2-24058877ff20` is healthy and `SUCCEEDED`
 - transfer run `69e03509-0000-2f53-ba6d-001a114b97f0` completed successfully
-- Looker Studio shell report `e1b671cf-55b4-4c96-a4cd-ec1a0872e072` exists with BigQuery-backed scorecards and a time-series shell
+- transfer run `69d4665f-0000-2933-a4f0-ac3eb1460e54` completed successfully
+- Looker Studio shell report `e1b671cf-55b4-4c96-a4cd-ec1a0872e072` now exists as a multi-page shell with:
+  - `Overview`
+  - `Voting funnel`
+  - `Entry analysis`
+  - `Manager operations`
+  - `Experience and devices`
+  - `Event taxonomy`
+- verified attached report data sources include `daily_overview`, `auth_funnel_daily`, `voting_funnel_daily`, `entry_performance`, and `manager_operations_daily`
 
 Artifacts:
 
 - `artifacts/analytics/looker-shell-ready.png`
+- `artifacts/analytics/looker-analysis-shell-pages.png`
 
 Result:
 

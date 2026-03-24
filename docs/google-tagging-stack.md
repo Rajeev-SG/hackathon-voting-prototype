@@ -261,8 +261,12 @@ Repo SQL sources:
 Stable reporting tables:
 
 - `daily_overview`
+- `auth_funnel_daily`
+- `voting_funnel_daily`
 - `event_breakdown`
 - `entry_performance`
+- `manager_operations_daily`
+- `experience_overview_daily`
 - `round_snapshots`
 
 Refresh behavior:
@@ -291,6 +295,8 @@ Verified live transfer config:
 Verified successful run:
 
 - `projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20/runs/69e03509-0000-2f53-ba6d-001a114b97f0`
+- latest scheduled run also verified:
+  - `projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20/runs/69d4665f-0000-2933-a4f0-ac3eb1460e54`
 
 This means the reporting pipeline is already healthy and waiting only for raw export rows to begin landing.
 
@@ -328,17 +334,36 @@ Verified report shell:
 - title:
   - `Hackathon Voting Memory Dashboard`
 - edit URL:
-  - `https://lookerstudio.google.com/reporting/e1b671cf-55b4-4c96-a4cd-ec1a0872e072/page/bc8sF/edit`
-- data source:
+  - `https://lookerstudio.google.com/reporting/e1b671cf-55b4-4c96-a4cd-ec1a0872e072/page/p_z5a814q31d/edit`
+- report pages:
+  - `Overview`
+  - `Voting funnel`
+  - `Entry analysis`
+  - `Manager operations`
+  - `Experience and devices`
+  - `Event taxonomy`
+- verified attached report data sources:
   - BigQuery `daily_overview`
+  - BigQuery `auth_funnel_daily`
+  - BigQuery `voting_funnel_daily`
+  - BigQuery `entry_performance`
+  - BigQuery `manager_operations_daily`
+- page intent:
+  - `Overview` for headline metrics and event-day timeline
+  - `Voting funnel` for auth-to-dialog-to-vote conversion
+  - `Entry analysis` for per-project performance and vote quality
+  - `Manager operations` for upload, round control, and voting-open governance activity
+  - `Experience and devices` for viewport, consent, and engagement analysis
+  - `Event taxonomy` for long-tail event inspection and instrumentation QA
 - current shell content:
-  - live-bound scorecards
-  - a time-series chart scaffold
   - report canvas already connected to the stable reporting dataset
+  - named pages for each deeper analysis layer
+  - core report-level data sources already attached for the main analysis surfaces
 
 Evidence:
 
 - [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-shell-ready.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-shell-ready.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-analysis-shell-pages.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-analysis-shell-pages.png)
 
 ## Current caveat
 

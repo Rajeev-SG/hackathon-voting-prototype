@@ -152,7 +152,9 @@ Production analytics now treats the voting app as its own measured surface.
 - Browser hits are sent through the first-party server path at `https://vote.rajeevg.com/metrics`.
 - The shared GA4 property has been extended with voting-app-specific custom dimensions and metrics.
 - BigQuery export has been updated to include the voting-app stream.
-- During the current audit window, the linked BigQuery dataset still had no landed export tables, so the Looker Studio report remains incomplete.
+- The reporting dataset now includes scoreboard, auth funnel, voting funnel, manager operations, device experience, and event taxonomy tables.
+- The Looker Studio report is now structured as a multi-page analysis shell in one report, ready to populate when raw export rows begin landing.
+- During the current audit window, the linked raw export dataset still had no landed `events_*` tables, so the report is intentionally shell-first rather than historically populated.
 
 The full stack notes live in [/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md), and the post-implementation audit lives in [/Users/rajeev/Code/hackathon-voting-prototype/docs/analytics-audit.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/analytics-audit.md).
 
