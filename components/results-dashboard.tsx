@@ -585,16 +585,12 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
             <div className="glass-panel rounded-[2rem] px-5 py-5 sm:px-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-3xl">
-                  <div className="eyebrow">
-                    {snapshot.viewer.isManager ? "Manager view" : "Public scoreboard"}
-                  </div>
                   <h1 className="mt-2 font-display text-[clamp(1.8rem,3.8vw,2.8rem)] font-black tracking-tight">
                     Live hackathon scoreboard
                   </h1>
                   <p className="mt-3 text-sm leading-7 text-muted-foreground">{scoreboardMeta.detail}</p>
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  <span className="rounded-full bg-radix-teal-a-3 px-3 py-2 text-accent-foreground">Public board</span>
                   <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
                     {snapshot.progress.entryCount} entr{snapshot.progress.entryCount === 1 ? "y" : "ies"}
                   </span>
