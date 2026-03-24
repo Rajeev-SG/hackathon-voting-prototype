@@ -539,6 +539,77 @@ Result:
 - The live production verification email is already understandable and app-branded through the Clerk application name and production sending domain.
 - Production verification-email template editing is still blocked by Clerk's current Hobby plan. Deeper subject/body template edits require a plan upgrade or custom delivery.
 
+## Final event-day risk pass
+
+Date: `2026-03-24`
+
+Goal:
+
+- ruthlessly probe the event-day risks that could still hurt a live judging session
+- fix any real app or proof weakness uncovered
+- leave a reusable operational smoke command and a durable recovery runbook
+
+Fresh command set:
+
+```bash
+pnpm check
+pnpm build
+pnpm exec vitest run tests/votes.integration.test.ts tests/readiness.integration.test.ts --reporter=verbose
+pnpm readiness:public -- --url https://vote.rajeevg.com --concurrency 50 --requests 500
+set -a && source .env.vercel-prod && set +a
+pnpm readiness:smoke -- --base-url https://vote.rajeevg.com
+LAYOUT_PROOF=1 E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/scoreboard-breakpoints.spec.ts --reporter=list
+```
+
+Real issues uncovered in this pass:
+
+- the vote path could still surface a false `Voting is not currently open.` during the immediate first voting wave after round-open or fresh entry creation, because the retry window was too short for the remote database consistency lag seen in the readiness simulation
+- the production proof path depended too much on the app already being in a clean state, which is unsafe for on-the-day verification
+- the ad hoc final smoke flow was too brittle around responsive duplicate elements, so it needed a purpose-built operational smoke command
+
+What changed:
+
+- widened the vote submission context retry window in [/Users/rajeev/Code/hackathon-voting-prototype/lib/competition.ts](/Users/rajeev/Code/hackathon-voting-prototype/lib/competition.ts)
+- made the production browser proof clean-start aware in [/Users/rajeev/Code/hackathon-voting-prototype/tests/e2e/single-screen-voting.spec.ts](/Users/rajeev/Code/hackathon-voting-prototype/tests/e2e/single-screen-voting.spec.ts)
+- added a reusable production smoke command in [/Users/rajeev/Code/hackathon-voting-prototype/scripts/event-day-smoke.mjs](/Users/rajeev/Code/hackathon-voting-prototype/scripts/event-day-smoke.mjs)
+- exposed that smoke command as `pnpm readiness:smoke`
+- documented the operating and recovery playbook in [/Users/rajeev/Code/hackathon-voting-prototype/docs/event-day-runbook.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/event-day-runbook.md)
+
+Observed results:
+
+- the shared local risk pack passed:
+  - `tests/votes.integration.test.ts`
+  - `tests/readiness.integration.test.ts`
+- the live public read probe passed:
+  - `500/500` completed
+  - `0` failures
+  - `p50 150.45ms`
+  - `p95 1120.87ms`
+  - `p99 1302.27ms`
+  - `max 1598.98ms`
+- the live event-day smoke command passed:
+  - manager signed in
+  - manager reset a dirty live round to a clean start
+  - public board showed the empty pre-upload state
+  - manager uploaded the workbook
+  - manager opened voting
+  - judge signed in and cast a real score
+  - manager tracker remained available
+  - public board reflected the new vote
+- the live breakpoint audit still passed after the hardening:
+  - `6 passed`
+  - `2 skipped`
+
+Artifacts:
+
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/event-day-smoke/2026-03-24T19-56-50.092Z/event-day-smoke-public.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/event-day-smoke/2026-03-24T19-56-50.092Z/event-day-smoke-public.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/event-day-smoke/2026-03-24T19-56-50.092Z/summary.json](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/event-day-smoke/2026-03-24T19-56-50.092Z/summary.json)
+- fresh breakpoint artifacts under `artifacts/playwright/scoreboard-breakpoints-*`
+
+Result:
+
+- Pass, with the runbook now required as part of event-day operations
+
 ## Production analytics proof
 
 Date: `2026-03-24`

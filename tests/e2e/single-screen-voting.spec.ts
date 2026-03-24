@@ -151,7 +151,7 @@ async function signInWithTicket(page: Page, baseURL: string, email: string, expe
   const ticketUrl = createSignInTicket(baseURL, email);
   await page.goto(ticketUrl);
   await page.waitForURL((url) => url.origin + url.pathname === new URL(baseURL).origin + "/");
-  await expect(page.getByText(expectedRoleLabel, { exact: true })).toBeVisible();
+  await expect(page.locator("span", { hasText: expectedRoleLabel }).first()).toBeVisible();
 }
 
 async function signInJudgeWithEmailCode(page: Page, email: string) {
@@ -228,6 +228,31 @@ async function expectCompetitionStateBadge(page: Page, expectedText: string) {
   await expect(badge).toHaveText(expectedText);
 }
 
+async function ensureManagerCleanStart(page: Page, baseURL: string) {
+  await signInWithTicket(page, baseURL, MANAGER_EMAIL, "Manager");
+  await page.goto("/");
+
+  const badge = page.locator('[data-testid="competition-state-badge"]:visible').first();
+  const stateText = (await badge.textContent())?.trim();
+  const hasEntries = (await page.getByTestId(/^scoreboard-row-/).count()) > 0;
+  const resetButton = page.getByTestId("manager-reset-round");
+
+  if (stateText === "Preparing" && !hasEntries) {
+    return;
+  }
+
+  if (await resetButton.isVisible()) {
+    page.once("dialog", (dialog) => void dialog.accept());
+    await resetButton.click();
+    await expect(page.getByText("Competition reset. Upload a fresh workbook to start the next dry run.")).toBeVisible();
+    await expect(page.getByTestId("scoreboard-empty-heading")).toBeVisible();
+    await expectCompetitionStateBadge(page, "Preparing");
+    return;
+  }
+
+  throw new Error(`Production proof needs a clean start, but the manager could not reset the current "${stateText ?? "unknown"}" state.`);
+}
+
 async function firstScoreboardRowTop(page: Page, slug: string) {
   return page.getByTestId(`scoreboard-row-${slug}`).first().evaluate((element) => {
     return element.getBoundingClientRect().top;
@@ -235,7 +260,9 @@ async function firstScoreboardRowTop(page: Page, slug: string) {
 }
 
 test.beforeEach(async ({ baseURL }, testInfo) => {
-  await resetCompetitionState();
+  if (baseURL?.includes("localhost") || baseURL?.includes("127.0.0.1")) {
+    await resetCompetitionState();
+  }
   await ensureProofUsers(baseURL!);
   testInfo.setTimeout(180000);
 });
@@ -261,6 +288,12 @@ test("manager, judges, and public users complete the single-screen voting flow",
   const judgePage = await judgeContext.newPage();
   const selfBlockedContext = await createRoleContext(browser, testInfo.project.name);
   const selfBlockedPage = await selfBlockedContext.newPage();
+
+  if (!baseURL?.includes("localhost") && !baseURL?.includes("127.0.0.1")) {
+    await test.step("Manager preflight resets the live board to a clean start", async () => {
+      await ensureManagerCleanStart(managerPage, baseURL!);
+    });
+  }
 
   await test.step("Anonymous visitors can see the board but not manager tools", async () => {
     await anonymousPage.goto("/");

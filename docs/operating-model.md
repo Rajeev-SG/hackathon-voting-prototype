@@ -171,3 +171,5 @@ This keeps the rule coherent without introducing a separate roster-management sy
 - The vote path tolerates a short read-after-write consistency window right after a round opens or a workbook-driven field is created, so immediate first votes are less likely to fail on pooled or remote Postgres infrastructure.
 - The repo includes a cheap public-read probe at `pnpm readiness:public` so the live site can be checked before the event without extra vendor spend.
 - Concurrent write readiness is covered in `tests/readiness.integration.test.ts`, which runs the real vote logic with 50 concurrent judges in project-by-project waves.
+- The reusable production smoke path lives at `pnpm readiness:smoke`.
+- The manager-facing risk and recovery guide lives in [event-day-runbook.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/event-day-runbook.md).
