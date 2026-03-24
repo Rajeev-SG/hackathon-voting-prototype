@@ -2,7 +2,7 @@ import * as XLSX from "xlsx";
 import { describe, expect, it } from "vitest";
 
 import { FINALIZED_RESULTS_SHEET, TEMPLATE_SHEET_NAME } from "@/lib/constants";
-import { buildFinalizedResultsWorkbook, parseEntriesWorkbook } from "@/lib/xlsx";
+import { buildFinalizedResultsWorkbook, buildTemplateWorkbook, parseEntriesWorkbook } from "@/lib/xlsx";
 
 function workbookBuffer(rows: Array<Array<string>>) {
   const workbook = XLSX.utils.book_new();
@@ -85,5 +85,16 @@ describe("buildFinalizedResultsWorkbook", () => {
       "Aggregate Score": 19,
       "Vote Count": 2
     });
+  });
+});
+
+describe("buildTemplateWorkbook", () => {
+  it("creates a blank workbook template without seeded demo projects", () => {
+    const workbook = XLSX.read(buildTemplateWorkbook(), { type: "buffer" });
+    const rows = XLSX.utils.sheet_to_json<Record<string, string>>(workbook.Sheets[TEMPLATE_SHEET_NAME], {
+      defval: ""
+    });
+
+    expect(rows).toEqual([]);
   });
 });

@@ -148,19 +148,7 @@ export function buildTemplateWorkbook() {
     ...Array.from({ length: MAX_TEAM_EMAIL_COLUMNS }, (_, index) => `Team Member ${index + 1} Email`),
     "Optional Note"
   ];
-  const entryData = [
-    entryHeaders,
-    [
-      "Aurora Atlas",
-      "Team North Star",
-      "An AI assistant for hackathon project triage.",
-      "founder@example.com",
-      "designer@example.com",
-      "",
-      "",
-      "Extra columns are allowed and will be preserved as metadata."
-    ]
-  ];
+  const entryData = [entryHeaders];
 
   const instructionsData = [
     ["How to use this workbook"],

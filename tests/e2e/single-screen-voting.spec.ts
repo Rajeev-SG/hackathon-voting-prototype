@@ -220,6 +220,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
   await test.step("Anonymous visitors can see the board but not manager tools", async () => {
     await anonymousPage.goto("/");
     await expect(anonymousPage.getByRole("heading", { name: "Hackathon scoreboard" })).toBeVisible();
+    await expect(anonymousPage.getByText("No projects loaded yet")).toBeVisible();
     await expect(anonymousPage.getByTestId("manager-download-template")).toHaveCount(0);
     await expect(anonymousPage.getByTestId("manager-upload-dropzone")).toHaveCount(0);
     await takeShot(anonymousPage, testInfo.outputPath("public-before-setup.png"));
@@ -234,11 +235,11 @@ test("manager, judges, and public users complete the single-screen voting flow",
     ]);
     expect(templateDownload.suggestedFilename()).toContain("hackathon-voting-template");
 
-    const [fileChooser] = await Promise.all([
+    const [dropzoneFileChooser] = await Promise.all([
       managerPage.waitForEvent("filechooser"),
-      managerPage.getByTestId("manager-upload-button").click()
+      managerPage.getByTestId("manager-upload-dropzone").click()
     ]);
-    await fileChooser.setFiles(workbookPath);
+    await dropzoneFileChooser.setFiles(workbookPath);
     await expect(managerPage.getByText("Imported 3 projects.")).toBeVisible();
     const rowIndex = activeResponsiveIndex(testInfo.project.name);
     await expect(managerPage.getByTestId("scoreboard-row-aurora-atlas").nth(rowIndex)).toBeVisible();
@@ -365,6 +366,30 @@ test("manager, judges, and public users complete the single-screen voting flow",
     expect(hasHorizontalOverflow).toBe(false);
 
     await takeShot(anonymousPage, testInfo.outputPath("public-finalized.png"));
+  });
+
+  await test.step("Manager can reset the round and return to an empty workbook-driven state", async () => {
+    await managerPage.goto("/");
+    managerPage.once("dialog", (dialog) => void dialog.accept());
+    await managerPage.getByTestId("manager-reset-round").click();
+    await expect(managerPage.getByText("Competition reset. Upload a fresh workbook to start the next dry run.")).toBeVisible();
+    await expect(managerPage.getByText("No projects loaded yet")).toBeVisible();
+    await expect(managerPage.getByTestId("manager-begin-voting")).toBeDisabled();
+    await expect(managerPage.getByTestId("manager-upload-button")).toBeEnabled();
+
+    const [buttonFileChooser] = await Promise.all([
+      managerPage.waitForEvent("filechooser"),
+      managerPage.getByTestId("manager-upload-button").click()
+    ]);
+    await buttonFileChooser.setFiles(workbookPath);
+    await expect(managerPage.getByText("Imported 3 projects.")).toBeVisible();
+    managerPage.once("dialog", (dialog) => void dialog.accept());
+    await managerPage.getByTestId("manager-reset-round").click();
+    await expect(managerPage.getByText("No projects loaded yet")).toBeVisible();
+
+    await anonymousPage.goto("/");
+    await expect(anonymousPage.getByText("No projects loaded yet")).toBeVisible();
+    await takeShot(managerPage, testInfo.outputPath("manager-reset-empty-state.png"));
   });
 
   await Promise.all([

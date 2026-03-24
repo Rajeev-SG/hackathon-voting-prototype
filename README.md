@@ -12,6 +12,7 @@ The app keeps the visual language of the original results dashboard, but the pro
 - Automatic self-vote blocking from uploaded team-member emails
 - Live judging progress
 - Manager-only finalization and finalized XLSX export
+- Manager-only reset button for repeatable dry runs
 - Light and dark mode
 - Flows walkthrough mount via `flows.sh`
 
@@ -116,6 +117,7 @@ Only that account can:
 
 - download the workbook template
 - upload a workbook
+- reset the round back to an empty state
 - begin voting
 - finalize the round
 - export finalized results

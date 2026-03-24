@@ -35,6 +35,26 @@ export function ResultsScoreboardTable({
   viewer,
   onSelectEntry
 }: ResultsScoreboardTableProps) {
+  if (entries.length === 0) {
+    return (
+      <div className="glass-panel rounded-[2rem] border border-border/80 p-8">
+        <div className="eyebrow">Workbook-driven board</div>
+        <h3 className="mt-3 font-display text-2xl font-black text-foreground">No projects loaded yet</h3>
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground">
+          The public scoreboard appears here after the manager uploads the judging workbook. Until then, the app stays empty on purpose so the event board is driven entirely by real XLSX content.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">No placeholder projects</span>
+          <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+            {viewer.isManager && status === "PREPARING"
+              ? "Upload a workbook to begin"
+              : "Waiting for manager workbook upload"}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="space-y-3 md:hidden">

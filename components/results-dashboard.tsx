@@ -10,6 +10,7 @@ import {
   FolderUp,
   LoaderCircle,
   Play,
+  RotateCcw,
   ShieldCheck,
   Trophy
 } from "lucide-react";
@@ -65,6 +66,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
   const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
   const uploadInputRef = React.useRef<HTMLInputElement>(null);
   const copy = statusCopy(snapshot.status);
+  const isEmpty = snapshot.entries.length === 0;
   const autoRefreshIntervalMs = snapshot.status === "OPEN" ? 5000 : 15000;
   const autoRefreshPaused =
     Boolean(selectedEntry) ||
@@ -245,10 +247,14 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <div className="eyebrow">Scoreboard</div>
-                <h2 className="font-display text-2xl font-black">Every project, one board</h2>
+                <h2 className="font-display text-2xl font-black">
+                  {isEmpty ? "Upload once, then the board comes alive" : "Every project, one board"}
+                </h2>
               </div>
               <div className="text-sm text-muted-foreground">
-                Click any row to vote or review why that project is locked.
+                {isEmpty
+                  ? "No placeholder projects are shown. The board stays empty until the manager uploads the workbook."
+                  : "Click any row to vote or review why that project is locked."}
               </div>
             </div>
             <ResultsScoreboardTable
@@ -275,7 +281,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                         XLSX workflow
                       </div>
                       <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                        Download the template, fill one row per project, keep project names unique, and include at least one team email per row.
+                        Download the template, fill one row per project, keep project names unique, and include at least one team email per row. The live board is driven entirely by what you upload here.
                       </p>
                       <div className="mt-4 flex flex-wrap gap-3">
                         <Button asChild size="sm" variant="outline">
@@ -287,11 +293,48 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                         {snapshot.canDownloadFinalizedExport ? (
                           <Button asChild size="sm">
                             <a data-testid="manager-export-results" href="/api/export">
-                              Export finalized scores
-                              <ArrowUpRight className="h-4 w-4" />
-                            </a>
-                          </Button>
-                        ) : null}
+                            Export finalized scores
+                            <ArrowUpRight className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      ) : null}
+                        <Button
+                          data-testid="manager-reset-round"
+                          disabled={!snapshot.canResetRound || pendingAction || uploadState.status === "uploading"}
+                          onClick={() => {
+                            if (
+                              !window.confirm(
+                                "Reset the round and remove the current workbook, votes, and judging state?"
+                              )
+                            ) {
+                              return;
+                            }
+
+                            void (async () => {
+                              try {
+                                setActionMessage(null);
+                                setUploadState({
+                                  status: "idle",
+                                  message: null,
+                                  issues: []
+                                });
+                                await postJson("/api/competition/reset");
+                                setActionMessage("Competition reset. Upload a fresh workbook to start the next dry run.");
+                                refreshBoard();
+                              } catch (error) {
+                                setActionMessage(
+                                  error instanceof Error ? error.message : "We could not reset the round."
+                                );
+                              }
+                            })();
+                          }}
+                          size="sm"
+                          type="button"
+                          variant="destructive"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                          Reset dry run
+                        </Button>
                       </div>
                     </div>
 
@@ -342,7 +385,9 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                           <div>
                             <div className="font-semibold text-foreground">Drag, drop, or choose a workbook</div>
                             <div className="text-sm text-muted-foreground">
-                              Upload is only available before voting begins.
+                              {snapshot.canUploadSheet
+                                ? "Upload is available now."
+                                : "Upload unlocks again after you reset the round back to manager setup."}
                             </div>
                           </div>
                         </div>
@@ -366,6 +411,12 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                     {uploadState.message ? (
                       <div className="rounded-[1.5rem] border border-border bg-radix-gray-a-3 p-4 text-sm text-muted-foreground">
                         {uploadState.message}
+                      </div>
+                    ) : null}
+
+                    {snapshot.viewer.isManager && isEmpty && uploadState.status === "idle" ? (
+                      <div className="rounded-[1.5rem] border border-border bg-radix-gray-a-3 p-4 text-sm leading-7 text-muted-foreground">
+                        No workbook is loaded right now. Download the blank template, fill it in, and upload it here to populate the board.
                       </div>
                     ) : null}
 
