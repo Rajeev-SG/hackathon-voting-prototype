@@ -17,6 +17,7 @@ import {
 
 import type { CompetitionSnapshot, ScoreboardEntryView } from "@/lib/competition-logic";
 import { JudgeAuthDialog } from "@/components/judge-auth-dialog";
+import { hasPendingJudgeAuthVerification } from "@/components/judge-auth-panel";
 import { ResultsScoreboardTable } from "@/components/results-scoreboard-table";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { VoteDialog } from "@/components/vote-dialog";
@@ -73,6 +74,12 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
     authDialogOpen ||
     uploadState.status === "uploading" ||
     pendingAction;
+
+  React.useEffect(() => {
+    if (snapshot.viewer.isAuthenticated) return;
+    if (!hasPendingJudgeAuthVerification()) return;
+    setAuthDialogOpen(true);
+  }, [snapshot.viewer.isAuthenticated]);
 
   function refreshBoard() {
     startTransition(() => {

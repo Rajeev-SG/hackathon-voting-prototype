@@ -43,6 +43,7 @@ Auth is handled by Clerk.
 - Production Clerk frontend API domain: `clerk.vote.rajeevg.com`
 - Google OAuth is enabled on production.
 - Email-code auth is enabled as the fallback and works on production.
+- If a judge requests an email code on mobile, switches to their email app, and returns, the app restores the pending verification step so they can enter the code immediately instead of restarting from the email form.
 
 Live email behavior on production:
 
