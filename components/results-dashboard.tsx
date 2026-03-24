@@ -24,64 +24,9 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { VoteDialog } from "@/components/vote-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
-function statusCopy({
-  status,
-  isManager
-}: {
-  status: CompetitionSnapshot["status"];
-  isManager: boolean;
-}) {
-  if (!isManager) {
-    if (status === "PREPARING") {
-      return {
-        eyebrow: "Public scoreboard",
-        headline: "The field is visible now, and judging opens when the manager is ready.",
-        body: "You can follow the live rankings without signing in. Once the round opens, judges can sign in and score directly from the modal."
-      };
-    }
-
-    if (status === "OPEN") {
-      return {
-        eyebrow: "Voting live",
-        headline: "The scoreboard is the room's shared source of truth.",
-        body: "Signed-in judges can cast one locked score on each project that is still open for voting. Closed projects stay visible, but they stop taking new votes."
-      };
-    }
-
-    return {
-      eyebrow: "Finalized",
-      headline: "The final standings are locked in.",
-      body: "Judging is complete. Everyone sees the same final scoreboard, and no more votes can be added."
-    };
-  }
-
-  if (status === "PREPARING") {
-    return {
-      eyebrow: "Round control",
-      headline: "The public scoreboard is live, and judging opens when the room is ready.",
-      body: "Use the manager controls below to upload entries, close any project that should stay out of the round, and open judging only when the field is exactly right."
-    };
-  }
-
-  if (status === "OPEN") {
-    return {
-      eyebrow: "Voting live",
-      headline: "The scoreboard is the room's shared source of truth.",
-      body: "Judges can sign in and cast one locked score on each project that is still open for voting. Closed projects stay visible on the board, but they stop taking new votes."
-    };
-  }
-
-  return {
-    eyebrow: "Finalized",
-    headline: "The final standings are locked in.",
-    body: "Judging is complete. Everyone sees the same final scoreboard, and the manager can export the official results workbook."
-  };
-}
-
-function progressStateMeta(status: CompetitionSnapshot["status"]) {
+function competitionStateMeta(status: CompetitionSnapshot["status"]) {
   if (status === "PREPARING") {
     return {
       label: "Preparing",
@@ -154,11 +99,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
   const [actionMessage, setActionMessage] = React.useState<string | null>(null);
   const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
   const uploadInputRef = React.useRef<HTMLInputElement>(null);
-  const copy = statusCopy({
-    status: snapshot.status,
-    isManager: snapshot.viewer.isManager
-  });
-  const stateMeta = progressStateMeta(snapshot.status);
+  const stateMeta = competitionStateMeta(snapshot.status);
   const isEmpty = snapshot.entries.length === 0;
   const scoreboardMeta = scoreboardCopy(snapshot, isEmpty);
   const autoRefreshIntervalMs = snapshot.status === "OPEN" ? 5000 : 15000;
@@ -317,45 +258,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
           </div>
         </section>
 
-        <section className="space-y-4" data-testid="workflow-summary">
-          <div className="glass-panel shell-surface rounded-[2rem] px-5 py-5 sm:px-6 sm:py-6">
-            <div className={cn("max-w-4xl", snapshot.viewer.isManager ? "" : "max-w-3xl")}>
-              <div className="eyebrow">{copy.eyebrow}</div>
-              <h1 className="mt-3 font-display text-[clamp(2rem,4vw,3.35rem)] font-black tracking-tight text-foreground">
-                Live hackathon scoreboard
-              </h1>
-              <p className="mt-3 text-base leading-8 text-foreground/90">{copy.headline}</p>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">{copy.body}</p>
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              <span className="rounded-full bg-radix-teal-a-3 px-3 py-2 text-accent-foreground">Public board</span>
-              <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
-                {snapshot.progress.entryCount} entr{snapshot.progress.entryCount === 1 ? "y" : "ies"}
-              </span>
-              <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
-                {snapshot.progress.openEntryCount} open for voting
-              </span>
-              {snapshot.viewer.isManager && snapshot.status === "OPEN" ? (
-                <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
-                  {snapshot.managerTracker.totalRemainingVotes} votes left
-                </span>
-              ) : null}
-              <span
-                className={cn(
-                  "rounded-full px-3 py-2",
-                  snapshot.status === "OPEN"
-                    ? "bg-radix-teal-a-3 text-accent-foreground"
-                    : snapshot.status === "FINALIZED"
-                      ? "bg-radix-purple-a-4 text-foreground"
-                      : "bg-radix-amber-a-3 text-foreground"
-                )}
-              >
-                {stateMeta.label}
-              </span>
-            </div>
-          </div>
-
+        <section className="space-y-4">
           {snapshot.viewer.isManager ? (
             <Card className="glass-panel rounded-[2rem] border-0 bg-transparent shadow-none">
               <CardHeader className="pb-2">
@@ -570,114 +473,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                     {actionMessage}
                   </div>
                 ) : null}
-              </CardContent>
-            </Card>
-          ) : null}
 
-          <section className="space-y-3" data-testid="scoreboard-section">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-2xl">
-                <div className="eyebrow">Scoreboard</div>
-                <h2 className="font-display text-2xl font-black">{scoreboardMeta.title}</h2>
-                <p className="mt-2 text-sm leading-7 text-muted-foreground">{scoreboardMeta.detail}</p>
-              </div>
-              <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
-                  {snapshot.progress.participatingJudgeCount} judging now
-                </span>
-                <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
-                  {snapshot.progress.openEntryCount} project{snapshot.progress.openEntryCount === 1 ? "" : "s"} open
-                </span>
-              </div>
-            </div>
-
-            <ResultsScoreboardTable
-              entries={snapshot.entries}
-              onSelectEntry={setSelectedEntry}
-              onToggleEntryVoting={snapshot.viewer.isManager ? handleEntryVotingToggle : undefined}
-              pendingEntryId={pendingEntryId}
-              status={snapshot.status}
-              viewer={snapshot.viewer}
-            />
-          </section>
-
-          <Card className="glass-panel rounded-[2rem] border-0 bg-transparent shadow-none" data-testid="progress-panel">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Judging progress</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div className="flex flex-wrap items-end gap-4">
-                  <div className="font-display text-5xl font-black text-primary">{snapshot.progress.percentage}%</div>
-                  <div className="pb-2 text-sm font-semibold text-muted-foreground">
-                    {snapshot.progress.castVotes}/{snapshot.progress.expectedVotes}
-                  </div>
-                </div>
-                <div className="max-w-2xl text-sm leading-7 text-muted-foreground">
-                  {snapshot.progress.helperText}
-                </div>
-              </div>
-              <Progress value={snapshot.progress.percentage} />
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div
-                  data-testid="progress-stat-entries"
-                  className="rounded-[1.45rem] border border-border/80 bg-radix-gray-a-3 p-4"
-                >
-                  <div className="eyebrow">Entries</div>
-                  <div
-                    data-testid="progress-stat-entries-value"
-                    className="mt-3 font-display text-[1.85rem] font-black leading-[1] tracking-tight"
-                  >
-                    {snapshot.progress.entryCount}
-                  </div>
-                  <p className="mt-3 text-xs leading-5 text-muted-foreground">Projects currently shown on the board.</p>
-                </div>
-                <div className="rounded-[1.45rem] border border-border/80 bg-radix-gray-a-3 p-4">
-                  <div className="eyebrow">Open now</div>
-                  <div className="mt-3 font-display text-[1.85rem] font-black leading-[1] tracking-tight">
-                    {snapshot.progress.openEntryCount}
-                  </div>
-                  <p className="mt-3 text-xs leading-5 text-muted-foreground">
-                    Only open projects accept new votes and count toward completion.
-                  </p>
-                </div>
-                <div
-                  data-testid="progress-stat-judges"
-                  className="rounded-[1.45rem] border border-border/80 bg-radix-gray-a-3 p-4"
-                >
-                  <div className="eyebrow">Judges in round</div>
-                  <div
-                    data-testid="progress-stat-judges-value"
-                    className="mt-3 font-display text-[1.85rem] font-black leading-[1] tracking-tight"
-                  >
-                    {snapshot.progress.participatingJudgeCount}
-                  </div>
-                  <p className="mt-3 text-xs leading-5 text-muted-foreground">
-                    The denominator only counts judges who have already started scoring.
-                  </p>
-                </div>
-                <div
-                  data-testid="progress-stat-state"
-                  className={cn(
-                    "rounded-[1.45rem] border p-4",
-                    stateMeta.accentClassName
-                  )}
-                >
-                  <div className="eyebrow">State</div>
-                  <div
-                    data-testid="progress-stat-state-value"
-                    className="mt-3 font-display text-[1.85rem] font-black leading-[1.02] tracking-tight"
-                  >
-                    {stateMeta.label}
-                  </div>
-                  <p className="mt-3 text-xs leading-5 opacity-90">{stateMeta.detail}</p>
-                </div>
-              </div>
-              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Board refreshes automatically every {Math.round(autoRefreshIntervalMs / 1000)} seconds while this tab is active.
-              </div>
-
-              {snapshot.viewer.isManager ? (
                 <div
                   className="rounded-[1.7rem] border border-border/80 bg-radix-gray-a-3/70 p-4 sm:p-5"
                   data-testid="manager-remaining-votes"
@@ -781,9 +577,74 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                     </div>
                   )}
                 </div>
-              ) : null}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          <section className="space-y-3" data-testid="scoreboard-section">
+            <div className="glass-panel rounded-[2rem] px-5 py-5 sm:px-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div className="max-w-3xl">
+                  <div className="eyebrow">
+                    {snapshot.viewer.isManager ? "Manager view" : "Public scoreboard"}
+                  </div>
+                  <h1 className="mt-2 font-display text-[clamp(1.8rem,3.8vw,2.8rem)] font-black tracking-tight">
+                    Live hackathon scoreboard
+                  </h1>
+                  <p className="mt-3 text-sm leading-7 text-muted-foreground">{scoreboardMeta.detail}</p>
+                </div>
+                <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  <span className="rounded-full bg-radix-teal-a-3 px-3 py-2 text-accent-foreground">Public board</span>
+                  <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                    {snapshot.progress.entryCount} entr{snapshot.progress.entryCount === 1 ? "y" : "ies"}
+                  </span>
+                  <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                    {snapshot.progress.openEntryCount} open now
+                  </span>
+                  {snapshot.status === "OPEN" ? (
+                    <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                      {snapshot.progress.participatingJudgeCount} judging now
+                    </span>
+                  ) : null}
+                  {snapshot.viewer.isManager && snapshot.status === "OPEN" ? (
+                    <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                      {snapshot.managerTracker.totalRemainingVotes} votes left
+                    </span>
+                  ) : null}
+                  <span
+                    className={cn(
+                      "rounded-full px-3 py-2",
+                      snapshot.status === "OPEN"
+                        ? "bg-radix-teal-a-3 text-accent-foreground"
+                        : snapshot.status === "FINALIZED"
+                          ? "bg-radix-purple-a-4 text-foreground"
+                          : "bg-radix-amber-a-3 text-foreground"
+                    )}
+                    data-testid="competition-state-badge"
+                  >
+                    {stateMeta.label}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-2xl">
+                <div className="eyebrow">Scoreboard</div>
+                <h2 className="font-display text-2xl font-black">{scoreboardMeta.title}</h2>
+                <p className="mt-2 text-sm leading-7 text-muted-foreground">{scoreboardMeta.detail}</p>
+              </div>
+            </div>
+
+            <ResultsScoreboardTable
+              entries={snapshot.entries}
+              onSelectEntry={setSelectedEntry}
+              onToggleEntryVoting={snapshot.viewer.isManager ? handleEntryVotingToggle : undefined}
+              pendingEntryId={pendingEntryId}
+              status={snapshot.status}
+              viewer={snapshot.viewer}
+            />
+          </section>
         </section>
       </main>
 

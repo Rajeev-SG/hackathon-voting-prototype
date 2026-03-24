@@ -1,12 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ArrowRight,
-  CheckCircle2,
-  LockKeyhole,
-  Sparkles
-} from "lucide-react";
+import { ArrowRight, CheckCircle2, LockKeyhole } from "lucide-react";
 import * as React from "react";
 
 import { JudgeAuthPanel } from "@/components/judge-auth-panel";
@@ -14,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
@@ -119,75 +113,51 @@ export function VoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[min(96vw,58rem)] overflow-hidden border-border/90 p-0">
-        <div className="shell-surface relative max-h-[88vh] overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
-          <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top_left,var(--hero-glow),transparent_72%)]" />
-          <div className="relative space-y-4">
-            <DialogHeader className="space-y-2">
+      <DialogContent className="w-[min(94vw,44rem)] overflow-hidden border-border/90 p-0">
+        <div className="shell-surface relative max-h-[88vh] overflow-y-auto px-4 py-4 sm:px-5 sm:py-4">
+          <div className="absolute inset-x-0 top-0 h-20 bg-[radial-gradient(circle_at_top_left,var(--hero-glow),transparent_72%)]" />
+          <div className="relative space-y-3">
+            <DialogHeader className="space-y-1.5">
               <div className="eyebrow">Judge vote</div>
-              <DialogTitle className="max-w-3xl text-[clamp(1.85rem,3vw,2.55rem)] leading-[0.95]">
+              <DialogTitle className="max-w-3xl text-[clamp(1.5rem,2.7vw,2.1rem)] leading-[0.98]">
                 {entry.projectName}
               </DialogTitle>
-              <DialogDescription className="max-w-3xl text-sm leading-6">
-                {entry.summary ??
-                  "Capture the energy of the project in one clear score from 0 to 10. Judges get one decisive vote per project, so everything here is designed to be fast and obvious."}
-              </DialogDescription>
+              {entry.summary ? (
+                <p className="max-w-3xl text-sm leading-6 text-muted-foreground">{entry.summary}</p>
+              ) : null}
             </DialogHeader>
 
-            <div className="grid gap-3 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="rounded-[1.5rem] border border-border/80 bg-[rgb(255_255_255_/_0.03)] p-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  {entry.teamName ? (
-                    <span className="rounded-full bg-radix-gray-a-3 px-3 py-1 text-xs font-semibold text-muted-foreground">
-                      {entry.teamName}
-                    </span>
-                  ) : null}
-                  <span className="rounded-full bg-radix-teal-a-3 px-3 py-1 text-xs font-semibold text-accent-foreground">
-                    {entry.voteCount} submitted vote{entry.voteCount === 1 ? "" : "s"}
+            <div className="rounded-[1.35rem] border border-border/80 bg-[rgb(255_255_255_/_0.03)] px-3.5 py-3">
+              <div className="flex flex-wrap items-center gap-2">
+                {entry.teamName ? (
+                  <span className="rounded-full bg-radix-gray-a-3 px-3 py-1 text-xs font-semibold text-muted-foreground">
+                    {entry.teamName}
                   </span>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${
-                      isEntryClosed ? "bg-radix-amber-a-3 text-foreground" : "bg-radix-gray-a-3 text-muted-foreground"
-                    }`}
-                  >
-                    {isEntryClosed ? "Voting paused" : "Voting active"}
+                ) : null}
+                <span className="rounded-full bg-radix-teal-a-3 px-3 py-1 text-xs font-semibold text-accent-foreground">
+                  {entry.voteCount} submitted vote{entry.voteCount === 1 ? "" : "s"}
+                </span>
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${
+                    isEntryClosed ? "bg-radix-amber-a-3 text-foreground" : "bg-radix-gray-a-3 text-muted-foreground"
+                  }`}
+                >
+                  {isEntryClosed ? "Voting paused" : "Voting active"}
+                </span>
+                <span className="rounded-full bg-radix-gray-a-3 px-3 py-1 text-xs font-semibold text-muted-foreground">
+                  Total{" "}
+                  <span className="font-display text-sm font-black text-foreground" data-testid="vote-dialog-aggregate-total">
+                    {entry.totalScore}
                   </span>
-                </div>
-
-                <div className="mt-4 flex items-end justify-between gap-4">
-                  <div>
-                    <div className="eyebrow">Live aggregate</div>
-                    <div
-                      className="mt-2 font-display text-4xl font-black text-primary sm:text-5xl"
-                      data-testid="vote-dialog-aggregate-total"
-                    >
-                      {entry.totalScore}
-                    </div>
-                  </div>
-                  <div
-                    className="max-w-[15rem] text-right text-sm leading-6 text-muted-foreground"
-                    data-testid="vote-dialog-aggregate-summary"
-                  >
-                    {entry.averageScore == null
-                      ? "No average yet"
-                      : `${entry.averageScore} average across ${entry.voteCount} vote${entry.voteCount === 1 ? "" : "s"}`}
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-[1.5rem] border border-border/80 bg-[rgb(255_255_255_/_0.03)] p-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <span>Keyboard friendly and optimized for quick judging.</span>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.16em]">
-                  <span className="rounded-full bg-radix-gray-a-3 px-3 py-1.5 text-muted-foreground">0-3 Stretch</span>
-                  <span className="rounded-full bg-radix-purple-a-4 px-3 py-1.5 text-foreground">4-7 Strong</span>
-                  <span className="rounded-full bg-radix-teal-a-4 px-3 py-1.5 text-accent-foreground">8-10 Winner</span>
-                </div>
-                <p className="mt-4 text-sm leading-6 text-muted-foreground">
-                  Choose the number that matches your conviction. Once you submit, that vote locks for the rest of the round.
-                </p>
+                </span>
+                <span
+                  className="rounded-full bg-radix-gray-a-3 px-3 py-1 text-xs font-semibold text-muted-foreground"
+                  data-testid="vote-dialog-aggregate-summary"
+                >
+                  {entry.averageScore == null
+                    ? "No average yet"
+                    : `${entry.averageScore} avg`}
+                </span>
               </div>
             </div>
 
@@ -229,7 +199,7 @@ export function VoteDialog({
             ) : null}
 
             {isLocked ? (
-              <div className="glass-panel rounded-[1.7rem] p-5 sm:p-6">
+              <div className="glass-panel rounded-[1.55rem] p-4 sm:p-5">
                 <h3 className="font-display text-2xl font-black">
                   {status === "PREPARING" ? "Voting opens soon" : "Judging is finalized"}
                 </h3>
@@ -240,7 +210,7 @@ export function VoteDialog({
                 </p>
               </div>
             ) : hasRecordedVote ? (
-              <div className="glass-panel rounded-[1.7rem] p-5 sm:p-6">
+              <div className="glass-panel rounded-[1.55rem] p-4 sm:p-5">
                 <div className="eyebrow">Vote locked</div>
                 <h3 className="mt-2 font-display text-2xl font-black">Score recorded</h3>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
@@ -248,14 +218,14 @@ export function VoteDialog({
                 </p>
               </div>
             ) : isEntryClosed ? (
-              <div className="glass-panel rounded-[1.7rem] p-5 sm:p-6">
+              <div className="glass-panel rounded-[1.55rem] p-4 sm:p-5">
                 <h3 className="font-display text-2xl font-black">Voting is paused</h3>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
                   This project is still visible on the public board, but the manager has closed it to new votes for now.
                 </p>
               </div>
             ) : needsAuth ? (
-              <div className="glass-panel rounded-[1.7rem] p-5 sm:p-6">
+              <div className="glass-panel rounded-[1.55rem] p-4 sm:p-5">
                 <JudgeAuthPanel
                   afterAuthenticate={() => {
                     onVoteSaved();
@@ -265,40 +235,40 @@ export function VoteDialog({
                 />
               </div>
             ) : isBlocked ? (
-              <div className="glass-panel rounded-[1.7rem] p-5 sm:p-6">
+              <div className="glass-panel rounded-[1.55rem] p-4 sm:p-5">
                 <h3 className="font-display text-2xl font-black">You can’t score this one</h3>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
                   We block self-voting automatically so judges never need to second-guess whether a score is allowed.
                 </p>
               </div>
             ) : (
-              <div className="glass-panel rounded-[1.7rem] p-4 sm:p-5" data-testid="vote-dialog-fit-surface">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="glass-panel rounded-[1.55rem] p-3.5 sm:p-4" data-testid="vote-dialog-fit-surface">
+                <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <div className="eyebrow">Cast your only vote</div>
-                    <h3 className="mt-2 font-display text-2xl font-black sm:text-[2rem]">Make it count</h3>
+                    <h3 className="mt-1.5 font-display text-[1.65rem] font-black sm:text-[1.85rem]">Make it count</h3>
                   </div>
-                  <div className="inline-flex items-center rounded-full bg-radix-gray-a-3 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  <div className="inline-flex items-center rounded-full bg-radix-gray-a-3 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     No edits after submit
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-[1.4rem] border border-border/80 bg-[rgb(255_255_255_/_0.03)] p-4">
+                <div className="mt-3 rounded-[1.25rem] border border-border/80 bg-[rgb(255_255_255_/_0.03)] p-3">
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
                       <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                         Selected score
                       </div>
-                      <div className="mt-2 flex items-end gap-3">
-                        <div className="font-display text-5xl font-black text-primary sm:text-6xl">{previewScore}</div>
-                        <div className="pb-1">
-                          <div className="text-base font-semibold text-foreground">{preview.band}</div>
-                          <div className="max-w-xs text-sm leading-6 text-muted-foreground">{preview.summary}</div>
+                      <div className="mt-1.5 flex items-end gap-3">
+                        <div className="font-display text-4xl font-black text-primary sm:text-5xl">{previewScore}</div>
+                        <div className="pb-0.5">
+                          <div className="text-sm font-semibold text-foreground">{preview.band}</div>
+                          <div className="max-w-[15rem] text-xs leading-5 text-muted-foreground">{preview.summary}</div>
                         </div>
                       </div>
                     </div>
                     <div
-                      className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] ${preview.accentClassName}`}
+                      className={`rounded-full px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] ${preview.accentClassName}`}
                     >
                       {preview.band}
                     </div>
@@ -306,7 +276,7 @@ export function VoteDialog({
                 </div>
 
                 <RadioGroup
-                  className="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-6"
+                  className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6"
                   value={selectedScore}
                   onValueChange={setSelectedScore}
                 >
@@ -319,12 +289,12 @@ export function VoteDialog({
                         autoFocus={value === 7}
                         key={value}
                         value={String(value)}
-                        className="group relative flex min-h-[64px] flex-col items-start justify-between overflow-hidden rounded-[1.25rem] border-border/80 bg-[rgb(255_255_255_/_0.03)] px-3 py-2.5 text-left hover:-translate-y-0.5 data-[state=checked]:shadow-[0_18px_50px_var(--shadow-soft)] sm:min-h-[72px]"
+                        className="group relative flex min-h-[54px] flex-col items-start justify-between overflow-hidden rounded-[1.05rem] border-border/80 bg-[rgb(255_255_255_/_0.03)] px-2.5 py-2 text-left hover:-translate-y-0.5 data-[state=checked]:shadow-[0_18px_50px_var(--shadow-soft)] sm:min-h-[58px]"
                         data-testid={`score-option-${value}`}
                       >
                         <span className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-radix-teal-a-6 to-transparent opacity-0 transition group-data-[state=checked]:opacity-100" />
-                        <span className="font-display text-[1.6rem] font-black leading-none sm:text-[1.8rem]">{value}</span>
-                        <span className="text-[0.58rem] font-semibold uppercase tracking-[0.2em] text-muted-foreground group-data-[state=checked]:text-accent-foreground">
+                        <span className="font-display text-[1.35rem] font-black leading-none sm:text-[1.5rem]">{value}</span>
+                        <span className="text-[0.52rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground group-data-[state=checked]:text-accent-foreground">
                           {tone.band}
                         </span>
                       </RadioGroupItem>
@@ -332,35 +302,31 @@ export function VoteDialog({
                   })}
                 </RadioGroup>
 
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                  Tab into the score grid, then use arrow keys and press space or enter to choose.
-                </p>
-
-                <div className="mt-4">
+                <div className="mt-3">
                   <AnimatePresence mode="wait">
                     {state === "success" ? (
                       <motion.div
                         key="vote-success"
                         animate={{ opacity: 1, y: 0 }}
                         aria-live="polite"
-                        className="rounded-[1.45rem] border border-radix-teal-a-6 bg-radix-teal-a-3 p-4 text-accent-foreground shadow-halo"
+                        className="rounded-[1.25rem] border border-radix-teal-a-6 bg-radix-teal-a-3 p-3.5 text-accent-foreground shadow-halo"
                         data-testid="vote-saved-toast"
                         exit={{ opacity: 0, y: 10 }}
                         initial={{ opacity: 0, y: 14 }}
                         role="status"
                       >
                         <div className="flex items-start gap-3">
-                          <div className="mt-1 rounded-full bg-[rgb(255_255_255_/_0.14)] p-2">
-                            <CheckCircle2 className="h-5 w-5" />
+                          <div className="mt-0.5 rounded-full bg-[rgb(255_255_255_/_0.14)] p-1.5">
+                            <CheckCircle2 className="h-4.5 w-4.5" />
                           </div>
                           <div>
-                            <div className="text-sm font-semibold uppercase tracking-[0.18em]">
+                            <div className="text-[0.7rem] font-semibold uppercase tracking-[0.18em]">
                               Vote locked in
                             </div>
-                            <div className="mt-1 font-display text-2xl font-black">
+                            <div className="mt-1 font-display text-xl font-black sm:text-2xl">
                               {previewScore} points recorded
                             </div>
-                            <div className="mt-1 text-sm leading-6">
+                            <div className="mt-1 text-sm leading-5">
                               Your score is live on the board now. This project is locked for the rest of the round.
                             </div>
                           </div>
@@ -370,26 +336,23 @@ export function VoteDialog({
                       <motion.div
                         key="vote-cta"
                         animate={{ opacity: 1, y: 0 }}
-                        className="rounded-[1.45rem] border border-border/80 bg-[rgb(255_255_255_/_0.03)] p-4"
+                        className="rounded-[1.25rem] border border-border/80 bg-[rgb(255_255_255_/_0.03)] p-3.5"
                         exit={{ opacity: 0, y: 10 }}
                         initial={{ opacity: 0, y: 14 }}
                       >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                           <div className="min-w-0">
-                            <div className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                              Ready to submit
-                            </div>
-                            <div className="mt-1 text-sm leading-6 text-muted-foreground">
-                              You are about to lock{" "}
+                            <div className="text-sm leading-5 text-muted-foreground">
+                              Lock{" "}
                               <span className="font-semibold text-foreground">{previewScore}</span> for this project.
                             </div>
                           </div>
                           <Button
-                            className="min-w-[200px] justify-center"
+                            className="min-w-[172px] justify-center"
                             data-testid="submit-vote"
                             disabled={!selectedScore || state === "submitting"}
                             onClick={submitVote}
-                            size="lg"
+                            size="sm"
                           >
                             {state === "submitting" ? (
                               "Locking vote..."

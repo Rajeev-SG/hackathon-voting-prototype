@@ -12,7 +12,7 @@ test.describe("single-column scoreboard stays coherent across breakpoints", () =
   test.skip(!runLayoutProof, "Run this focused breakpoint proof only when explicitly requested.");
 
   for (const viewport of viewports) {
-    test(`${viewport.name} keeps the scoreboard and progress flow coherent`, async ({ page }, testInfo) => {
+    test(`${viewport.name} keeps the scoreboard flow coherent`, async ({ page }, testInfo) => {
       if (testInfo.project.name === "desktop-light" && viewport.name === "mobile-tight") {
         test.skip(true, "Mobile-tight layout is covered by the dedicated mobile project.");
       }
@@ -32,7 +32,10 @@ test.describe("single-column scoreboard stays coherent across breakpoints", () =
       await page.goto("/");
       const appOrigin = new URL(page.url()).origin;
 
-      await expect(page.getByTestId("workflow-summary")).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Live hackathon scoreboard" })).toBeVisible();
+      await expect(page.getByTestId("competition-state-badge")).toBeVisible();
+      await expect(page.getByTestId("progress-panel")).toHaveCount(0);
+      await expect(page.getByTestId("workflow-summary")).toHaveCount(0);
 
       const pageMetrics = await page.evaluate(() => ({
         viewportWidth: window.innerWidth,
@@ -44,35 +47,22 @@ test.describe("single-column scoreboard stays coherent across breakpoints", () =
       const scoreboardTop = await page.locator("[data-testid='scoreboard-section']").evaluate((element) => {
         return element.getBoundingClientRect().top;
       });
-      const progressTop = await page.locator("[data-testid='progress-panel']").evaluate((element) => {
-        return element.getBoundingClientRect().top;
-      });
 
       expect(scoreboardTop).toBeLessThan(viewport.height * 0.82);
-      expect(progressTop).toBeGreaterThan(scoreboardTop);
 
-      const stateMetrics = await page.locator("[data-testid='progress-stat-state']").evaluate((element) => {
+      const stateBadgeMetrics = await page.locator("[data-testid='competition-state-badge']").evaluate((element) => {
         const rect = element.getBoundingClientRect();
-        const value = element.querySelector<HTMLElement>("[data-testid='progress-stat-state-value']");
-        const valueRect = value?.getBoundingClientRect();
-
         return {
-          cardLeft: rect.left,
-          cardRight: rect.right,
+          left: rect.left,
+          right: rect.right,
           viewportWidth: window.innerWidth,
-          valueText: value?.textContent?.trim() ?? "",
-          valueTopInset: valueRect ? valueRect.top - rect.top : null,
-          valueBottomInset: valueRect ? rect.bottom - valueRect.bottom : null
+          text: element.textContent?.trim() ?? ""
         };
       });
 
-      expect(stateMetrics.cardLeft).toBeGreaterThanOrEqual(0);
-      expect(stateMetrics.cardRight).toBeLessThanOrEqual(stateMetrics.viewportWidth);
-      expect(stateMetrics.valueText.length).toBeGreaterThan(0);
-      expect(stateMetrics.valueTopInset).not.toBeNull();
-      expect(stateMetrics.valueBottomInset).not.toBeNull();
-      expect(stateMetrics.valueTopInset!).toBeGreaterThan(10);
-      expect(stateMetrics.valueBottomInset!).toBeGreaterThan(10);
+      expect(stateBadgeMetrics.left).toBeGreaterThanOrEqual(0);
+      expect(stateBadgeMetrics.right).toBeLessThanOrEqual(stateBadgeMetrics.viewportWidth);
+      expect(stateBadgeMetrics.text.length).toBeGreaterThan(0);
 
       await page.screenshot({ path: testInfo.outputPath(`${viewport.name}.png`), fullPage: true });
       expect(serverErrors.filter((entry) => entry.includes(appOrigin))).toEqual([]);

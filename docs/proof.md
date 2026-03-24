@@ -37,8 +37,8 @@ Flows proven:
 - Manager finalizes the round
 - Manager downloads the finalized XLSX export
 - Public finalized state is visible and modal voting is locked
-- The judging-progress state card keeps its label fully contained at mobile and wide desktop widths
-- The scoreboard remains visually ahead of the progress section, and the progress section stays below the board across breakpoints
+- The scoreboard remains the dominant first-read surface after the redundant manager-summary and judging-progress panels were removed
+- The compact vote modal fits above the fold on both proof viewports without redundant instructional blocks
 
 Artifacts:
 
@@ -96,7 +96,7 @@ Date: `2026-03-24`
 
 Goal:
 
-- Re-check the single-column ordering after removing the old side rail and ensure progress stays below the scoreboard cleanly
+- Re-check the single-column ordering after removing the old side rail and keeping the scoreboard as the dominant first-read surface
 
 Local production surface:
 
@@ -115,10 +115,10 @@ Focused proof artifacts:
 
 Observed result:
 
-- The state card now renders `Preparing` instead of the raw uppercase enum token.
-- Mobile at `430px` keeps the progress cards readable without clipping or overlap.
+- The state badge now renders `Preparing` instead of the raw uppercase enum token.
+- Mobile at `430px` keeps the scoreboard header and first board section readable without clipping or overlap.
 - Wide desktop at `1575px` keeps the scoreboard dominant instead of splitting attention with a side rail.
-- DOM measurement on both local production and the live site confirmed the state label stayed inset inside its card with healthy top and bottom space.
+- DOM measurement on both local production and the live site confirmed the compact state badge stayed within the viewport with no overflow.
 
 Result:
 
@@ -130,7 +130,7 @@ Date: `2026-03-24`
 
 Goal:
 
-- Prove the single-column scoreboard keeps the board above the progress section and stays contained at the in-between widths where the live site previously clipped
+- Prove the single-column scoreboard stays contained at the in-between widths where the live site previously clipped
 
 Local validation:
 
@@ -148,9 +148,8 @@ Viewports covered:
 Proof contract:
 
 - No horizontal page overflow
-- Progress panel appears below the scoreboard section
-- State card remains inside the viewport
-- State label keeps healthy top and bottom inset inside the card
+- No redundant summary or progress panel remains on the page
+- State badge remains inside the viewport
 - Mid-width layouts keep the one-column reading order without accidental side-by-side competition
 
 Artifacts:
@@ -289,7 +288,7 @@ Design proof notes:
 - Desktop uses the full width well without horizontal overflow
 - Mobile layout preserves the single-screen journey and keeps the modal legible and tappable
 - The modal remains the visual center of the flow on both viewports while fitting above the fold in the judge proof run
-- The judging-progress state card now uses a friendly label plus helper copy, and fresh section proof confirmed no clipping or overlap in the status area
+- The page no longer exposes redundant `Round control` or `Judging progress` panels; state is carried by compact chips and manager-only tracker surfaces instead
 
 Artifacts:
 
