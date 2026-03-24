@@ -6,6 +6,7 @@ The app keeps the visual language of the original results dashboard, but the pro
 
 The current layout is intentionally content-first: the scoreboard and next action are prioritized above the fold, while explanatory rules live in lighter supporting panels instead of dominating the first scan.
 The screen stays single-column across viewports so the scoreboard leads the first scan, manager controls only appear for the manager, and round state is reduced to compact status chips instead of bulky side panels.
+On mobile, the secondary scoreboard summary and board-view controls stay collapsed by default and expand as overlays, so the table itself remains visible sooner.
 
 ## What the app is now
 
@@ -197,6 +198,7 @@ These checks prove two different things:
 - `readiness:public` sends 250 public scoreboard requests with 50-way concurrency to confirm the live site stays responsive under the expected spectator load without requiring a paid load-testing service.
 
 Proof notes live in [proof.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/proof.md).
+Viewport-specific appearance and usability findings live in [viewport-ux-audit.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/viewport-ux-audit.md).
 
 ## Auth and deploy notes
 

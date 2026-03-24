@@ -223,9 +223,15 @@ async function takeShot(page: Page, outputPath: string) {
 }
 
 async function expectCompetitionStateBadge(page: Page, expectedText: string) {
-  const badge = page.getByTestId("competition-state-badge");
+  const badge = page.locator('[data-testid="competition-state-badge"]:visible').first();
   await expect(badge).toBeVisible();
   await expect(badge).toHaveText(expectedText);
+}
+
+async function firstScoreboardRowTop(page: Page, slug: string) {
+  return page.getByTestId(`scoreboard-row-${slug}`).first().evaluate((element) => {
+    return element.getBoundingClientRect().top;
+  });
 }
 
 test.beforeEach(async ({ baseURL }, testInfo) => {
@@ -293,10 +299,32 @@ test("manager, judges, and public users complete the single-screen voting flow",
       "Harbor Collective Reloaded"
     );
 
-    await managerPage.getByTestId("scoreboard-view-chart").click();
+    if (testInfo.project.name.includes("mobile")) {
+      await expect(managerPage.getByTestId("scoreboard-mobile-summary-panel")).toHaveCount(0);
+      await expect(managerPage.getByTestId("scoreboard-mobile-view-panel")).toHaveCount(0);
+
+      await managerPage.getByTestId("scoreboard-mobile-summary-toggle").click();
+      await expect(managerPage.getByTestId("scoreboard-mobile-summary-panel")).toBeVisible();
+      await managerPage.getByTestId("scoreboard-mobile-summary-toggle").click();
+      await expect(managerPage.getByTestId("scoreboard-mobile-summary-panel")).toHaveCount(0);
+
+      await managerPage.getByTestId("scoreboard-mobile-view-toggle").click();
+      await expect(managerPage.getByTestId("scoreboard-mobile-view-panel")).toBeVisible();
+    }
+
+    if (testInfo.project.name.includes("mobile")) {
+      await managerPage.getByTestId("scoreboard-mobile-view-panel").getByTestId("scoreboard-view-chart").click();
+    } else {
+      await managerPage.getByTestId("scoreboard-view-chart").click();
+    }
     await expect(managerPage.getByTestId("scoreboard-chart-view")).toBeVisible();
     await takeShot(managerPage, testInfo.outputPath("manager-chart-view.png"));
-    await managerPage.getByTestId("scoreboard-view-table").click();
+    if (testInfo.project.name.includes("mobile")) {
+      await managerPage.getByTestId("scoreboard-mobile-view-toggle").click();
+      await managerPage.getByTestId("scoreboard-mobile-view-panel").getByTestId("scoreboard-view-table").click();
+    } else {
+      await managerPage.getByTestId("scoreboard-view-table").click();
+    }
     if (testInfo.project.name.includes("mobile")) {
       await expect(managerPage.getByTestId("scoreboard-row-aurora-atlas").nth(rowIndex)).toBeVisible();
     } else {
@@ -321,6 +349,13 @@ test("manager, judges, and public users complete the single-screen voting flow",
 
   await test.step("Anonymous users stay read-only after voting opens", async () => {
     await anonymousPage.goto("/");
+    if (testInfo.project.name.includes("mobile")) {
+      await expect(anonymousPage.getByTestId("scoreboard-mobile-summary-panel")).toHaveCount(0);
+      await expect(anonymousPage.getByTestId("scoreboard-mobile-view-panel")).toHaveCount(0);
+      const firstRowTop = await firstScoreboardRowTop(anonymousPage, "aurora-atlas");
+      const viewportHeight = await anonymousPage.evaluate(() => window.innerHeight);
+      expect(firstRowTop).toBeLessThan(viewportHeight - 120);
+    }
     await openVoteDialog(anonymousPage, "Harbor Pulse");
     await expect(anonymousPage.getByText("Voting is paused for this project right now.")).toBeVisible();
     await expect(anonymousPage.getByTestId("submit-vote")).toHaveCount(0);
