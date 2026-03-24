@@ -81,6 +81,48 @@ Result:
 
 - Pass
 
+## Intermediate breakpoint scoreboard proof
+
+Date: `2026-03-24`
+
+Goal:
+
+- Prove the judging-progress cards stay contained at the in-between widths where the live site previously clipped
+
+Local validation:
+
+```bash
+pnpm exec playwright test tests/e2e/scoreboard-breakpoints.spec.ts --reporter=list
+```
+
+Viewports covered:
+
+- `480px`
+- `560px`
+- `768px`
+- `1575px`
+
+Proof contract:
+
+- No horizontal page overflow
+- State card remains inside the viewport
+- State label keeps healthy top and bottom inset inside the card
+- Mid-width layouts use a two-up row with a full-width state card instead of forcing three narrow columns
+
+Artifacts:
+
+- `artifacts/manual-proof/gh-14/local-fresh-480.png`
+- `artifacts/manual-proof/gh-14/local-fresh-560.png`
+- `artifacts/manual-proof/gh-14/local-fresh-768.png`
+- `artifacts/manual-proof/gh-14/local-fresh-1575.png`
+- `artifacts/manual-proof/gh-14/live-progress-480.png`
+- `artifacts/manual-proof/gh-14/live-progress-560.png`
+- `artifacts/manual-proof/gh-14/live-progress-1575.png`
+
+Result:
+
+- Pass
+
 ## Event-day readiness proof
 
 Date: `2026-03-23`

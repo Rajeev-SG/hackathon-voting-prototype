@@ -256,7 +256,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
               <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
                 Board refreshes automatically every {Math.round(autoRefreshIntervalMs / 1000)} seconds while this tab is active.
               </p>
-              <div className="grid gap-3 min-[430px]:grid-cols-3">
+              <div className="grid gap-3 min-[560px]:grid-cols-2">
                 <div
                   data-testid="progress-stat-entries"
                   className="flex min-h-[132px] flex-col justify-between rounded-[1.55rem] border border-border/80 bg-radix-gray-a-3 p-4"
@@ -288,7 +288,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                 <div
                   data-testid="progress-stat-state"
                   className={cn(
-                    "flex min-h-[132px] flex-col justify-between rounded-[1.55rem] border p-4",
+                    "flex min-h-[132px] flex-col justify-between rounded-[1.55rem] border p-4 min-[560px]:col-span-2",
                     stateMeta.accentClassName
                   )}
                 >
