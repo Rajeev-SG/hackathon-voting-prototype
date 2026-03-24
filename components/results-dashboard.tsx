@@ -480,7 +480,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                 ) : (
                   <>
                     <div className="rounded-[1.5rem] border border-border bg-radix-gray-a-3 p-4 text-sm leading-7 text-muted-foreground">
-                      Anyone can view the board. Judges sign in once, vote from the modal, and can edit their own score until the manager finalizes the round.
+                      Anyone can view the board. Judges sign in once, cast one score per project from the modal, and that score stays locked unless the manager resets the whole round.
                     </div>
                     <div className="rounded-[1.5rem] border border-border bg-radix-gray-a-3 p-4 text-sm leading-7 text-muted-foreground">
                       A judge joins the progress denominator the moment they cast their first vote. Completion means every participating judge has scored every entry.

@@ -41,7 +41,7 @@ describe("submitJudgeVote", () => {
     await resetDatabase();
   });
 
-  it("upserts a judge vote instead of creating duplicates", async () => {
+  it("stores the first judge vote and blocks later attempts to change it", async () => {
     const entry = await prisma.entry.create({
       data: {
         slug: "aurora-atlas",
@@ -59,19 +59,21 @@ describe("submitJudgeVote", () => {
       score: 6
     });
 
-    await submitJudgeVote({
-      entryId: entry.id,
-      judgeEmail: "judge@example.com",
-      judgeUserId: "user_1",
-      score: 8
-    });
+    await expect(
+      submitJudgeVote({
+        entryId: entry.id,
+        judgeEmail: "judge@example.com",
+        judgeUserId: "user_1",
+        score: 8
+      })
+    ).rejects.toThrow("You've already scored this project. Votes lock after submission.");
 
     const votes = await prisma.vote.findMany({
       where: { entryId: entry.id }
     });
 
     expect(votes).toHaveLength(1);
-    expect(votes[0]?.score).toBe(8);
+    expect(votes[0]?.score).toBe(6);
   });
 
   it("blocks self-voting when the judge email matches an uploaded team email", async () => {

@@ -277,26 +277,27 @@ export async function submitJudgeVote({
     throw new Error("Team members cannot vote on their own project.");
   }
 
-  await withPrismaRetry(() =>
-    prisma.vote.upsert({
-      where: {
-        entryId_judgeEmail: {
+  try {
+    await withPrismaRetry(() =>
+      prisma.vote.create({
+        data: {
           entryId,
-          judgeEmail: normalizedJudgeEmail
+          judgeEmail: normalizedJudgeEmail,
+          judgeUserId,
+          score
         }
-      },
-      update: {
-        score,
-        judgeUserId
-      },
-      create: {
-        entryId,
-        judgeEmail: normalizedJudgeEmail,
-        judgeUserId,
-        score
-      }
-    })
-  );
+      })
+    );
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      throw new Error("You've already scored this project. Votes lock after submission.");
+    }
+
+    throw error;
+  }
 
   safeRevalidateHome();
 }

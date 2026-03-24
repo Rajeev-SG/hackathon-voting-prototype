@@ -26,7 +26,7 @@ function actionLabel({
   if (status === "PREPARING") return "Opens soon";
   if (entry.isSelfVoteBlocked) return "Team member";
   if (!viewer.isAuthenticated) return "Sign in";
-  return entry.currentUserVote == null ? "Vote" : "Update";
+  return entry.currentUserVote == null ? "Vote" : "Scored";
 }
 
 export function ResultsScoreboardTable({
@@ -115,24 +115,20 @@ export function ResultsScoreboardTable({
                     {entry.totalScore}
                   </motion.div>
                 </div>
-                <Button
-                  className="min-w-[118px] justify-center"
-                  data-testid={`scoreboard-action-${entry.slug}`}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onSelectEntry(entry);
-                  }}
-                  size="sm"
-                  type="button"
-                  variant={status === "OPEN" && !entry.isSelfVoteBlocked ? "default" : "outline"}
-                >
-                  {status !== "OPEN" || entry.isSelfVoteBlocked ? (
-                    <Lock className="h-4 w-4" />
-                  ) : (
-                    <Vote className="h-4 w-4" />
-                  )}
-                  {actionLabel({ entry, status, viewer })}
-                </Button>
+                  <Button
+                    className="min-w-[118px] justify-center"
+                    data-testid={`scoreboard-action-${entry.slug}`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onSelectEntry(entry);
+                    }}
+                    size="sm"
+                    type="button"
+                    variant={entry.canVote ? "default" : "outline"}
+                  >
+                    {entry.canVote ? <Vote className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                    {actionLabel({ entry, status, viewer })}
+                  </Button>
               </div>
             </motion.div>
           ))}
@@ -212,13 +208,9 @@ export function ResultsScoreboardTable({
                         data-testid={`scoreboard-action-${entry.slug}`}
                         onClick={() => onSelectEntry(entry)}
                         size="sm"
-                        variant={status === "OPEN" && !entry.isSelfVoteBlocked ? "default" : "outline"}
+                        variant={entry.canVote ? "default" : "outline"}
                       >
-                        {status !== "OPEN" || entry.isSelfVoteBlocked ? (
-                          <Lock className="h-4 w-4" />
-                        ) : (
-                          <Vote className="h-4 w-4" />
-                        )}
+                        {entry.canVote ? <Vote className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                         {actionLabel({ entry, status, viewer })}
                       </Button>
                     </td>

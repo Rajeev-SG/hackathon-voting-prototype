@@ -130,6 +130,8 @@ The app uses a practical judging-round rule:
 - self-vote-blocked projects are removed from that judge's denominator
 - finalization unlocks when every participating judge has scored every project they are eligible to judge
 
+Each judge can submit one score per project. Once submitted, that score is locked for the rest of the round.
+
 More detail lives in [operating-model.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/operating-model.md).
 
 A fuller operational walkthrough lives in [how-it-works.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/how-it-works.md).
@@ -157,12 +159,12 @@ The Playwright suite covers:
 - email-code judge auth
 - modal keyboard voting
 - self-vote blocking
-- single active vote with edits
+- single locked vote per judge per project
 - progress completion
 - finalization
 - public finalized lock state
 - manager XLSX export
-- anonymous cross-device freshness after another judge updates a score
+- anonymous cross-device freshness after another judge casts a score
 
 Cheap event-day readiness checks:
 

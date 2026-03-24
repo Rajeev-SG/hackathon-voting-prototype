@@ -260,7 +260,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
   await test.step("Anonymous users stay read-only after voting opens", async () => {
     await anonymousPage.goto("/");
     await openVoteDialog(anonymousPage, "Aurora Atlas");
-    await expect(anonymousPage.getByText("Sign in and score this project")).toBeVisible();
+    await expect(anonymousPage.getByText("Sign in to cast your vote")).toBeVisible();
     await expect(anonymousPage.getByTestId("submit-vote")).toHaveCount(0);
     await anonymousPage.getByRole("button", { name: "Close" }).click();
   });
@@ -276,6 +276,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await expect(voteDialog.getByTestId("score-option-7")).toBeFocused();
     await judgePage.keyboard.press("Space");
     await expect(voteDialog.getByTestId("score-option-7")).toHaveAttribute("data-state", "checked");
+    await takeShot(judgePage, testInfo.outputPath("judge-modal-before-submit.png"));
     await judgePage.keyboard.press("Tab");
     await expect(voteDialog.getByTestId("submit-vote")).toBeFocused();
     await judgePage.keyboard.press("Enter");
@@ -285,7 +286,13 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await saveVote(judgePage, 7);
 
     await openVoteDialog(judgePage, "Signal Bloom");
-    await saveVote(judgePage, 9);
+    await expect(judgePage.getByRole("heading", { name: "Score recorded" })).toBeVisible();
+    await expect(
+      judgePage.getByText("Each judge gets one vote per project in this round.")
+    ).toBeVisible();
+    await expect(judgePage.getByTestId("submit-vote")).toHaveCount(0);
+    await takeShot(judgePage, testInfo.outputPath("judge-modal-locked-after-vote.png"));
+    await judgePage.getByRole("button", { name: "Close" }).click();
 
     const signalBloomRow = judgePage.getByTestId("scoreboard-row-signal-bloom").nth(
       activeResponsiveIndex(testInfo.project.name)
@@ -294,13 +301,13 @@ test("manager, judges, and public users complete the single-screen voting flow",
       activeResponsiveIndex(testInfo.project.name)
     );
     await expect(signalBloomRow).toContainText("1 vote");
-    await expect(signalBloomRow).toContainText("9");
-    await expect(signalBloomAction).toContainText("Update");
+    await expect(signalBloomRow).toContainText("7");
+    await expect(signalBloomAction).toContainText("Scored");
     await expect(
       anonymousPage
         .getByTestId("scoreboard-row-signal-bloom")
         .nth(activeResponsiveIndex(testInfo.project.name))
-    ).toContainText("9", { timeout: 12000 });
+    ).toContainText("7", { timeout: 12000 });
 
     await openVoteDialog(judgePage, "Harbor Pulse");
     await saveVote(judgePage, 6);
@@ -358,7 +365,9 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await expect(anonymousPage.getByText("Finalized", { exact: true })).toBeVisible();
     await openVoteDialog(anonymousPage, "Signal Bloom");
     await expect(anonymousPage.getByRole("heading", { name: "Judging is finalized" })).toBeVisible();
-    await expect(anonymousPage.getByText("Finalized results are now locked. Thanks for judging.")).toBeVisible();
+    await expect(
+      anonymousPage.getByText("Finalized results are locked now. Thanks for helping judge the field.")
+    ).toBeVisible();
 
     const hasHorizontalOverflow = await anonymousPage.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth + 1

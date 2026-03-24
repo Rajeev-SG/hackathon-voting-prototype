@@ -235,6 +235,7 @@ export function deriveCompetitionSnapshot({
         status === "OPEN" &&
         viewer.isAuthenticated &&
         !entry.isSelfVoteBlocked &&
+        entry.currentUserVote == null &&
         Boolean(viewer.email)
     }));
 

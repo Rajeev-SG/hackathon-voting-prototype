@@ -25,10 +25,11 @@ Flows proven:
 - Anonymous user can view the scoreboard but not manager controls
 - Manager downloads the XLSX template
 - Manager uploads a workbook and seeded entries appear
+- Manager uploads a workbook and workbook-driven entries appear
 - Manager begins voting
 - Judge signs in with email-code auth
 - Vote modal supports keyboard selection and submission
-- Judge edits an existing vote without creating a duplicate active vote
+- Judge is locked out from changing a project after submitting the first vote
 - Self-voting is blocked for matching team emails
 - Progress reaches completion under the documented denominator rule
 - Manager finalizes the round
@@ -93,7 +94,7 @@ Behavior proof:
 
 - Public scoreboard is reachable without auth
 - Manager template download, workbook upload, begin-voting, finalization, and export all complete successfully
-- The vote modal opens from the scoreboard, accepts keyboard score selection, submits successfully, and supports score edits
+- The vote modal opens from the scoreboard, accepts keyboard score selection, submits successfully, and then locks the judge out from changing that project
 - Self-vote blocking is enforced from uploaded team emails
 - Finalized public state locks the modal and keeps the scoreboard readable
 
