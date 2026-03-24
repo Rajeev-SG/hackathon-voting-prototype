@@ -33,7 +33,7 @@ The app is intentionally a single-screen product.
 - Any authenticated non-manager user is treated as a judge.
 - Judges can sign in with Google or email code.
 - Judges can score a project from `0` to `10`.
-- Judges can edit their own score until the round is finalized.
+- Judges get one score per project. Once submitted, that score is locked for the rest of the round.
 
 ## Auth
 
@@ -130,7 +130,7 @@ The production data model is intentionally small.
 - `CompetitionState`: manager identity, lifecycle state, started/finalized timestamps
 - `Entry`: uploaded project row and aggregate project metadata
 - `EntryTeamEmail`: normalized team emails used for self-vote blocking
-- `Vote`: one active judge score per project, editable until finalization
+- `Vote`: one locked judge score per project for the active round
 
 See [/Users/rajeev/Code/hackathon-voting-prototype/prisma/schema.prisma](/Users/rajeev/Code/hackathon-voting-prototype/prisma/schema.prisma) for the exact schema and [/Users/rajeev/Code/hackathon-voting-prototype/docs/operating-model.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/operating-model.md) for the rule details.
 

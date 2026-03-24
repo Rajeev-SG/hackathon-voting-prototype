@@ -24,7 +24,8 @@ The app is intentionally a single-screen hackathon voting surface.
 - The preferred auth path is Google SSO when enabled in Clerk.
 - The required fallback path is email code auth, which is fully wired and covered by proof.
 - Judges can cast one active score per project from `0` to `10`.
-- Judges can revise their own score until finalization.
+- Judges can submit exactly one score per project.
+- Once submitted, that score is locked for the rest of the round.
 
 ### Manager
 
@@ -112,7 +113,8 @@ Self-vote blocking is derived from normalized email equality between the signed-
 - Public scoreboard stays visible.
 - Authenticated judges can vote.
 - A judge becomes part of the progress denominator the moment they cast their first score.
-- A judge can edit their score for the same project; the vote row is updated in place.
+- Each judge can submit exactly one score per project for the active round.
+- After submission, that project is locked for that judge unless the manager resets the whole round.
 - Active scoreboard tabs auto-refresh every 5 seconds during judging, and focused tabs also refresh on visibility or focus return.
 
 ### `FINALIZED`

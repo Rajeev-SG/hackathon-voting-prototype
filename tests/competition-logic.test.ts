@@ -47,6 +47,7 @@ describe("competition logic", () => {
     expect(snapshot.canFinalize).toBe(true);
     expect(snapshot.entries.find((entry) => entry.id === "entry-2")?.isSelfVoteBlocked).toBe(true);
     expect(snapshot.entries.find((entry) => entry.id === "entry-1")?.currentUserVote).toBe(9);
+    expect(snapshot.entries.find((entry) => entry.id === "entry-1")?.canVote).toBe(false);
   });
 
   it("does not mark the round complete when an eligible project is still missing a score", () => {
