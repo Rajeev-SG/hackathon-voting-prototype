@@ -289,6 +289,83 @@ Result:
 
 - Pass
 
+## Mobile scoreboard disclosure hardening
+
+Date: `2026-03-24`
+
+Goal:
+
+- reproduce the reported mobile dropdown failure instead of assuming the earlier density pass was enough
+- harden the mobile `Details` and `Board view` interactions so they remain reachable and dismissible on event day
+- prove the repaired interactions on both local production and the live production app
+
+What failed before this pass:
+
+- the mobile scoreboard disclosures were implemented as custom absolute overlays
+- that pattern was brittle enough that the panel could render off-screen and its close affordance could become effectively unreachable on mobile
+
+What changed:
+
+- the mobile `Details` and `Board view` controls now open through dialog-based bottom sheets instead of ad hoc positioned overlays
+- the local Playwright rig disables the signed-out public snapshot cache so anonymous proof reflects live seeded state instead of stale cached state
+- a dedicated mobile acceptance spec now proves the disclosures, their dismissal paths, and the chart-table switch on a real mobile viewport
+
+Authoritative implementation paths:
+
+- [/Users/rajeev/Code/hackathon-voting-prototype/components/results-dashboard.tsx](/Users/rajeev/Code/hackathon-voting-prototype/components/results-dashboard.tsx)
+- [/Users/rajeev/Code/hackathon-voting-prototype/components/results-scoreboard-table.tsx](/Users/rajeev/Code/hackathon-voting-prototype/components/results-scoreboard-table.tsx)
+- [/Users/rajeev/Code/hackathon-voting-prototype/lib/competition.ts](/Users/rajeev/Code/hackathon-voting-prototype/lib/competition.ts)
+- [/Users/rajeev/Code/hackathon-voting-prototype/playwright.config.ts](/Users/rajeev/Code/hackathon-voting-prototype/playwright.config.ts)
+- [/Users/rajeev/Code/hackathon-voting-prototype/tests/e2e/mobile-scoreboard-controls.spec.ts](/Users/rajeev/Code/hackathon-voting-prototype/tests/e2e/mobile-scoreboard-controls.spec.ts)
+
+Local validation:
+
+```bash
+pnpm check
+pnpm build
+E2E_BASE_URL=http://localhost:3017 pnpm exec playwright test tests/e2e/mobile-scoreboard-controls.spec.ts --project=mobile-dark --reporter=list
+LAYOUT_PROOF=1 E2E_BASE_URL=http://localhost:3017 pnpm exec playwright test tests/e2e/scoreboard-breakpoints.spec.ts --reporter=list
+```
+
+Production validation:
+
+```bash
+vercel --prod --yes
+curl -I https://vote.rajeevg.com
+set -a && source .env.vercel-prod && set +a && E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/mobile-scoreboard-controls.spec.ts --project=mobile-dark --reporter=list
+LAYOUT_PROOF=1 E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/scoreboard-breakpoints.spec.ts --reporter=list
+```
+
+What the proof checked:
+
+- the public mobile scoreboard still reaches the heading and first rows quickly
+- the `Details` sheet opens, renders inside the viewport, and dismisses cleanly
+- the `Board view` sheet opens, switches to chart view, then back to table view
+- the same behavior survives after a manager seeds the live board with real workbook data
+- mid-width and wide desktop layouts remain coherent after the interaction hardening
+
+Artifacts:
+
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/local-mobile-public.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/local-mobile-public.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/local-mobile-summary-open.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/local-mobile-summary-open.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/local-mobile-view-open.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/local-mobile-view-open.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mobile-public.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mobile-public.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mobile-summary-open.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mobile-summary-open.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mobile-view-open.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mobile-view-open.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mid-public.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-mid-public.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-wide-desktop-public.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/ux-audit/gh-39/prod-wide-desktop-public.png)
+
+Observed result:
+
+- the earlier mobile dropdown bug was real and is now fixed
+- the disclosure surfaces are viewport-bounded, scroll-safe, and dismissible through standard dialog behavior
+- the board remains the dominant first destination on mobile
+- the live app preserved the repaired interaction after workbook seeding and chart-table switching
+
+Result:
+
+- Pass
+
 ## Corrected analytics stack completion proof
 
 Date: `2026-03-24`
