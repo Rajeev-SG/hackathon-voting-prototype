@@ -47,10 +47,10 @@ Current live public-read result:
 
 - `500/500` requests completed
 - `0` failures
-- `p50 150.45ms`
-- `p95 1120.87ms`
-- `p99 1302.27ms`
-- `max 1598.98ms`
+- `p50 175.65ms`
+- `p95 1819.43ms`
+- `p99 1982.92ms`
+- `max 2128.46ms`
 
 Current live smoke result:
 
@@ -64,8 +64,8 @@ Current live smoke result:
 
 Smoke artifacts:
 
-- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/event-day-smoke/2026-03-24T19-56-50.092Z/event-day-smoke-public.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/event-day-smoke/2026-03-24T19-56-50.092Z/event-day-smoke-public.png)
-- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/event-day-smoke/2026-03-24T19-56-50.092Z/summary.json](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/event-day-smoke/2026-03-24T19-56-50.092Z/summary.json)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/event-day-smoke/2026-03-24T20-01-32.881Z/event-day-smoke-public.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/event-day-smoke/2026-03-24T20-01-32.881Z/event-day-smoke-public.png)
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/event-day-smoke/2026-03-24T20-01-32.881Z/summary.json](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/event-day-smoke/2026-03-24T20-01-32.881Z/summary.json)
 
 ## Preflight checklist
 
