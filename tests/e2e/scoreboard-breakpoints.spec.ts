@@ -36,6 +36,7 @@ test.describe("single-column scoreboard stays coherent across breakpoints", () =
       await expect(page.locator('[data-testid="competition-state-badge"]:visible').first()).toBeVisible();
       await expect(page.getByTestId("progress-panel")).toHaveCount(0);
       await expect(page.getByTestId("workflow-summary")).toHaveCount(0);
+      await expect(page.locator('[data-analytics-section="floating_privacy_button"]')).toHaveCount(0);
 
       const pageMetrics = await page.evaluate(() => ({
         viewportWidth: window.innerWidth,

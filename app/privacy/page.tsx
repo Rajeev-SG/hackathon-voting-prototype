@@ -123,9 +123,9 @@ export default function PrivacyPage() {
           <div className="space-y-2">
             <h2 className="text-xl font-semibold text-foreground">6. Your choices</h2>
             <p>
-              You can reopen privacy settings at any time from the app footer or the floating privacy
-              button and switch between necessary-only and analytics-enabled measurement. You can also
-              clear relevant cookies and local storage in your browser.
+              You can reopen privacy settings at any time from the app footer and switch between
+              necessary-only and analytics-enabled measurement. You can also clear relevant cookies
+              and local storage in your browser.
             </p>
           </div>
         </div>
