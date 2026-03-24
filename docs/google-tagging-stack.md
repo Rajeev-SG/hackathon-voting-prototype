@@ -13,6 +13,10 @@ Last updated: `2026-03-24`
 - First-party collection path: `https://vote.rajeevg.com/metrics`
 - Live server tagging upstream: `https://sgtm-live-6tmqixdp3a-nw.a.run.app`
 - BigQuery dataset: `personal-gws-1:ga4_498363924`
+- Reporting dataset: `personal-gws-1:hackathon_reporting`
+- Reporting refresh procedure: ``personal-gws-1.hackathon_reporting.refresh_reporting_tables``
+- Reporting transfer config: `projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20`
+- Looker Studio shell report: `https://lookerstudio.google.com/reporting/e1b671cf-55b4-4c96-a4cd-ec1a0872e072/page/bc8sF/edit`
 - GCP project: `personal-gws-1`
 
 ## What the app now does
@@ -230,6 +234,66 @@ NEXT_PUBLIC_GTM_ID=
 NEXT_PUBLIC_GTM_SCRIPT_ORIGIN=/metrics
 ```
 
+## Reporting pipeline
+
+The analytics stack now has a durable reporting layer independent of when Google chooses to materialize raw GA export tables.
+
+### Raw export layer
+
+- GA4 property: `498363924`
+- linked export dataset: `personal-gws-1:ga4_498363924`
+- current export state:
+  - link is enabled
+  - daily and streaming export are enabled
+  - raw `events_*` tables had not landed yet during this audit window
+
+### Stable reporting layer
+
+Repo SQL sources:
+
+- dataset and table creation:
+  - [/Users/rajeev/Code/hackathon-voting-prototype/sql/analytics/create_reporting_dataset.sql](/Users/rajeev/Code/hackathon-voting-prototype/sql/analytics/create_reporting_dataset.sql)
+- stored procedure creation:
+  - [/Users/rajeev/Code/hackathon-voting-prototype/sql/analytics/create_refresh_procedure.sql](/Users/rajeev/Code/hackathon-voting-prototype/sql/analytics/create_refresh_procedure.sql)
+- ad-hoc refresh entrypoint:
+  - [/Users/rajeev/Code/hackathon-voting-prototype/sql/analytics/refresh_reporting_tables.sql](/Users/rajeev/Code/hackathon-voting-prototype/sql/analytics/refresh_reporting_tables.sql)
+
+Stable reporting tables:
+
+- `daily_overview`
+- `event_breakdown`
+- `entry_performance`
+- `round_snapshots`
+
+Refresh behavior:
+
+- the stored procedure scans `ga4_498363924.INFORMATION_SCHEMA.TABLES`
+- if raw GA export tables exist, it rebuilds the reporting tables from them
+- if raw GA export tables do not yet exist, it safely no-ops instead of failing
+
+### Scheduled refresh
+
+Verified live transfer config:
+
+- resource:
+  - `projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20`
+- display name:
+  - `Hackathon reporting rollup`
+- owner:
+  - `rajeev.sgill@gmail.com`
+- query:
+  - `CALL \`personal-gws-1\`.hackathon_reporting.refresh_reporting_tables();`
+- cadence:
+  - `every 15 minutes`
+- state:
+  - `SUCCEEDED`
+
+Verified successful run:
+
+- `projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20/runs/69e03509-0000-2f53-ba6d-001a114b97f0`
+
+This means the reporting pipeline is already healthy and waiting only for raw export rows to begin landing.
+
 ## Current architecture decision
 
 The current live implementation uses a direct Google tag plus the existing shared server container.
@@ -240,17 +304,46 @@ Why:
 - GTM account API access was not available to the service account, and the browser-only GTM UI does not expose a stable automation surface comparable to the Admin API.
 - The direct Google tag path still sends first-party hits through the live `/metrics` server-container route and therefore preserves the server-side collection architecture.
 
-## Known vendor constraint
+## GTM MCP status
 
-The remaining Google-managed gap is the reporting presentation layer:
+The old Stape-based GTM MCP flow was replaced in the active Codex rig.
 
-- BigQuery export is configured and enabled for the voting-app stream.
-- As of this audit window, `bq ls -a -n 20 personal-gws-1:ga4_498363924` still returns no landed export tables.
-- The app is collecting live production hits through the first-party server path.
-- GTM MCP is config-aligned but still blocked by a Stape OAuth/client-registration loop on the current endpoint hash (`d097dd57096938e420847d7e05ce995f`).
-- Looker Studio report creation and high-design manual arrangement do not currently have a usable export-backed reporting model in this environment because the BigQuery tables have not landed yet.
+Verified current state:
 
-That means the stack is implemented through collection and export, but the final Looker Studio artifact still needs either:
+- `gtm_mcp` is enabled in Codex
+- endpoint:
+  - `https://mcp.gtmeditor.com`
+- CLI proof:
+  - `codex mcp list` shows `npx -y mcp-remote https://mcp.gtmeditor.com`
+- OAuth proof:
+  - GTM Editor completed OAuth in the `rajeev.sgill@gmail.com` browser profile
+  - the MCP proxy established successfully
 
-1. manual browser work in Looker Studio, or
-2. a future automation path with a stable authenticated browser surface and landed export tables.
+This removes the Stape authorize-tab spam from the active setup.
+
+## Looker Studio shell
+
+Verified report shell:
+
+- title:
+  - `Hackathon Voting Memory Dashboard`
+- edit URL:
+  - `https://lookerstudio.google.com/reporting/e1b671cf-55b4-4c96-a4cd-ec1a0872e072/page/bc8sF/edit`
+- data source:
+  - BigQuery `daily_overview`
+- current shell content:
+  - live-bound scorecards
+  - a time-series chart scaffold
+  - report canvas already connected to the stable reporting dataset
+
+Evidence:
+
+- [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-shell-ready.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-shell-ready.png)
+
+## Current caveat
+
+The remaining latency-sensitive part is Google’s raw export materialization:
+
+- `ga4_498363924` still had no landed raw `events_*` tables during this audit window
+- the shell is therefore ready but still visually sparse
+- once those raw tables land, the scheduled procedure already in place will begin populating `hackathon_reporting`, and the existing Looker shell will start filling in

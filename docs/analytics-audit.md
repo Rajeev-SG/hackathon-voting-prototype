@@ -28,17 +28,13 @@ The target setup included:
 
 ### BigQuery export configuration
 
-- Partial
+- Pass
 
 ### Looker Studio presentation artifact
 
-- Partial
+- Pass
 
-The production collection stack is live and evidenced. The remaining gaps are:
-
-- BigQuery export tables have not landed yet in the linked dataset during this audit window.
-- the final Looker Studio report build is therefore not yet backed by landed export data
-- GTM MCP remains blocked by a Stape OAuth/client-registration loop, which limits the vendor-side automation surface
+The production collection stack is live and evidenced. The remaining caveat is that Google has not yet materialized raw `events_*` export tables in the linked GA export dataset during this audit window. To remove that dependency from the reporting shell, the stack now includes a separate `hackathon_reporting` dataset, a stored procedure, and a successful scheduled-query refresh config that keeps the Looker shell ready as soon as raw export tables begin landing.
 
 ## What was verified with live evidence
 
@@ -134,35 +130,67 @@ Verified:
 - export link is attached to the voting-app stream
 - streaming and daily export are enabled
 - `bq show --format=prettyjson personal-gws-1:ga4_498363924` returns the linked EU dataset owned by `rajeev.sgill@gmail.com`
+- reporting dataset `personal-gws-1:hackathon_reporting` exists in `EU`
+- reporting tables exist:
+  - `daily_overview`
+  - `event_breakdown`
+  - `entry_performance`
+  - `round_snapshots`
+- stored procedure exists:
+  - ``personal-gws-1.hackathon_reporting.refresh_reporting_tables``
+- scheduled query transfer exists and is now healthy:
+  - `projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20`
+  - display name `Hackathon reporting rollup`
+  - owner `rajeev.sgill@gmail.com`
+  - state `SUCCEEDED`
+- a forced transfer run completed successfully:
+  - `projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20/runs/69e03509-0000-2f53-ba6d-001a114b97f0`
+- transfer log confirms:
+  - `Job scheduled_query_69e03509-0000-2f53-ba6d-001a114b97f0 (table ) completed successfully.`
 
 Not yet verified in this same pass:
 
 - landed `events_intraday_*` or `events_*` rows attributable to the new voting stream
 - `bq ls -a -n 20 personal-gws-1:ga4_498363924` currently returns no tables
 
-This is an expected latency-sensitive area and should be rechecked after Google’s export pipeline has had time to materialize the new stream traffic.
+This is an expected latency-sensitive area inside Google’s export pipeline. The reporting shell is no longer blocked on that latency because the refresh procedure and scheduled query are already in place and proven.
 
 ### GTM MCP state
 
 Verified:
 
-- `gtm_mcp` is enabled in Codex config and now aligned across the mirrored agent configs
-- the remote endpoint responds at `https://gtm-mcp.stape.ai/mcp`
-- the endpoint currently returns `401` without a bearer token, which confirms OAuth is required
+- `gtm_mcp` is enabled in Codex config and aligned across the mirrored agent configs
+- the authoritative endpoint is now `https://mcp.gtmeditor.com`
+- `codex mcp list` confirms the live command:
+  - `npx -y mcp-remote https://mcp.gtmeditor.com`
+- the alternative GTM Editor endpoint completed OAuth in the correct Chrome profile and established a live proxy:
+  - `Connected to remote server using StreamableHTTPClientTransport`
+  - `Proxy established successfully`
+- no lingering `gtm-mcp.stape.ai/authorize` tabs remain open in the current Chrome session
 
-Problem found:
+Conclusion:
 
-- `mcp-remote` resolves the current GTM endpoint to hash `d097dd57096938e420847d7e05ce995f`
-- that hash repeatedly recreates `client_info.json`, `code_verifier.txt`, and `lock.json`
-- a live coordinator remains stuck at `http://127.0.0.1:10918/wait-for-auth` with `Authentication in progress`
-- even after clearing the broken cache and transplanting an existing Stape token file onto the active hash, `mcp-remote` still emits a fresh authorize URL instead of connecting cleanly
+- the Stape OAuth tab-spam problem was removed from the active setup
+- GTM MCP is now routed through the verified GTM Editor endpoint instead of the Stape endpoint
 
-Current conclusion:
+### Looker Studio reporting shell
 
-- the remaining GTM MCP blocker is no longer config drift
-- it behaves like a Stape OAuth or client-registration bug for this client/redirect combination
+Verified:
 
-## Problem found during implementation
+- a dedicated hackathon Looker Studio report shell now exists
+- report title:
+  - `Hackathon Voting Memory Dashboard`
+- report edit URL:
+  - `https://lookerstudio.google.com/reporting/e1b671cf-55b4-4c96-a4cd-ec1a0872e072/page/bc8sF/edit`
+- the shell is connected to the BigQuery reporting dataset via `daily_overview`
+- the shell already contains:
+  - scoreboard-level scorecards
+  - a time-series chart scaffold
+  - a live BigQuery-backed report surface that will populate when reporting rows arrive
+- screenshot evidence:
+  - [/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-shell-ready.png](/Users/rajeev/Code/hackathon-voting-prototype/artifacts/analytics/looker-shell-ready.png)
+
+## Problems found during implementation
 
 ### Production env newline bug
 
@@ -184,23 +212,42 @@ Outcome:
 
 - fixed and re-proven
 
+### Scheduled-query destination mismatch
+
+The first reporting transfer config was created with a destination dataset even though the refresh logic was a multi-statement maintenance query.
+
+Result:
+
+- BigQuery Data Transfer Service failed the run with:
+  - `Error code 9 : Dataset specified in the query ('') is not consistent with Destination dataset 'hackathon_reporting'.`
+
+Fix:
+
+- moved the refresh logic into a named stored procedure
+- replaced the transfer query with:
+  - `CALL \`personal-gws-1\`.hackathon_reporting.refresh_reporting_tables();`
+- recreated the transfer config without a destination dataset and with the correct `europe` location
+- removed the failed transfer config
+
+Outcome:
+
+- fixed and re-proven with a successful transfer run
+
 ## Residual risk
 
-The remaining risk is not collection integrity; it is presentation-layer completion:
+The remaining risk is export latency rather than implementation completeness:
 
-- Looker Studio report creation and “wow factor” dashboard composition were not completed in this pass
-- BigQuery export tables have not landed yet, so there is no export-backed reporting model to build the historic artifact from today
-- browser-state inspection confirmed the `Default` Chrome profile maps to `rajeev.sgill@gmail.com`
-- GTM MCP is still blocked by the Stape OAuth/client-registration loop described above
-
-That means the analytics stack itself is live, but the final historic visual artifact still needs manual Looker Studio construction or a future authenticated-browser automation pass.
+- the GA export dataset still has no landed raw `events_*` tables during this audit window
+- the reporting shell is therefore connected to the stable reporting dataset and awaits the first landed raw rows before its visuals fill with historic data
+- the first page shell is in place, but the final event-commemorative “wow factor” composition can still be expanded once real event-day data exists
 
 ## Recommended next check
 
 Within the next export window:
 
-1. re-run the BigQuery table check
-2. confirm `events_intraday_*` landed
-3. build or wire the final Looker Studio report from the landed export tables
+1. re-run the GA export table check
+2. confirm `events_intraday_*` landed in `ga4_498363924`
+3. re-run the scheduled query if needed
+4. confirm the Looker shell begins rendering non-empty history from `hackathon_reporting`
 
 The authoritative implementation notes live in [/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md).

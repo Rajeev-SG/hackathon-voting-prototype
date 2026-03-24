@@ -213,7 +213,13 @@ Production analytics now includes:
 - first-party server-side collection via `https://vote.rajeevg.com/metrics`
 - GA4 custom dimensions and metrics for the hackathon app
 - BigQuery export enabled for the voting-app stream
-- current audit status: the linked BigQuery dataset still has no landed export tables, so the final Looker Studio report artifact is not complete yet
+- a stable reporting dataset in BigQuery:
+  - `personal-gws-1:hackathon_reporting`
+- a successful scheduled query refresh:
+  - `projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20`
+- a live Looker Studio shell report:
+  - [Hackathon Voting Memory Dashboard](https://lookerstudio.google.com/reporting/e1b671cf-55b4-4c96-a4cd-ec1a0872e072/page/bc8sF/edit)
+- current audit status: the linked raw GA export dataset still has no landed `events_*` tables, but the reporting shell and refresh pipeline are ready and verified
 
 Analytics env vars:
 
@@ -228,6 +234,14 @@ Analytics proof command:
 
 ```bash
 E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/analytics-stack.spec.ts --reporter=list
+```
+
+BigQuery reporting refresh:
+
+```bash
+bq query --location=EU --use_legacy_sql=false < sql/analytics/create_reporting_dataset.sql
+bq query --location=EU --use_legacy_sql=false < sql/analytics/create_refresh_procedure.sql
+bq query --location=EU --use_legacy_sql=false < sql/analytics/refresh_reporting_tables.sql
 ```
 
 ## Auth and deploy notes

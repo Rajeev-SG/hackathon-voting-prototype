@@ -289,6 +289,48 @@ Result:
 
 - Pass
 
+## Analytics stack completion proof
+
+Date: `2026-03-24`
+
+Goal:
+
+- remove the Stape GTM MCP tab-spam path from the active rig
+- prove the replacement GTM MCP endpoint works under `rajeev.sgill@gmail.com`
+- prove the BigQuery reporting refresh is healthy
+- prove a real Looker Studio reporting shell exists and is attached to the reporting dataset
+
+Commands and checks:
+
+```bash
+codex mcp list | rg 'gtm_mcp|analytics_mcp|chrome_devtools'
+bq show --format=prettyjson personal-gws-1:ga4_498363924
+bq show --format=prettyjson personal-gws-1:hackathon_reporting
+bq show --transfer_config projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20
+bq ls --transfer_run projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20
+bq ls --transfer_log projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20/runs/69e03509-0000-2f53-ba6d-001a114b97f0
+```
+
+Observed result:
+
+- Codex now points `gtm_mcp` at `https://mcp.gtmeditor.com`
+- no `gtm-mcp.stape.ai/authorize` tabs remained open in the active Chrome session
+- the GTM Editor OAuth flow completed in the `rajeev.sgill@gmail.com` profile and established a working MCP proxy
+- GA realtime still showed live voting-app events on property `498363924`
+- reporting dataset `personal-gws-1:hackathon_reporting` exists in `EU`
+- reporting procedure `refresh_reporting_tables` exists
+- transfer config `69d1795c-0000-21c1-bcb2-24058877ff20` is healthy and `SUCCEEDED`
+- transfer run `69e03509-0000-2f53-ba6d-001a114b97f0` completed successfully
+- Looker Studio shell report `e1b671cf-55b4-4c96-a4cd-ec1a0872e072` exists with BigQuery-backed scorecards and a time-series shell
+
+Artifacts:
+
+- `artifacts/analytics/looker-shell-ready.png`
+
+Result:
+
+- Pass
+
 ## Event-day readiness proof
 
 Date: `2026-03-23`
