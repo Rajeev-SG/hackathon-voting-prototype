@@ -141,6 +141,21 @@ The production data model is intentionally small.
 
 See [/Users/rajeev/Code/hackathon-voting-prototype/prisma/schema.prisma](/Users/rajeev/Code/hackathon-voting-prototype/prisma/schema.prisma) for the exact schema and [/Users/rajeev/Code/hackathon-voting-prototype/docs/operating-model.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/operating-model.md) for the rule details.
 
+## Analytics and privacy
+
+Production analytics now treats the voting app as its own measured surface.
+
+- Consent mode defaults to denied until the user opts in.
+- The app exposes a privacy page at `/privacy`.
+- The app emits structured scoreboard, workbook, auth, and vote events into `window.dataLayer`.
+- The live voting-app stream uses measurement ID `G-HT8Z6KR8CX`.
+- Browser hits are sent through the first-party server path at `https://vote.rajeevg.com/metrics`.
+- The shared GA4 property has been extended with voting-app-specific custom dimensions and metrics.
+- BigQuery export has been updated to include the voting-app stream.
+- During the current audit window, the linked BigQuery dataset still had no landed export tables, so the Looker Studio report remains incomplete.
+
+The full stack notes live in [/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md), and the post-implementation audit lives in [/Users/rajeev/Code/hackathon-voting-prototype/docs/analytics-audit.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/analytics-audit.md).
+
 ## Event-day operating checklist
 
 1. Sign in as `rajeev.gill@omc.com`.

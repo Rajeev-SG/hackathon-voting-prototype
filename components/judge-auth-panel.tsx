@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { pushDataLayerEvent } from "@/lib/analytics";
 
 type JudgeAuthPanelProps = {
   title?: string;
@@ -67,6 +68,11 @@ function getEmailCodeFactor(factors: unknown): EmailCodeFactor | null {
 
 function createGeneratedPassword() {
   return `Judge-${crypto.randomUUID()}-Aa1`;
+}
+
+function getEmailDomain(email: string) {
+  const [, domain] = email.split("@");
+  return domain || "unknown";
 }
 
 export function readPersistedJudgeAuthState(): PersistedJudgeAuthState | null {
@@ -172,6 +178,10 @@ export function JudgeAuthPanel({
 
     setPending("email");
     setNotice(null);
+    pushDataLayerEvent("judge_auth_email_requested", {
+      auth_method: "email_code",
+      email_domain: getEmailDomain(identifier)
+    });
 
     try {
       const signInAttempt = await signIn.create({
@@ -219,8 +229,16 @@ export function JudgeAuthPanel({
             tone: "info",
             text: `No judge account existed for ${identifier}, so we started one and sent a 6-digit verification code.`
           });
+          pushDataLayerEvent("judge_auth_signup_started", {
+            auth_method: "email_code",
+            email_domain: getEmailDomain(identifier)
+          });
           return;
         } catch (signUpError) {
+          pushDataLayerEvent("judge_auth_email_request_failed", {
+            auth_method: "email_code",
+            email_domain: getEmailDomain(identifier)
+          });
           setNotice({
             tone: "error",
             text: getErrorMessage(signUpError)
@@ -234,6 +252,10 @@ export function JudgeAuthPanel({
       setNotice({
         tone: "error",
         text: getErrorMessage(error)
+      });
+      pushDataLayerEvent("judge_auth_email_request_failed", {
+        auth_method: "email_code",
+        email_domain: getEmailDomain(identifier)
       });
     } finally {
       setPending("idle");
@@ -274,6 +296,10 @@ export function JudgeAuthPanel({
           tone: "success",
           text: "Your judge account is ready. Voting controls are now unlocked."
         });
+        pushDataLayerEvent("judge_auth_completed", {
+          auth_method: "email_code",
+          auth_flow: "sign_up"
+        });
       } else {
         const attempt = await signIn.attemptFirstFactor({
           strategy: "email_code",
@@ -293,11 +319,18 @@ export function JudgeAuthPanel({
           tone: "success",
           text: "You're signed in. Your voting controls are ready."
         });
+        pushDataLayerEvent("judge_auth_completed", {
+          auth_method: "email_code",
+          auth_flow: "sign_in"
+        });
       }
 
       router.refresh();
       afterAuthenticate?.();
     } catch (error) {
+      pushDataLayerEvent("judge_auth_verify_failed", {
+        auth_method: flow === "sign-up" ? "email_code_signup" : "email_code_signin"
+      });
       setNotice({
         tone: "error",
         text: getErrorMessage(error)
@@ -312,6 +345,9 @@ export function JudgeAuthPanel({
 
     setPending("google");
     setNotice(null);
+    pushDataLayerEvent("judge_auth_google_started", {
+      auth_method: "google_oauth"
+    });
 
     try {
       await signIn.authenticateWithRedirect({
@@ -320,6 +356,9 @@ export function JudgeAuthPanel({
         redirectUrlComplete: "/"
       });
     } catch (error) {
+      pushDataLayerEvent("judge_auth_google_failed", {
+        auth_method: "google_oauth"
+      });
       setNotice({
         tone: "error",
         text: getErrorMessage(error)

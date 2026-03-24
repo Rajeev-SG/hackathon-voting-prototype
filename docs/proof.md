@@ -289,6 +289,48 @@ Result:
 
 - Pass
 
+## Analytics stack completion proof
+
+Date: `2026-03-24`
+
+Goal:
+
+- remove the Stape GTM MCP tab-spam path from the active rig
+- prove the replacement GTM MCP endpoint works under `rajeev.sgill@gmail.com`
+- prove the BigQuery reporting refresh is healthy
+- prove a real Looker Studio reporting shell exists and is attached to the reporting dataset
+
+Commands and checks:
+
+```bash
+codex mcp list | rg 'gtm_mcp|analytics_mcp|chrome_devtools'
+bq show --format=prettyjson personal-gws-1:ga4_498363924
+bq show --format=prettyjson personal-gws-1:hackathon_reporting
+bq show --transfer_config projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20
+bq ls --transfer_run projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20
+bq ls --transfer_log projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20/runs/69e03509-0000-2f53-ba6d-001a114b97f0
+```
+
+Observed result:
+
+- Codex now points `gtm_mcp` at `https://mcp.gtmeditor.com`
+- no `gtm-mcp.stape.ai/authorize` tabs remained open in the active Chrome session
+- the GTM Editor OAuth flow completed in the `rajeev.sgill@gmail.com` profile and established a working MCP proxy
+- GA realtime still showed live voting-app events on property `498363924`
+- reporting dataset `personal-gws-1:hackathon_reporting` exists in `EU`
+- reporting procedure `refresh_reporting_tables` exists
+- transfer config `69d1795c-0000-21c1-bcb2-24058877ff20` is healthy and `SUCCEEDED`
+- transfer run `69e03509-0000-2f53-ba6d-001a114b97f0` completed successfully
+- Looker Studio shell report `e1b671cf-55b4-4c96-a4cd-ec1a0872e072` exists with BigQuery-backed scorecards and a time-series shell
+
+Artifacts:
+
+- `artifacts/analytics/looker-shell-ready.png`
+
+Result:
+
+- Pass
+
 ## Event-day readiness proof
 
 Date: `2026-03-23`
@@ -388,3 +430,50 @@ Result:
 - Google OAuth is configured on the production Clerk instance for `https://clerk.vote.rajeevg.com/v1/oauth_callback`.
 - The live production verification email is already understandable and app-branded through the Clerk application name and production sending domain.
 - Production verification-email template editing is still blocked by Clerk's current Hobby plan. Deeper subject/body template edits require a plan upgrade or custom delivery.
+
+## Production analytics proof
+
+Date: `2026-03-24`
+
+Surface: `https://vote.rajeevg.com`
+
+Commands:
+
+```bash
+curl -I https://vote.rajeevg.com
+curl https://vote.rajeevg.com/metrics/healthy
+set -a && source .env.vercel-prod && set +a && E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/analytics-stack.spec.ts --reporter=list
+```
+
+Behavior proof:
+
+- the live app rendered the analytics consent banner
+- granting consent dismissed the banner and enabled analytics collection
+- the app emitted analytics events into `window.dataLayer`
+- the live page loaded the voting-app measurement ID `G-HT8Z6KR8CX`
+- the browser sent first-party collection traffic to `/metrics/g/collect`
+- the consent banner rendered in a reduced compact card instead of the earlier oversized overlay
+- the floating privacy settings button was absent on mobile, with privacy controls still available in the footer
+- desktop and mobile both passed the live consent-and-collection flow
+
+Artifacts:
+
+- `artifacts/playwright/analytics-stack-consent-en-035d7-r-routed-collection-traffic-desktop-light/analytics-before-consent.png`
+- `artifacts/playwright/analytics-stack-consent-en-035d7-r-routed-collection-traffic-desktop-light/analytics-after-consent.png`
+- `artifacts/playwright/analytics-stack-consent-en-035d7-r-routed-collection-traffic-mobile-dark/analytics-before-consent.png`
+- `artifacts/playwright/analytics-stack-consent-en-035d7-r-routed-collection-traffic-mobile-dark/analytics-after-consent.png`
+
+Supporting platform evidence:
+
+- GA Admin API confirms web stream `14214480224` exists for `https://vote.rajeevg.com`
+- GA Admin API confirms the BigQuery link is enabled and includes both the main site stream and the voting-app stream
+- GA custom dimensions and metrics for the voting app were promoted on the shared property
+
+Important note:
+
+- the first production analytics proof failed because the Vercel measurement ID env var had been saved with a trailing newline
+- that defect was fixed by removing and re-adding the env vars without the newline, then redeploying production and rerunning the proof
+
+Result:
+
+- Pass

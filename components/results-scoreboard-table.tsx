@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { BarChart3, ChevronDown, Lock, PauseCircle, PlayCircle, Table2, Vote } from "lucide-react";
 
 import type { ScoreboardEntryView, ViewerIdentity } from "@/lib/competition-logic";
+import { pushDataLayerEvent } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -248,6 +249,16 @@ export function ResultsScoreboardTable({
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, [mobileViewPanelOpen]);
 
+  function handleViewModeChange(nextViewMode: "table" | "chart", triggerSurface: "mobile" | "desktop") {
+    setViewMode(nextViewMode);
+    pushDataLayerEvent("scoreboard_view_changed", {
+      board_view: nextViewMode,
+      trigger_surface: triggerSurface,
+      entry_count: entries.length,
+      viewer_role: viewer.isManager ? "manager" : viewer.isAuthenticated ? "judge" : "public"
+    });
+  }
+
   if (entries.length === 0) {
     return (
       <div className="glass-panel rounded-[2rem] border border-border/80 p-6 sm:p-8">
@@ -314,7 +325,7 @@ export function ResultsScoreboardTable({
                   )}
                   data-testid="scoreboard-view-table"
                   onClick={() => {
-                    setViewMode("table");
+                    handleViewModeChange("table", "mobile");
                     setMobileViewPanelOpen(false);
                   }}
                   type="button"
@@ -329,7 +340,7 @@ export function ResultsScoreboardTable({
                   )}
                   data-testid="scoreboard-view-chart"
                   onClick={() => {
-                    setViewMode("chart");
+                    handleViewModeChange("chart", "mobile");
                     setMobileViewPanelOpen(false);
                   }}
                   type="button"
@@ -357,7 +368,7 @@ export function ResultsScoreboardTable({
               viewMode === "table" ? "bg-background text-foreground shadow-soft" : "text-muted-foreground"
             )}
             data-testid="scoreboard-view-table"
-            onClick={() => setViewMode("table")}
+            onClick={() => handleViewModeChange("table", "desktop")}
             type="button"
           >
             <Table2 className="h-4 w-4" />
@@ -369,7 +380,7 @@ export function ResultsScoreboardTable({
               viewMode === "chart" ? "bg-background text-foreground shadow-soft" : "text-muted-foreground"
             )}
             data-testid="scoreboard-view-chart"
-            onClick={() => setViewMode("chart")}
+            onClick={() => handleViewModeChange("chart", "desktop")}
             type="button"
           >
             <BarChart3 className="h-4 w-4" />
