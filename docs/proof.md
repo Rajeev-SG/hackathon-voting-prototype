@@ -236,7 +236,9 @@ Viewports exercised:
 Behavior proof:
 
 - Public scoreboard is reachable without auth
+- Judges do not see manager-only controls or manager framing in the summary surface
 - Manager template download, workbook upload, begin-voting, per-entry close / reopen, finalization, and export all complete successfully
+- Manager remaining-votes tracker updates after the first submitted vote and mirrors the live completion denominator
 - Scoreboard table and horizontal bar-chart modes both render correctly
 - The vote modal opens from the scoreboard, accepts keyboard score selection, submits successfully, and then locks the judge out from changing that project
 - Self-vote blocking is enforced from uploaded team emails
@@ -246,7 +248,7 @@ Design proof notes:
 
 - Desktop uses the full width well without horizontal overflow
 - Mobile layout preserves the single-screen journey and keeps the modal legible and tappable
-- The modal remains the visual center of the flow on both viewports
+- The modal remains the visual center of the flow on both viewports while fitting above the fold in the judge proof run
 - The judging-progress state card now uses a friendly label plus helper copy, and fresh section proof confirmed no clipping or overlap in the status area
 
 Artifacts:

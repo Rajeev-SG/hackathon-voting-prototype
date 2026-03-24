@@ -53,6 +53,22 @@ export type ProgressSummary = {
   helperText: string;
 };
 
+export type JudgeCoverageSummary = {
+  judgeEmail: string;
+  eligibleOpenEntries: number;
+  completedOpenEntries: number;
+  remainingOpenEntries: number;
+  remainingProjectNames: string[];
+  lastActivityAt: string | null;
+};
+
+export type ManagerRoundTracker = {
+  totalRemainingVotes: number;
+  judgesStillOutstanding: number;
+  judges: JudgeCoverageSummary[];
+  helperText: string;
+};
+
 export type CompetitionSnapshot = {
   status: VotingStatus;
   startedAt: string | null;
@@ -61,6 +77,7 @@ export type CompetitionSnapshot = {
   viewer: ViewerIdentity;
   entries: ScoreboardEntryView[];
   progress: ProgressSummary;
+  managerTracker: ManagerRoundTracker;
   canDownloadTemplate: boolean;
   canUploadSheet: boolean;
   canBeginVoting: boolean;
@@ -208,6 +225,91 @@ export function deriveProgress({
   };
 }
 
+export function deriveManagerRoundTracker({
+  status,
+  entries
+}: {
+  status: VotingStatus;
+  entries: EntryRecordForLogic[];
+}): ManagerRoundTracker {
+  const openEntries = entries.filter((entry) => entry.isVotingOpen);
+  const participatingJudgeEmails = Array.from(
+    new Set(
+      openEntries.flatMap((entry) => entry.votes.map((vote) => normalizeEmail(vote.judgeEmail)))
+    )
+  );
+
+  if (status !== "OPEN") {
+    return {
+      totalRemainingVotes: 0,
+      judgesStillOutstanding: 0,
+      judges: [],
+      helperText:
+        status === "PREPARING"
+          ? "Judges appear here after the round opens and they cast their first score."
+          : "Judging is finalized. Every remaining-vote obligation is already resolved."
+    };
+  }
+
+  if (participatingJudgeEmails.length === 0) {
+    return {
+      totalRemainingVotes: 0,
+      judgesStillOutstanding: 0,
+      judges: [],
+      helperText:
+        "No judge has cast a vote yet. As soon as the first score arrives, this tracker will show who still has work left."
+    };
+  }
+
+  const judges = participatingJudgeEmails
+    .map((judgeEmail) => {
+      const eligibleOpenEntries = openEntries.filter((entry) => {
+        const entryEmails = entry.teamEmails.map((teamMember) => teamMember.email);
+        return !isSelfVoteBlocked(entryEmails, judgeEmail);
+      });
+      const completedOpenEntries = eligibleOpenEntries.filter((entry) =>
+        entry.votes.some((vote) => normalizeEmail(vote.judgeEmail) === judgeEmail)
+      );
+      const remainingEntries = eligibleOpenEntries.filter((entry) =>
+        entry.votes.every((vote) => normalizeEmail(vote.judgeEmail) !== judgeEmail)
+      );
+      const lastActivity = openEntries
+        .flatMap((entry) =>
+          entry.votes
+            .filter((vote) => normalizeEmail(vote.judgeEmail) === judgeEmail)
+            .map((vote) => vote.updatedAt)
+        )
+        .sort((left, right) => right.getTime() - left.getTime())[0];
+
+      return {
+        judgeEmail,
+        eligibleOpenEntries: eligibleOpenEntries.length,
+        completedOpenEntries: completedOpenEntries.length,
+        remainingOpenEntries: remainingEntries.length,
+        remainingProjectNames: remainingEntries.map((entry) => entry.projectName),
+        lastActivityAt: lastActivity?.toISOString() ?? null
+      };
+    })
+    .sort((left, right) => {
+      if (right.remainingOpenEntries !== left.remainingOpenEntries) {
+        return right.remainingOpenEntries - left.remainingOpenEntries;
+      }
+
+      return left.judgeEmail.localeCompare(right.judgeEmail);
+    });
+
+  const totalRemainingVotes = judges.reduce((sum, judge) => sum + judge.remainingOpenEntries, 0);
+  const judgesStillOutstanding = judges.filter((judge) => judge.remainingOpenEntries > 0).length;
+
+  return {
+    totalRemainingVotes,
+    judgesStillOutstanding,
+    judges,
+    helperText:
+      "Uses the same open-project and self-vote rules as finalization, so this is the trustworthy list of what is still outstanding."
+  };
+}
+
 export function deriveCompetitionSnapshot({
   status,
   startedAt,
@@ -222,6 +324,10 @@ export function deriveCompetitionSnapshot({
   viewer: ViewerIdentity;
 }): CompetitionSnapshot {
   const progress = deriveProgress({
+    status,
+    entries
+  });
+  const managerTracker = deriveManagerRoundTracker({
     status,
     entries
   });
@@ -279,6 +385,7 @@ export function deriveCompetitionSnapshot({
     viewer,
     entries: rankedEntries,
     progress,
+    managerTracker,
     canDownloadTemplate: viewer.isManager,
     canUploadSheet: viewer.isManager && status === "PREPARING",
     canBeginVoting: viewer.isManager && status === "PREPARING" && entries.some((entry) => entry.isVotingOpen),

@@ -115,6 +115,7 @@ Self-vote blocking is derived from normalized email equality between the signed-
 - Public scoreboard stays visible.
 - Authenticated judges can vote.
 - The manager can close or reopen individual projects without removing them from the public board.
+- The manager sees a remaining-votes tracker that lists only participating judges, the open projects they still owe, and the total votes still outstanding.
 - A judge becomes part of the progress denominator the moment they cast their first score.
 - Each judge can submit exactly one score per project for the active round.
 - After submission, that project is locked for that judge unless the manager resets the whole round.
@@ -138,6 +139,7 @@ Completion is intentionally simple and operationally practical:
 - Entries the manager has closed to new votes are removed from the live denominator until reopened.
 - The round is complete when every participating judge has scored every project that is still open and eligible for them.
 - Finalization is available only when the round is `OPEN` and that completion rule is satisfied.
+- The manager tracker reuses the same eligibility logic so the outstanding list is trustworthy enough to use operationally during the event.
 
 This keeps the rule coherent without introducing a separate roster-management system.
 
@@ -159,6 +161,7 @@ This keeps the rule coherent without introducing a separate roster-management sy
   - keep project context visible
   - support keyboard-first scoring
   - announce feedback with live regions
+  - stay fully above the fold in the proven desktop and mobile judge flows
   - remain usable on mobile
 
 ## Event-day readiness notes

@@ -180,6 +180,25 @@ async function openVoteDialog(page: Page, projectName: string) {
   return dialog;
 }
 
+async function expectDialogToFitViewport(page: Page) {
+  const dialog = page.getByRole("dialog");
+  const submitButton = page.getByTestId("submit-vote");
+
+  const measurements = await dialog.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      top: rect.top,
+      bottom: rect.bottom,
+      height: rect.height,
+      viewportHeight: window.innerHeight
+    };
+  });
+
+  expect(measurements.top).toBeGreaterThanOrEqual(0);
+  expect(measurements.bottom).toBeLessThanOrEqual(measurements.viewportHeight);
+  await expect(submitButton).toBeVisible();
+}
+
 async function saveVote(page: Page, score: number) {
   await page.getByTestId(`score-option-${score}`).click();
   await page.getByTestId("submit-vote").click();
@@ -264,6 +283,8 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await expect(anonymousPage.getByRole("heading", { name: "Live hackathon scoreboard" })).toBeVisible();
     await expect(anonymousPage.getByTestId("scoreboard-empty-heading")).toBeVisible();
     await expectProgressStateCardToContainValue(anonymousPage, "Preparing");
+    await expect(anonymousPage.getByText("Manager setup")).toHaveCount(0);
+    await expect(anonymousPage.getByText("Manager controls")).toHaveCount(0);
     await expect(anonymousPage.getByTestId("manager-download-template")).toHaveCount(0);
     await expect(anonymousPage.getByTestId("manager-upload-dropzone")).toHaveCount(0);
     await takeShot(anonymousPage, testInfo.outputPath("public-before-setup.png"));
@@ -346,6 +367,7 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await judgePage.getByRole("button", { name: "Close" }).click();
 
     let voteDialog = await openVoteDialog(judgePage, "Aurora Atlas");
+    await expectDialogToFitViewport(judgePage);
     await expect(voteDialog.getByTestId("score-option-7")).toBeFocused();
     await judgePage.keyboard.press("Space");
     await expect(voteDialog.getByTestId("score-option-7")).toHaveAttribute("data-state", "checked");
@@ -354,6 +376,21 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await expect(voteDialog.getByTestId("submit-vote")).toBeFocused();
     await judgePage.keyboard.press("Enter");
     await expect(judgePage.getByText("Judge", { exact: true })).toBeVisible();
+    await expect(
+      judgePage
+        .getByTestId("scoreboard-action-aurora-atlas")
+        .nth(activeResponsiveIndex(testInfo.project.name))
+    ).toContainText("Scored");
+    await expect(
+      judgePage
+        .getByTestId("scoreboard-row-aurora-atlas")
+        .nth(activeResponsiveIndex(testInfo.project.name))
+    ).toContainText("1 vote");
+
+    await managerPage.goto("/");
+    await expect(managerPage.getByTestId("manager-remaining-votes")).toContainText("1 vote still outstanding.");
+    await expect(managerPage.getByTestId("manager-remaining-votes")).toContainText(JUDGE_EMAIL);
+    await expect(managerPage.getByTestId("manager-remaining-votes")).toContainText("Signal Bloom");
 
     await openVoteDialog(judgePage, "Signal Bloom");
     await saveVote(judgePage, 7);
