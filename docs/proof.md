@@ -123,6 +123,67 @@ Result:
 
 - Pass
 
+## Layout hierarchy proof
+
+Date: `2026-03-24`
+
+Goal:
+
+- Rebalance the screen so the scoreboard and next action dominate above the fold instead of a large explanatory hero
+
+Guidance used:
+
+- GOV.UK layout guidance informed the simplification and content-first structure: [Layout – GOV.UK Design System](https://design-system.service.gov.uk/styles/layout/)
+- Atlassian messaging guidance informed the shorter supporting copy and empty-state wording: [Info messages – Atlassian Design](https://atlassian.design/foundations/content/designing-messages/info-messages/)
+
+Local visual proof:
+
+- Surface: `http://127.0.0.1:3005`
+- Command set:
+
+```bash
+pnpm exec playwright screenshot --wait-for-selector "[data-testid='scoreboard-section']" --wait-for-timeout 1200 --viewport-size "1575,1100" --color-scheme light http://127.0.0.1:3005 artifacts/layout-proof/local-wide-desktop.png
+pnpm exec playwright screenshot --wait-for-selector "[data-testid='scoreboard-section']" --wait-for-timeout 1200 --viewport-size "560,900" --color-scheme dark http://127.0.0.1:3005 artifacts/layout-proof/local-mid.png
+pnpm exec playwright screenshot --wait-for-selector "[data-testid='scoreboard-section']" --wait-for-timeout 1200 --viewport-size "430,932" --color-scheme dark http://127.0.0.1:3005 artifacts/layout-proof/local-mobile.png
+```
+
+Observed local result:
+
+- Wide desktop no longer burns most of the first screen on a tall empty hero.
+- The scoreboard header and first rows now appear in the primary scan area instead of being pushed too far down.
+- Mid-width and mobile now carry only the decision-driving summary above the fold, with the board appearing sooner.
+- Supporting rules remain present but visually secondary.
+
+Artifacts:
+
+- `artifacts/layout-proof/local-wide-desktop.png`
+- `artifacts/layout-proof/local-mid.png`
+- `artifacts/layout-proof/local-mobile.png`
+
+Production layout proof:
+
+- Surface: `https://vote.rajeevg.com`
+- Command set:
+
+```bash
+pnpm exec playwright screenshot --wait-for-selector "[data-testid='scoreboard-section']" --wait-for-timeout 1200 --viewport-size "1575,1100" --color-scheme light https://vote.rajeevg.com artifacts/layout-proof/prod-wide-desktop.png
+pnpm exec playwright screenshot --wait-for-selector "[data-testid='scoreboard-section']" --wait-for-timeout 1200 --viewport-size "560,900" --color-scheme dark https://vote.rajeevg.com artifacts/layout-proof/prod-mid.png
+pnpm exec playwright screenshot --wait-for-selector "[data-testid='scoreboard-section']" --wait-for-timeout 1200 --viewport-size "430,932" --color-scheme dark https://vote.rajeevg.com artifacts/layout-proof/prod-mobile.png
+LAYOUT_PROOF=1 E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/scoreboard-breakpoints.spec.ts --reporter=list
+```
+
+Observed production result:
+
+- Wide desktop keeps the scoreboard and first action in the dominant scan path without the old dead-zone hero feeling.
+- Mid-width and mobile preserve the same reading order and expose the scoreboard sooner.
+- The focused breakpoint proof passed on the live app across the intentional desktop, tablet, mid-width, and mobile combinations.
+
+Production artifacts:
+
+- `artifacts/layout-proof/prod-wide-desktop.png`
+- `artifacts/layout-proof/prod-mid.png`
+- `artifacts/layout-proof/prod-mobile.png`
+
 ## Event-day readiness proof
 
 Date: `2026-03-23`

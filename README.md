@@ -4,6 +4,8 @@ Production-oriented single-screen hackathon voting app built with Next.js 14, Ty
 
 The app keeps the visual language of the original results dashboard, but the product has been simplified to one public scoreboard with an integrated manager control surface and a polished voting modal for judges.
 
+The current layout is intentionally content-first: the scoreboard and next action are prioritized above the fold, while explanatory rules live in lighter supporting panels instead of dominating the first scan.
+
 ## What the app is now
 
 - One primary public scoreboard at `/`
@@ -142,6 +144,12 @@ Local end-to-end proof:
 
 ```bash
 pnpm test:e2e
+```
+
+Focused layout proof:
+
+```bash
+LAYOUT_PROOF=1 E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/scoreboard-breakpoints.spec.ts --reporter=list
 ```
 
 Production end-to-end proof:
