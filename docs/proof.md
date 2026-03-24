@@ -227,6 +227,68 @@ Production artifacts:
 - `artifacts/layout-proof/prod-mid.png`
 - `artifacts/layout-proof/prod-mobile.png`
 
+Result:
+
+- Pass
+
+## Mobile density and viewport audit
+
+Date: `2026-03-24`
+
+Goal:
+
+- keep the scoreboard visible sooner on mobile by collapsing secondary summary and board-view surfaces by default
+- ensure those supporting panels expand as overlays instead of pushing the scoreboard down the page
+- re-audit the visual hierarchy across mobile, mid-width, tablet, and desktop
+
+Local validation:
+
+```bash
+pnpm check
+pnpm build
+E2E_BASE_URL=http://localhost:3017 pnpm exec playwright test tests/e2e/single-screen-voting.spec.ts --project=desktop-light --reporter=list
+E2E_BASE_URL=http://localhost:3017 pnpm exec playwright test tests/e2e/single-screen-voting.spec.ts --project=mobile-dark --reporter=list
+LAYOUT_PROOF=1 E2E_BASE_URL=http://localhost:3017 pnpm exec playwright test tests/e2e/scoreboard-breakpoints.spec.ts --reporter=list
+```
+
+Production validation:
+
+```bash
+curl -I https://vote.rajeevg.com
+E2E_BASE_URL=https://vote.rajeevg.com E2E_JUDGE_AUTH_MODE=ticket pnpm exec playwright test tests/e2e/single-screen-voting.spec.ts --reporter=list
+LAYOUT_PROOF=1 E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/scoreboard-breakpoints.spec.ts --reporter=list
+```
+
+What the proof checked:
+
+- mobile summary and board-view panels are collapsed by default
+- the mobile controls can still be opened and used
+- the first scoreboard row remains visible sooner in the mobile first scan
+- the same single-column hierarchy holds through mid-width, tablet, and wide desktop
+- manager, judge, and public journeys still complete on production after the density change
+
+Audit artifacts:
+
+- `artifacts/ux-audit/gh-30/prod-mobile-public.png`
+- `artifacts/ux-audit/gh-30/prod-mid-public.png`
+- `artifacts/ux-audit/gh-30/local-tablet-public.png`
+- `artifacts/ux-audit/gh-30/prod-wide-desktop-public.png`
+
+Audit note:
+
+- `docs/viewport-ux-audit.md`
+
+Observed result:
+
+- mobile now defers secondary scoreboard chrome until requested, which lifts the board higher without hiding functionality
+- opened supporting panels overlay the page instead of reflowing the scoreboard downward
+- mid-width, tablet, and desktop retain the simplified single-column reading order
+- production desktop and mobile end-to-end flows remained green after the change
+
+Result:
+
+- Pass
+
 ## Event-day readiness proof
 
 Date: `2026-03-23`

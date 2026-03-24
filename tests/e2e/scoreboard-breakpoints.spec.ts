@@ -33,7 +33,7 @@ test.describe("single-column scoreboard stays coherent across breakpoints", () =
       const appOrigin = new URL(page.url()).origin;
 
       await expect(page.getByTestId("scoreboard-section")).toBeVisible();
-      await expect(page.getByTestId("competition-state-badge")).toBeVisible();
+      await expect(page.locator('[data-testid="competition-state-badge"]:visible').first()).toBeVisible();
       await expect(page.getByTestId("progress-panel")).toHaveCount(0);
       await expect(page.getByTestId("workflow-summary")).toHaveCount(0);
 
@@ -50,7 +50,7 @@ test.describe("single-column scoreboard stays coherent across breakpoints", () =
 
       expect(scoreboardTop).toBeLessThan(viewport.height * 0.82);
 
-      const stateBadgeMetrics = await page.locator("[data-testid='competition-state-badge']").evaluate((element) => {
+      const stateBadgeMetrics = await page.locator("[data-testid='competition-state-badge']:visible").first().evaluate((element) => {
         const rect = element.getBoundingClientRect();
         return {
           left: rect.left,

@@ -1,13 +1,16 @@
 "use client";
 
 import * as React from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import {
   ArrowUpRight,
+  ChevronDown,
   FileSpreadsheet,
   Flag,
   FolderUp,
+  Info,
   LoaderCircle,
   Play,
   RotateCcw,
@@ -98,7 +101,9 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
   const [isDragOver, setIsDragOver] = React.useState(false);
   const [actionMessage, setActionMessage] = React.useState<string | null>(null);
   const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
+  const [mobileSummaryOpen, setMobileSummaryOpen] = React.useState(false);
   const uploadInputRef = React.useRef<HTMLInputElement>(null);
+  const mobileSummaryRef = React.useRef<HTMLDivElement>(null);
   const stateMeta = competitionStateMeta(snapshot.status);
   const isEmpty = snapshot.entries.length === 0;
   const scoreboardMeta = scoreboardCopy(snapshot, isEmpty);
@@ -115,6 +120,19 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
     if (!hasPendingJudgeAuthVerification()) return;
     setAuthDialogOpen(true);
   }, [snapshot.viewer.isAuthenticated]);
+
+  React.useEffect(() => {
+    if (!mobileSummaryOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!mobileSummaryRef.current?.contains(event.target as Node)) {
+        setMobileSummaryOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [mobileSummaryOpen]);
 
   function refreshBoard() {
     startTransition(() => {
@@ -581,8 +599,82 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
             </Card>
           ) : null}
 
-          <section className="space-y-3" data-testid="scoreboard-section">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <section className="relative space-y-3" data-testid="scoreboard-section">
+            <div className="md:hidden" ref={mobileSummaryRef}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="eyebrow">Scoreboard</div>
+                  <h1 className="font-display text-2xl font-black" data-testid="scoreboard-primary-heading">
+                    {scoreboardMeta.title}
+                  </h1>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      "rounded-full px-3 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em]",
+                      snapshot.status === "OPEN"
+                        ? "bg-radix-teal-a-3 text-accent-foreground"
+                        : snapshot.status === "FINALIZED"
+                          ? "bg-radix-purple-a-4 text-foreground"
+                          : "bg-radix-amber-a-3 text-foreground"
+                    )}
+                    data-testid="competition-state-badge"
+                  >
+                    {stateMeta.label}
+                  </span>
+                  {!isEmpty ? (
+                    <Button
+                      className="shrink-0"
+                      data-testid="scoreboard-mobile-summary-toggle"
+                      onClick={() => setMobileSummaryOpen((open) => !open)}
+                      size="sm"
+                      type="button"
+                      variant="outline"
+                    >
+                      <Info className="h-4 w-4" />
+                      Details
+                      <ChevronDown
+                        className={cn("h-4 w-4 transition", mobileSummaryOpen ? "rotate-180" : "")}
+                      />
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+
+              <AnimatePresence>
+                {mobileSummaryOpen ? (
+                  <motion.div
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    className="absolute inset-x-0 top-full z-30 mt-3 rounded-[1.5rem] border border-border/80 bg-background/95 p-4 shadow-[0_20px_70px_var(--shadow-soft)] backdrop-blur"
+                    data-testid="scoreboard-mobile-summary-panel"
+                    exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                    initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                  >
+                    <p className="text-sm leading-6 text-muted-foreground">{scoreboardMeta.detail}</p>
+                    <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                        {snapshot.progress.entryCount} entr{snapshot.progress.entryCount === 1 ? "y" : "ies"}
+                      </span>
+                      <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                        {snapshot.progress.openEntryCount} open now
+                      </span>
+                      {snapshot.status === "OPEN" ? (
+                        <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                          {snapshot.progress.participatingJudgeCount} judging now
+                        </span>
+                      ) : null}
+                      {snapshot.viewer.isManager && snapshot.status === "OPEN" ? (
+                        <span className="rounded-full bg-radix-gray-a-3 px-3 py-2">
+                          {snapshot.managerTracker.totalRemainingVotes} votes left
+                        </span>
+                      ) : null}
+                    </div>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </div>
+
+            <div className="hidden flex-col gap-3 lg:flex-row lg:items-end lg:justify-between md:flex">
               <div className="max-w-2xl">
                 <div className="eyebrow">Scoreboard</div>
                 <h1 className="font-display text-2xl font-black">{scoreboardMeta.title}</h1>
