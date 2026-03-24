@@ -201,6 +201,7 @@ Proof notes live in [proof.md](/Users/rajeev/Code/hackathon-voting-prototype/doc
 Viewport-specific appearance and usability findings live in [viewport-ux-audit.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/viewport-ux-audit.md).
 Analytics implementation notes live in [google-tagging-stack.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md).
 Analytics audit notes live in [analytics-audit.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/analytics-audit.md).
+Promoted GA dimension and metric definitions live in [google-tagging-stack.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md#promoted-ga-custom-definitions).
 
 ## Analytics stack
 

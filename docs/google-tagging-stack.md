@@ -114,6 +114,53 @@ Hackathon-specific events include:
 - `viewer_has_vote`
 - `entry_voting_open`
 
+#### Dimension definitions
+
+- `event_source`
+  - Plain meaning: which part of the app emitted the event.
+  - Typical values: `scoreboard`, `vote_dialog`, `judge_auth`, `manager_controls`, `consent_banner`.
+  - Use it for: separating manager actions, judge actions, and passive board viewing in reports.
+- `competition_status`
+  - Plain meaning: the round state at the time of the event.
+  - Typical values: `preparing`, `open`, `finalized`.
+  - Use it for: splitting behavior before judging opens, during live voting, and after finalization.
+- `viewer_role`
+  - Plain meaning: what kind of user the app believes this visitor is in the current moment.
+  - Typical values: `public`, `judge`, `manager`.
+  - Use it for: comparing anonymous viewers, authenticated judges, and the single manager.
+- `entry_slug`
+  - Plain meaning: the stable project identifier used in the app for a specific entry.
+  - Typical values: slugified project names such as `team-nova` or `smart-logistics`.
+  - Use it for: project-level drilldowns and joining related events across the same entry.
+- `entry_name`
+  - Plain meaning: the human-readable project name shown in the interface.
+  - Typical values: the uploaded project title from the workbook.
+  - Use it for: report labels, scorecards, and stakeholder-friendly charts.
+- `upload_method`
+  - Plain meaning: how the workbook import was initiated.
+  - Typical values: `drag_drop`, `file_picker`.
+  - Use it for: understanding whether managers naturally prefer drag-and-drop or manual selection.
+- `workbook_extension`
+  - Plain meaning: the file type uploaded by the manager.
+  - Typical values: `xlsx`.
+  - Use it for: validating that the intended workbook format is actually what gets used on the day.
+- `consent_source`
+  - Plain meaning: which consent control changed the visitor’s analytics choice.
+  - Typical values: `default`, `banner_accept`, `banner_decline`, `preferences`.
+  - Use it for: seeing whether consent is mostly decided at first banner view or later from privacy settings.
+- `viewer_can_vote`
+  - Plain meaning: whether the current signed-in viewer is allowed to vote on the entry tied to the event.
+  - Typical values: `true`, `false`.
+  - Use it for: segmenting successful voting opportunities from blocked or read-only views.
+- `viewer_has_vote`
+  - Plain meaning: whether the current viewer has already cast a score for the entry tied to the event.
+  - Typical values: `true`, `false`.
+  - Use it for: identifying fresh voting opportunities versus already-completed judging.
+- `entry_voting_open`
+  - Plain meaning: whether this specific project is currently accepting votes.
+  - Typical values: `true`, `false`.
+  - Use it for: explaining why some entries attract vote attempts while others are intentionally paused.
+
 ### Custom metrics created on `2026-03-24`
 
 - `entry_count`
@@ -125,6 +172,45 @@ Hackathon-specific events include:
 - `vote_count`
 - `aggregate_score`
 - `score`
+
+#### Metric definitions
+
+- `entry_count`
+  - Plain meaning: how many projects are currently loaded into the active scoreboard snapshot.
+  - Unit: count.
+  - Use it for: validating workbook import completeness and understanding board size over time.
+- `open_entry_count`
+  - Plain meaning: how many projects are currently open for voting.
+  - Unit: count.
+  - Use it for: checking whether the manager has paused any entries and how much of the field is still live.
+- `participating_judge_count`
+  - Plain meaning: how many judges are currently counted in the round denominator because they have started scoring.
+  - Unit: count.
+  - Use it for: understanding actual judging participation, not just total sign-ins.
+- `total_remaining_votes`
+  - Plain meaning: how many vote obligations are still outstanding across all open entries for participating judges.
+  - Unit: count.
+  - Use it for: the manager’s “how much judging is left?” view and finalization readiness.
+- `issue_count`
+  - Plain meaning: how many validation issues were found in a workbook upload attempt.
+  - Unit: count.
+  - Use it for: spotting messy imports and quantifying workbook quality problems.
+- `imported_project_count`
+  - Plain meaning: how many projects were successfully accepted from a workbook upload.
+  - Unit: count.
+  - Use it for: confirming upload success and comparing successful imports against attempted uploads.
+- `vote_count`
+  - Plain meaning: the number of votes represented by the event payload or competition snapshot.
+  - Unit: count.
+  - Use it for: measuring judging throughput and vote accumulation over time.
+- `aggregate_score`
+  - Plain meaning: the current summed scoreboard score for a project.
+  - Unit: score points.
+  - Use it for: trend charts, leaderboard movement, and project-level comparisons.
+- `score`
+  - Plain meaning: the single 0-10 score chosen by a judge in an individual vote event.
+  - Unit: score points.
+  - Use it for: score distribution analysis, judge behavior, and outlier review.
 
 ## Runtime environment contract
 

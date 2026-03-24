@@ -108,6 +108,11 @@ Verified by live API calls against the property:
 - hackathon custom dimensions were created
 - hackathon custom metrics were created
 
+Definition coverage:
+
+- the operator-facing definitions for every promoted dimension and metric now live in [/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md)
+- each definition explains the plain-English meaning, expected values or units, and how it should be interpreted in reporting
+
 ### GA realtime confirmation
 
 Realtime API evidence currently shows fresh standard events on the property:
