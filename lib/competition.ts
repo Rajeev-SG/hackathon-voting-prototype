@@ -103,6 +103,33 @@ const managerSnapshotViewer = {
   isManager: true
 } as const;
 
+export type PublicCompetitionSummary = {
+  source: "competition-public-snapshot";
+  generatedAt: string;
+  status: VotingStatus;
+  startedAt: string | null;
+  finalizedAt: string | null;
+  totals: {
+    totalVotes: number;
+    uniqueJudges: number;
+    totalEntries: number;
+    openEntries: number;
+    participatingJudges: number;
+    remainingVotes: number;
+    totalScore: number;
+    averageScore: number | null;
+  };
+  entries: Array<{
+    rank: number;
+    slug: string;
+    projectName: string;
+    voteCount: number;
+    totalScore: number;
+    averageScore: number | null;
+    isVotingOpen: boolean;
+  }>;
+};
+
 async function resolveVoteSubmissionContext(entryId: string) {
   let state: Awaited<ReturnType<typeof ensureCompetitionState>> | null = null;
   let entry:
@@ -162,6 +189,22 @@ const getCachedPublicCompetitionSnapshot = unstable_cache(
   }
 );
 
+async function getPublicCompetitionSnapshot() {
+  if (shouldUsePublicSnapshotCache) {
+    return getCachedPublicCompetitionSnapshot();
+  }
+
+  const { state, entries } = await getCompetitionSnapshotData();
+
+  return deriveCompetitionSnapshot({
+    status: state.votingStatus,
+    startedAt: state.startedAt,
+    finalizedAt: state.finalizedAt,
+    entries,
+    viewer: anonymousViewer
+  });
+}
+
 export async function getCompetitionSnapshot() {
   const viewer = await getViewerIdentity();
   if (!viewer.isAuthenticated && shouldUsePublicSnapshotCache) {
@@ -177,6 +220,42 @@ export async function getCompetitionSnapshot() {
     entries,
     viewer
   });
+}
+
+export async function getPublicCompetitionSummary(): Promise<PublicCompetitionSummary> {
+  const snapshot = await getPublicCompetitionSnapshot();
+  const totalVotes = snapshot.entries.reduce((sum, entry) => sum + entry.voteCount, 0);
+  const totalScore = snapshot.entries.reduce((sum, entry) => sum + entry.totalScore, 0);
+  const uniqueJudges = new Set(
+    snapshot.entries.flatMap((entry) => entry.judgeEmails.map((judgeEmail) => normalizeEmail(judgeEmail)))
+  ).size;
+
+  return {
+    source: "competition-public-snapshot",
+    generatedAt: new Date().toISOString(),
+    status: snapshot.status,
+    startedAt: snapshot.startedAt,
+    finalizedAt: snapshot.finalizedAt,
+    totals: {
+      totalVotes,
+      uniqueJudges,
+      totalEntries: snapshot.progress.entryCount,
+      openEntries: snapshot.progress.openEntryCount,
+      participatingJudges: snapshot.progress.participatingJudgeCount,
+      remainingVotes: snapshot.managerTracker.totalRemainingVotes,
+      totalScore,
+      averageScore: totalVotes > 0 ? Number((totalScore / totalVotes).toFixed(2)) : null
+    },
+    entries: snapshot.entries.map((entry) => ({
+      rank: entry.rank,
+      slug: entry.slug,
+      projectName: entry.projectName,
+      voteCount: entry.voteCount,
+      totalScore: entry.totalScore,
+      averageScore: entry.averageScore,
+      isVotingOpen: entry.isVotingOpen
+    }))
+  };
 }
 
 export async function replaceEntriesFromWorkbook(buffer: ArrayBuffer | Buffer) {

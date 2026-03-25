@@ -44,6 +44,8 @@ On mobile, the secondary scoreboard summary and board-view controls stay collaps
 - Dashboard shell: [results-dashboard.tsx](/Users/rajeev/Code/hackathon-voting-prototype/components/results-dashboard.tsx)
 - Scoreboard table/cards: [results-scoreboard-table.tsx](/Users/rajeev/Code/hackathon-voting-prototype/components/results-scoreboard-table.tsx)
 - Voting modal: [vote-dialog.tsx](/Users/rajeev/Code/hackathon-voting-prototype/components/vote-dialog.tsx)
+- Public source-of-truth summary: [route.ts](/Users/rajeev/Code/hackathon-voting-prototype/app/api/reporting/public-summary/route.ts)
+- Snapshot and vote persistence helpers: [competition.ts](/Users/rajeev/Code/hackathon-voting-prototype/lib/competition.ts)
 - Competition rules: [competition-logic.ts](/Users/rajeev/Code/hackathon-voting-prototype/lib/competition-logic.ts)
 - Workbook parsing/export: [xlsx.ts](/Users/rajeev/Code/hackathon-voting-prototype/lib/xlsx.ts)
 - Prisma schema: [schema.prisma](/Users/rajeev/Code/hackathon-voting-prototype/prisma/schema.prisma)
@@ -233,6 +235,7 @@ Production analytics now includes:
 - direct Google tag delivery for the voting-app stream
 - first-party server-side collection via `https://vote.rajeevg.com/metrics`
 - GA4 custom dimensions and metrics for the hackathon app
+- public source-of-truth reporting at `https://vote.rajeevg.com/api/reporting/public-summary`
 - BigQuery export enabled for the voting-app stream
 - a stable reporting dataset in BigQuery:
   - `personal-gws-1:hackathon_reporting`
@@ -259,6 +262,7 @@ Production analytics now includes:
   - `Experience and devices`
   - `Event taxonomy`
 - current audit status: the linked raw GA export dataset still has no landed `events_*` tables, but the reporting dataset, refresh pipeline, and six-page Looker shell are now visibly present and re-proven with direct page screenshots after correcting an earlier invalid blank/editor-state proof
+- reconciliation rule: persisted vote totals now come from the live competition snapshot and public scoreboard, while GA4 `vote_submitted` remains analytics coverage telemetry rather than the authoritative vote count
 
 Analytics env vars:
 
