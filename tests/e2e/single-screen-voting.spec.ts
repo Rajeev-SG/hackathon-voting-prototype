@@ -3,13 +3,13 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
-import { PrismaClient } from "@prisma/client";
 import { expect, test, type Browser, type Page, devices } from "playwright/test";
 import * as XLSX from "xlsx";
 
 import { TEMPLATE_SHEET_NAME } from "@/lib/constants";
+import { createDirectPrismaClient } from "@/tests/e2e/support/direct-prisma";
 
-const prisma = new PrismaClient();
+const prisma = createDirectPrismaClient();
 
 const MANAGER_EMAIL = "rajeev.gill@omc.com";
 const JUDGE_EMAIL = "judge.one+clerk_test@example.com";

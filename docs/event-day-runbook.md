@@ -38,6 +38,7 @@ What still needs human discipline on the day:
 
 Fresh evidence from this pass:
 
+- `set -a && source .env.vercel-prod && set +a && pnpm readiness:db -- --url https://vote.rajeevg.com`
 - `pnpm exec vitest run tests/votes.integration.test.ts tests/readiness.integration.test.ts --reporter=verbose`
 - `pnpm readiness:public -- --url https://vote.rajeevg.com --concurrency 50 --requests 500`
 - `set -a && source .env.vercel-prod && set +a && pnpm readiness:smoke -- --base-url https://vote.rajeevg.com`
@@ -81,18 +82,22 @@ Expected:
 
 - `HTTP/2 200`
 
-If this returns `500`, check the attached Vercel database integration before you do anything else:
+2. Run the non-destructive database and vendor preflight.
 
 ```bash
-vercel integration ls
+set -a && source .env.vercel-prod && set +a
+pnpm readiness:db -- --url https://vote.rajeevg.com
 ```
 
 Expected:
 
-- the database resource for this project is `Available`, not `Suspended`
-- if the primary Prisma resource is suspended, provision or reconnect the emergency `HOTFIX_*` database path before judges arrive
+- public site check returns `200` and a scoreboard signal
+- `neon-hotfix` is `Available`
+- `HOTFIX_DATABASE_URL` and `HOTFIX_DATABASE_URL_UNPOOLED` are present in production
+- the direct database query succeeds when `.env.vercel-prod` is loaded
+- a suspended legacy Prisma resource is not itself a blocker as long as the hotfix Neon resource is green
 
-2. Confirm the public board still handles expected spectator load.
+3. Confirm the public board still handles expected spectator load.
 
 ```bash
 pnpm readiness:public -- --url https://vote.rajeevg.com --concurrency 50 --requests 500
@@ -103,7 +108,7 @@ Expected:
 - `failures: 0`
 - all statuses `200`
 
-3. Run the production smoke path.
+4. Run the production smoke path.
 
 ```bash
 set -a && source .env.vercel-prod && set +a
@@ -115,7 +120,7 @@ Expected:
 - script exits `0`
 - `result: "pass"`
 
-4. Sign into the live app as the manager and visually confirm:
+5. Sign into the live app as the manager and visually confirm:
 
 - the workbook you intend to use is ready
 - the board is either intentionally empty or intentionally loaded

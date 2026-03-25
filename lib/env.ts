@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const environmentSchema = z.object({
+  MANAGER_EMAIL: z.string().email().optional(),
   CLERK_SECRET_KEY: z.string().min(1, "Missing CLERK_SECRET_KEY").optional(),
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z
     .string()
@@ -20,6 +21,7 @@ const environmentSchema = z.object({
 });
 
 export const env = environmentSchema.parse({
+  MANAGER_EMAIL: process.env.MANAGER_EMAIL,
   CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
   DATABASE_URL: process.env.DATABASE_URL,

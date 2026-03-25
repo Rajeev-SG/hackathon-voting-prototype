@@ -52,6 +52,7 @@ On mobile, the secondary scoreboard summary and board-view controls stay collaps
 Copy [.env.example](/Users/rajeev/Code/hackathon-voting-prototype/.env.example) into `.env.local` and set:
 
 ```bash
+MANAGER_EMAIL=rajeev.gill@omc.com
 CLERK_SECRET_KEY=
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 DATABASE_URL=
@@ -65,10 +66,12 @@ NEXT_PUBLIC_FLOWS_ENVIRONMENT=production
 
 Notes:
 
+- `MANAGER_EMAIL` defaults to `rajeev.gill@omc.com` and is the only identity allowed to run manager actions.
 - `DATABASE_URL` is the runtime connection string Prisma uses in the app.
 - `POSTGRES_URL` and `PRISMA_DATABASE_URL` are kept for Vercel/Postgres compatibility.
 - `HOTFIX_DATABASE_URL` is an emergency runtime override. When present, the app will prefer it over `DATABASE_URL`.
 - `HOTFIX_DATABASE_URL_UNPOOLED` is the matching emergency migration URL for `prisma migrate deploy` or `prisma db push`.
+- Manager workbook uploads are intentionally capped at `5 MB` to keep the live XLSX parser path narrow and predictable.
 - Production Clerk is configured on `vote.rajeevg.com`.
 - Google SSO is configured on the production Clerk instance.
 - Local automated proof covers the email-code flow directly.
@@ -281,6 +284,7 @@ bq query --location=EU --use_legacy_sql=false < sql/analytics/refresh_reporting_
 - The live verification email already arrives branded from `Hackathon Voting App <notifications@vote.rajeevg.com>`.
 - If a mobile judge switches to their email app to fetch the one-time code and then returns, the app restores the pending verification step instead of dropping them back on the email-entry form.
 - Production verification-email template editing is still limited by the current Clerk plan; deeper subject/body customization requires a Clerk plan upgrade or a custom email-delivery integration.
+- `pnpm readiness:db -- --url https://vote.rajeevg.com` is the fastest non-destructive production preflight for the live site, Vercel integration state, and required `HOTFIX_*` env surface. If `.env.vercel-prod` is loaded first, it also performs a direct runtime database query.
 
 ## Production URL
 
