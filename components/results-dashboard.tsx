@@ -131,7 +131,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
       snapshot.viewer.isManager
     ]
   );
-  const autoRefreshIntervalMs = snapshot.status === "OPEN" ? 5000 : 15000;
+  const shouldUseLiveRefresh = snapshot.status === "OPEN" && !snapshot.progress.isComplete;
   const autoRefreshPaused =
     Boolean(selectedEntry) ||
     authDialogOpen ||
@@ -166,7 +166,9 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
       });
     };
 
-    intervalId = window.setInterval(refreshIfVisible, autoRefreshIntervalMs);
+    if (shouldUseLiveRefresh) {
+      intervalId = window.setInterval(refreshIfVisible, 5000);
+    }
     window.addEventListener("focus", refreshIfVisible);
     document.addEventListener("visibilitychange", refreshIfVisible);
 
@@ -175,7 +177,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
       window.removeEventListener("focus", refreshIfVisible);
       document.removeEventListener("visibilitychange", refreshIfVisible);
     };
-  }, [autoRefreshIntervalMs, autoRefreshPaused, router, startTransition]);
+  }, [autoRefreshPaused, router, shouldUseLiveRefresh, startTransition]);
 
   async function sendJson(url: string, init?: RequestInit) {
     const response = await fetch(url, {

@@ -40,6 +40,8 @@ export type ScoreboardEntryView = {
   currentUserVote: number | null;
   canVote: boolean;
   lastVoteAt: string | null;
+  outstandingJudgeEmails: string[];
+  outstandingJudgeCount: number;
 };
 
 export type ProgressSummary = {
@@ -68,6 +70,31 @@ export type ManagerRoundTracker = {
   judges: JudgeCoverageSummary[];
   helperText: string;
 };
+
+function getParticipatingJudgeEmails(entries: Pick<EntryRecordForLogic, "votes">[]) {
+  return Array.from(
+    new Set(entries.flatMap((entry) => entry.votes.map((vote) => normalizeEmail(vote.judgeEmail))))
+  );
+}
+
+function getEligibleJudgeEmailsForEntry(
+  entry: Pick<EntryRecordForLogic, "teamEmails" | "votes">,
+  participatingJudgeEmails: string[]
+) {
+  const entryEmails = entry.teamEmails.map((teamMember) => teamMember.email);
+  return participatingJudgeEmails.filter((judgeEmail) => !isSelfVoteBlocked(entryEmails, judgeEmail));
+}
+
+function getOutstandingJudgeEmailsForEntry(
+  entry: Pick<EntryRecordForLogic, "teamEmails" | "votes">,
+  participatingJudgeEmails: string[]
+) {
+  const judgesWhoAlreadyVoted = new Set(entry.votes.map((vote) => normalizeEmail(vote.judgeEmail)));
+
+  return getEligibleJudgeEmailsForEntry(entry, participatingJudgeEmails).filter(
+    (judgeEmail) => !judgesWhoAlreadyVoted.has(judgeEmail)
+  );
+}
 
 export type CompetitionSnapshot = {
   status: VotingStatus;
@@ -158,31 +185,18 @@ export function deriveProgress({
     };
   }
 
-  const participatingJudgeEmails = Array.from(
-    new Set(openVotes.map((vote) => normalizeEmail(vote.judgeEmail)))
-  );
+  const participatingJudgeEmails = getParticipatingJudgeEmails(openEntries);
   const participatingJudgeCount = participatingJudgeEmails.length;
   const castVotes = openVotes.length;
-  const expectedVotes = participatingJudgeEmails.reduce((sum, judgeEmail) => {
-    const eligibleEntryCount = openEntries.filter(
-      (entry) => !isSelfVoteBlocked(entry.teamEmails.map((teamMember) => teamMember.email), judgeEmail)
-    ).length;
-
-    return sum + eligibleEntryCount;
-  }, 0);
+  const outstandingJudgeEmailsByEntry = openEntries.map((entry) =>
+    getOutstandingJudgeEmailsForEntry(entry, participatingJudgeEmails)
+  );
+  const expectedVotes = openEntries.reduce(
+    (sum, entry) => sum + getEligibleJudgeEmailsForEntry(entry, participatingJudgeEmails).length,
+    0
+  );
   const percentage = expectedVotes === 0 ? 0 : Math.round((castVotes / expectedVotes) * 100);
-  const isComplete =
-    expectedVotes > 0 &&
-    participatingJudgeEmails.every((judgeEmail) =>
-      openEntries.every((entry) => {
-        const entryEmails = entry.teamEmails.map((teamMember) => teamMember.email);
-        if (isSelfVoteBlocked(entryEmails, judgeEmail)) {
-          return true;
-        }
-
-        return entry.votes.some((vote) => normalizeEmail(vote.judgeEmail) === judgeEmail);
-      })
-    );
+  const isComplete = expectedVotes > 0 && outstandingJudgeEmailsByEntry.every((emails) => emails.length === 0);
 
   if (status === "FINALIZED") {
     return {
@@ -233,11 +247,7 @@ export function deriveManagerRoundTracker({
   entries: EntryRecordForLogic[];
 }): ManagerRoundTracker {
   const openEntries = entries.filter((entry) => entry.isVotingOpen);
-  const participatingJudgeEmails = Array.from(
-    new Set(
-      openEntries.flatMap((entry) => entry.votes.map((vote) => normalizeEmail(vote.judgeEmail)))
-    )
-  );
+  const participatingJudgeEmails = getParticipatingJudgeEmails(openEntries);
 
   if (status !== "OPEN") {
     return {
@@ -263,10 +273,9 @@ export function deriveManagerRoundTracker({
 
   const judges = participatingJudgeEmails
     .map((judgeEmail) => {
-      const eligibleOpenEntries = openEntries.filter((entry) => {
-        const entryEmails = entry.teamEmails.map((teamMember) => teamMember.email);
-        return !isSelfVoteBlocked(entryEmails, judgeEmail);
-      });
+      const eligibleOpenEntries = openEntries.filter((entry) =>
+        getEligibleJudgeEmailsForEntry(entry, participatingJudgeEmails).includes(judgeEmail)
+      );
       const completedOpenEntries = eligibleOpenEntries.filter((entry) =>
         entry.votes.some((vote) => normalizeEmail(vote.judgeEmail) === judgeEmail)
       );
@@ -331,6 +340,7 @@ export function deriveCompetitionSnapshot({
     status,
     entries
   });
+  const participatingJudgeEmails = getParticipatingJudgeEmails(entries.filter((entry) => entry.isVotingOpen));
 
   const rankedEntries = entries
     .map((entry) => {
@@ -341,6 +351,10 @@ export function deriveCompetitionSnapshot({
         viewer.email == null
           ? null
           : entry.votes.find((vote) => normalizeEmail(vote.judgeEmail) === viewer.email)?.score ?? null;
+      const outstandingJudgeEmails =
+        status === "OPEN"
+          ? getOutstandingJudgeEmailsForEntry(entry, participatingJudgeEmails)
+          : [];
 
       return {
         ...entry,
@@ -352,6 +366,8 @@ export function deriveCompetitionSnapshot({
         isVotingOpen: entry.isVotingOpen,
         isSelfVoteBlocked: isSelfVoteBlocked(teamEmails, viewer.email),
         currentUserVote,
+        outstandingJudgeEmails,
+        outstandingJudgeCount: outstandingJudgeEmails.length,
         lastVoteAt: entry.votes
           .reduce<Date | null>((latest, vote) => {
             if (!latest || vote.updatedAt > latest) return vote.updatedAt;

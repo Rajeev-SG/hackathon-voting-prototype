@@ -16,8 +16,9 @@ On mobile, the secondary scoreboard summary and board-view controls stay collaps
 - Automatic self-vote blocking from uploaded team-member emails
 - Compact live status chips on the scoreboard
 - Manager-only remaining-votes tracker that mirrors the real finalization denominator
+- Manager-only per-entry outstanding-judge avatars with email tooltips
 - Table and horizontal bar-chart views on the same scoreboard
-- Manager-only per-entry voting open/closed controls
+- Manager-only per-entry voting open/closed controls with fairness blocking when a live entry still has judges outstanding
 - Manager-only finalization and finalized XLSX export
 - Manager-only reset button for repeatable dry runs
 - Light and dark mode
@@ -143,7 +144,14 @@ The app uses a practical judging-round rule:
 - judges join the denominator when they cast their first vote
 - self-vote-blocked projects are removed from that judge's denominator
 - manager-closed projects are removed from the live denominator until reopened
+- managers cannot close an entry once the round is live if any participating, eligible judge still owes that entry a vote
 - finalization unlocks when every participating judge has scored every project that is still open and eligible for them
+
+The public board does not poll continuously all day:
+
+- before voting opens, viewers update on direct interaction instead of a fixed refresh loop
+- while voting is open and work is still outstanding, the board refreshes every 5 seconds
+- once every required live vote has been cast, the automatic 5-second refresh loop stops again
 
 Each judge can submit one score per project. Once submitted, that score is locked for the rest of the round.
 

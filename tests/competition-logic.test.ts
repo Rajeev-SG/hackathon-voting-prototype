@@ -90,6 +90,10 @@ describe("competition logic", () => {
     expect(snapshot.progress.isComplete).toBe(false);
     expect(snapshot.canFinalize).toBe(false);
     expect(snapshot.progress.percentage).toBe(50);
+    expect(snapshot.entries.find((entry) => entry.id === "entry-2")).toMatchObject({
+      outstandingJudgeCount: 1,
+      outstandingJudgeEmails: ["judge.three@example.com"]
+    });
   });
 
   it("excludes manager-closed projects from the live completion denominator", () => {
@@ -186,6 +190,58 @@ describe("competition logic", () => {
       completedOpenEntries: 1,
       remainingOpenEntries: 1,
       remainingProjectNames: ["Signal Bloom"]
+    });
+    expect(snapshot.entries.find((entry) => entry.id === "entry-2")).toMatchObject({
+      outstandingJudgeCount: 1,
+      outstandingJudgeEmails: ["judge.one@example.com"]
+    });
+  });
+
+  it("keeps entry-level outstanding judges empty once all eligible scores are in", () => {
+    const snapshot = deriveCompetitionSnapshot({
+      status: "OPEN",
+      startedAt: new Date("2026-03-23T12:00:00.000Z"),
+      finalizedAt: null,
+      viewer: {
+        clerkUserId: "user_999",
+        email: "rajeev.gill@omc.com",
+        isAuthenticated: true,
+        isManager: true
+      },
+      entries: [
+        {
+          id: "entry-1",
+          slug: "aurora-atlas",
+          projectName: "Aurora Atlas",
+          teamName: "Team North Star",
+          summary: "Summary",
+          isVotingOpen: true,
+          teamEmails: [{ email: "founder@example.com" }],
+          votes: [
+            { judgeEmail: "judge.one@example.com", score: 9, updatedAt: new Date("2026-03-23T12:00:00.000Z") },
+            { judgeEmail: "judge.two@example.com", score: 8, updatedAt: new Date("2026-03-23T12:01:00.000Z") }
+          ]
+        },
+        {
+          id: "entry-2",
+          slug: "signal-bloom",
+          projectName: "Signal Bloom",
+          teamName: "Team Bloom",
+          summary: "Summary",
+          isVotingOpen: true,
+          teamEmails: [{ email: "judge.one@example.com" }],
+          votes: [{ judgeEmail: "judge.two@example.com", score: 10, updatedAt: new Date("2026-03-23T12:03:00.000Z") }]
+        }
+      ]
+    });
+
+    expect(snapshot.entries.find((entry) => entry.id === "entry-1")).toMatchObject({
+      outstandingJudgeCount: 0,
+      outstandingJudgeEmails: []
+    });
+    expect(snapshot.entries.find((entry) => entry.id === "entry-2")).toMatchObject({
+      outstandingJudgeCount: 0,
+      outstandingJudgeEmails: []
     });
   });
 

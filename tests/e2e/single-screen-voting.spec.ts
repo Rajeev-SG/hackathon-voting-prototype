@@ -436,6 +436,21 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await expect(managerPage.getByTestId("manager-remaining-votes")).toContainText("1 vote still outstanding.");
     await expect(managerPage.getByTestId("manager-remaining-votes")).toContainText(JUDGE_EMAIL);
     await expect(managerPage.getByTestId("manager-remaining-votes")).toContainText("Signal Bloom");
+    await expect(
+      managerPage
+        .getByTestId("manager-entry-outstanding-signal-bloom")
+        .nth(activeResponsiveIndex(testInfo.project.name))
+    ).toContainText("1 judge left");
+
+    await managerPage
+      .getByTestId("manager-entry-toggle-signal-bloom")
+      .nth(activeResponsiveIndex(testInfo.project.name))
+      .click();
+    await expect(
+      managerPage.getByText(
+        "Cannot close voting for Signal Bloom yet. 1 judge still needs to score it, and every entry must stay equally covered."
+      )
+    ).toBeVisible();
 
     await openVoteDialog(judgePage, "Signal Bloom");
     await saveVote(judgePage, 7);

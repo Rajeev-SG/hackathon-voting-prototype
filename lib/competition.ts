@@ -96,6 +96,13 @@ async function getCompetitionSnapshotData() {
   };
 }
 
+const managerSnapshotViewer = {
+  clerkUserId: null,
+  email: MANAGER_EMAIL,
+  isAuthenticated: true,
+  isManager: true
+} as const;
+
 async function resolveVoteSubmissionContext(entryId: string) {
   let state: Awaited<ReturnType<typeof ensureCompetitionState>> | null = null;
   let entry:
@@ -414,6 +421,25 @@ export async function setEntryVotingAvailability({
 
   if (entry.isVotingOpen === isVotingOpen) {
     return;
+  }
+
+  if (state.votingStatus === "OPEN" && entry.isVotingOpen && !isVotingOpen) {
+    const { entries } = await getCompetitionSnapshotData();
+    const snapshot = deriveCompetitionSnapshot({
+      status: state.votingStatus,
+      startedAt: state.startedAt,
+      finalizedAt: state.finalizedAt,
+      entries,
+      viewer: managerSnapshotViewer
+    });
+    const entrySnapshot = snapshot.entries.find((candidate) => candidate.id === entryId);
+
+    if ((entrySnapshot?.outstandingJudgeCount ?? 0) > 0) {
+      const count = entrySnapshot?.outstandingJudgeCount ?? 0;
+      throw new Error(
+        `Cannot close voting for ${entry.projectName} yet. ${count} judge${count === 1 ? " still needs" : "s still need"} to score it, and every entry must stay equally covered.`
+      );
+    }
   }
 
   if (state.votingStatus === "PREPARING" && !isVotingOpen) {
