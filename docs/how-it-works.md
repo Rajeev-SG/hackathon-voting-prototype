@@ -21,7 +21,8 @@ The app is intentionally a single-screen product.
 
 ### Manager
 
-- The manager is exactly `rajeev.gill@omc.com`.
+- The manager identity defaults to `rajeev.gill@omc.com`.
+- You can override it with `MANAGER_EMAIL` if the event owner changes.
 - Only this user can:
   - download the workbook template
   - upload a workbook
@@ -77,6 +78,7 @@ Important rules:
 - The downloaded template is intentionally blank. There are no seeded demo or placeholder projects.
 - `Project Name` must be unique.
 - Each row must contain at least one team email.
+- Uploaded workbooks must stay under `5 MB`.
 - Unknown non-email columns are tolerated and stored as metadata.
 - Legacy fields such as tracks, booths, demo URLs, repository URLs, and image URLs are no longer part of the product.
 

@@ -1,6 +1,6 @@
 # Hackathon Voting App
 
-Production-oriented single-screen hackathon voting app built with Next.js 14, TypeScript, Tailwind, Clerk, Prisma, and Postgres.
+Production-oriented single-screen hackathon voting app built with Next.js 14, TypeScript, Tailwind, Clerk, Prisma ORM, and Postgres.
 
 The app keeps the visual language of the original results dashboard, but the product has been simplified to one public scoreboard with an integrated manager control surface and a polished voting modal for judges.
 
@@ -16,8 +16,9 @@ On mobile, the secondary scoreboard summary and board-view controls stay collaps
 - Automatic self-vote blocking from uploaded team-member emails
 - Compact live status chips on the scoreboard
 - Manager-only remaining-votes tracker that mirrors the real finalization denominator
+- Manager-only per-entry outstanding-judge avatars with email tooltips
 - Table and horizontal bar-chart views on the same scoreboard
-- Manager-only per-entry voting open/closed controls
+- Manager-only per-entry voting open/closed controls with fairness blocking when a live entry still has judges outstanding
 - Manager-only finalization and finalized XLSX export
 - Manager-only reset button for repeatable dry runs
 - Light and dark mode
@@ -31,8 +32,8 @@ On mobile, the secondary scoreboard summary and board-view controls stay collaps
 - Tailwind CSS
 - shadcn-style Radix primitives
 - Clerk
-- Prisma
-- Postgres
+- Prisma ORM
+- Neon Postgres in current production, with legacy Prisma Postgres variables still accepted as fallback
 - `xlsx`
 - Playwright
 - Vitest
@@ -52,19 +53,27 @@ On mobile, the secondary scoreboard summary and board-view controls stay collaps
 Copy [.env.example](/Users/rajeev/Code/hackathon-voting-prototype/.env.example) into `.env.local` and set:
 
 ```bash
+MANAGER_EMAIL=rajeev.gill@omc.com
 CLERK_SECRET_KEY=
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 DATABASE_URL=
 POSTGRES_URL=
 PRISMA_DATABASE_URL=
+HOTFIX_DATABASE_URL=
+HOTFIX_DATABASE_URL_UNPOOLED=
 NEXT_PUBLIC_FLOWS_ORGANIZATION_ID=
 NEXT_PUBLIC_FLOWS_ENVIRONMENT=production
 ```
 
 Notes:
 
-- `DATABASE_URL` is the runtime connection string Prisma uses in the app.
-- `POSTGRES_URL` and `PRISMA_DATABASE_URL` are kept for Vercel/Postgres compatibility.
+- `MANAGER_EMAIL` defaults to `rajeev.gill@omc.com` and is the only identity allowed to run manager actions.
+- The app still uses Prisma ORM, but production currently points at Neon through `HOTFIX_DATABASE_URL` and `HOTFIX_DATABASE_URL_UNPOOLED`.
+- `DATABASE_URL`, `POSTGRES_URL`, and `PRISMA_DATABASE_URL` are legacy fallback inputs that may still exist in Vercel, but they are not the current production source of truth.
+- `HOTFIX_DATABASE_URL` is the production-preferred runtime connection string. When present, the app will prefer it over `DATABASE_URL`.
+- `HOTFIX_DATABASE_URL_UNPOOLED` is the matching direct Neon migration URL for `prisma migrate deploy` or `prisma db push`.
+- If local env files still point at `db.prisma.io`, treat them as stale until refreshed from the linked Vercel project.
+- Manager workbook uploads are intentionally capped at `5 MB` to keep the live XLSX parser path narrow and predictable.
 - Production Clerk is configured on `vote.rajeevg.com`.
 - Google SSO is configured on the production Clerk instance.
 - Local automated proof covers the email-code flow directly.
@@ -136,7 +145,14 @@ The app uses a practical judging-round rule:
 - judges join the denominator when they cast their first vote
 - self-vote-blocked projects are removed from that judge's denominator
 - manager-closed projects are removed from the live denominator until reopened
+- managers cannot close an entry once the round is live if any participating, eligible judge still owes that entry a vote
 - finalization unlocks when every participating judge has scored every project that is still open and eligible for them
+
+The public board does not poll continuously all day:
+
+- before voting opens, viewers update on direct interaction instead of a fixed refresh loop
+- while voting is open and work is still outstanding, the board refreshes every 5 seconds
+- once every required live vote has been cast, the automatic 5-second refresh loop stops again
 
 Each judge can submit one score per project. Once submitted, that score is locked for the rest of the round.
 
@@ -190,13 +206,14 @@ Cheap event-day readiness checks:
 ```bash
 pnpm exec vitest run tests/readiness.integration.test.ts tests/votes.integration.test.ts --reporter=verbose
 pnpm readiness:public -- --url https://vote.rajeevg.com --concurrency 50 --requests 500
-set -a && source .env.vercel-prod && set +a
+tmpenv=$(mktemp) && vercel env pull "$tmpenv" --environment=production --yes >/dev/null && set -a && source "$tmpenv" && set +a
 pnpm readiness:smoke -- --base-url https://vote.rajeevg.com
+rm -f "$tmpenv"
 ```
 
 These checks prove two different things:
 
-- the Vitest pair covers vote locking, self-vote blocking, project-close behavior, reset behavior, and the 50-judge readiness waves against the real Prisma-backed vote logic
+- the Vitest pair covers vote locking, self-vote blocking, project-close behavior, reset behavior, and the 50-judge readiness waves against the real Prisma-ORM voting logic, but your local env source must match the live Neon runtime if you want production-representative results
 - `readiness:public` sends 500 public scoreboard requests with 50-way concurrency to confirm the live site stays responsive under the expected spectator load without requiring a paid load-testing service
 - `readiness:smoke` is the manager/judge/public production smoke path that resets to a clean start, uploads the workbook, opens voting, casts a real judge vote, and confirms the public board refreshes
 
@@ -277,6 +294,8 @@ bq query --location=EU --use_legacy_sql=false < sql/analytics/refresh_reporting_
 - The live verification email already arrives branded from `Hackathon Voting App <notifications@vote.rajeevg.com>`.
 - If a mobile judge switches to their email app to fetch the one-time code and then returns, the app restores the pending verification step instead of dropping them back on the email-entry form.
 - Production verification-email template editing is still limited by the current Clerk plan; deeper subject/body customization requires a Clerk plan upgrade or a custom email-delivery integration.
+- `pnpm readiness:db -- --url https://vote.rajeevg.com` is the fastest non-destructive production preflight for the live site, Vercel integration state, and required `HOTFIX_*` env surface. Pull the live production env from Vercel first if you also want the direct runtime database query.
+- `.env.vercel-prod` should be treated as a local historical snapshot, not as the production source of truth.
 
 ## Production URL
 

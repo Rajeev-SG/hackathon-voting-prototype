@@ -7,6 +7,7 @@ import { BarChart3, ChevronDown, Lock, PauseCircle, PlayCircle, Table2, Vote } f
 import type { ScoreboardEntryView, ViewerIdentity } from "@/lib/competition-logic";
 import { pushDataLayerEvent } from "@/lib/analytics";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,61 @@ type ResultsScoreboardTableProps = {
   onToggleEntryVoting?: (entry: ScoreboardEntryView) => void;
   pendingEntryId?: string | null;
 };
+
+function emailAvatarLabel(email: string) {
+  const localPart = email.split("@")[0] ?? email;
+  const chunks = localPart.split(/[._+-]/).filter(Boolean);
+
+  if (chunks.length >= 2) {
+    return `${chunks[0]?.[0] ?? ""}${chunks[1]?.[0] ?? ""}`.toUpperCase();
+  }
+
+  return localPart.slice(0, 2).toUpperCase();
+}
+
+function OutstandingJudgeAvatarGroup({ entry }: { entry: ScoreboardEntryView }) {
+  if (entry.outstandingJudgeCount === 0) return null;
+
+  const visibleEmails = entry.outstandingJudgeEmails.slice(0, 3);
+  const hiddenCount = entry.outstandingJudgeCount - visibleEmails.length;
+
+  return (
+    <div
+      className="flex flex-wrap items-center gap-2"
+      data-testid={`manager-entry-outstanding-${entry.slug}`}
+    >
+      <span className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        {entry.outstandingJudgeCount} judge{entry.outstandingJudgeCount === 1 ? "" : "s"} left
+      </span>
+      <div className="flex -space-x-2">
+        {visibleEmails.map((email) => (
+          <button
+            aria-label={email}
+            className="group relative rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            key={email}
+            onClick={(event) => event.stopPropagation()}
+            title={email}
+            type="button"
+          >
+            <Avatar className="h-8 w-8 border-background shadow-sm">
+              <AvatarFallback className="bg-radix-purple-a-4 text-[0.68rem] font-black text-foreground">
+                {emailAvatarLabel(email)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="pointer-events-none absolute -top-10 left-1/2 z-20 -translate-x-1/2 rounded-full bg-foreground px-2.5 py-1 text-[0.68rem] font-medium text-background opacity-0 shadow-lg transition duration-150 group-hover:opacity-100 group-focus-visible:opacity-100">
+              {email}
+            </span>
+          </button>
+        ))}
+        {hiddenCount > 0 ? (
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-background bg-radix-gray-a-4 text-[0.68rem] font-semibold text-foreground shadow-sm">
+            +{hiddenCount}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 
 function actionLabel({
   entry,
@@ -131,6 +187,22 @@ function EntryMetaPills({
   );
 }
 
+function ManagerEntryCoverage({
+  entry,
+  viewer
+}: {
+  entry: ScoreboardEntryView;
+  viewer: ViewerIdentity;
+}) {
+  if (!viewer.isManager || entry.outstandingJudgeCount === 0) return null;
+
+  return (
+    <div className="mt-3">
+      <OutstandingJudgeAvatarGroup entry={entry} />
+    </div>
+  );
+}
+
 function ChartView({
   entries,
   status,
@@ -178,6 +250,7 @@ function ChartView({
                       {entry.summary ? (
                         <div className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{entry.summary}</div>
                       ) : null}
+                      <ManagerEntryCoverage entry={entry} viewer={viewer} />
                     </div>
                   </div>
 
@@ -281,8 +354,9 @@ export function ResultsScoreboardTable({
           <Button
             aria-expanded={mobileViewPanelOpen}
             aria-haspopup="dialog"
+            className={cn(mobileViewPanelOpen ? "relative z-[60]" : "")}
             data-testid="scoreboard-mobile-view-toggle"
-            onClick={() => setMobileViewPanelOpen(true)}
+            onClick={() => setMobileViewPanelOpen((open) => !open)}
             size="sm"
             type="button"
             variant="outline"
@@ -430,6 +504,7 @@ export function ResultsScoreboardTable({
                   </div>
 
                   <EntryMetaPills entry={entry} status={status} />
+                  <ManagerEntryCoverage entry={entry} viewer={viewer} />
 
                   <div className="flex items-center justify-between gap-4">
                     <div>
@@ -518,6 +593,7 @@ export function ResultsScoreboardTable({
                               {entry.summary ? (
                                 <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">{entry.summary}</div>
                               ) : null}
+                              <ManagerEntryCoverage entry={entry} viewer={viewer} />
                             </div>
                           </div>
                         </td>

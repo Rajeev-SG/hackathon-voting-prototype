@@ -110,9 +110,9 @@ export function ConsentManager() {
   return (
     <>
       {isBannerOpen ? (
-        <div className="pointer-events-none fixed inset-x-0 bottom-3 z-50 px-3 sm:bottom-4 sm:px-4">
-          <Card className="pointer-events-auto mx-auto max-w-xl border-border/80 bg-background/95 shadow-lg backdrop-blur">
-            <CardContent className="flex flex-col gap-3 p-4">
+        <div className="pointer-events-none fixed inset-x-0 top-3 z-50 px-3 sm:bottom-4 sm:top-auto sm:px-4">
+          <Card className="pointer-events-none mx-auto max-w-xl border-border/80 bg-background/95 shadow-lg backdrop-blur">
+            <CardContent className="pointer-events-none flex flex-col gap-3 p-4">
               <div className="space-y-1.5">
                 <CardTitle className="text-sm sm:text-base">Analytics preferences</CardTitle>
                 <CardDescription className="max-w-lg text-xs leading-5 sm:text-sm sm:leading-5">
@@ -120,7 +120,7 @@ export function ConsentManager() {
                   reporting. Advertising-related consent stays denied.
                 </CardDescription>
                 <Link
-                  className="inline-flex text-xs text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground sm:text-sm"
+                  className="pointer-events-auto inline-flex text-xs text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground sm:text-sm"
                   data-analytics-event="navigation_click"
                   data-analytics-item-name="Privacy policy"
                   data-analytics-item-type="privacy_policy_link"
@@ -130,7 +130,7 @@ export function ConsentManager() {
                   Read the privacy policy
                 </Link>
               </div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <div className="pointer-events-auto flex flex-col gap-2 sm:flex-row sm:justify-end">
                 <Button
                   className="h-10 px-4 text-sm"
                   onClick={() => updateConsent("denied", "banner_decline")}

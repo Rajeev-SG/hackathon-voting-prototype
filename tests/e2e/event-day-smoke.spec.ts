@@ -2,10 +2,11 @@ import { execFileSync } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
 
-import { PrismaClient } from "@prisma/client";
 import { expect, test, type Browser, type Page } from "playwright/test";
 
-const prisma = new PrismaClient();
+import { createDirectPrismaClient } from "@/tests/e2e/support/direct-prisma";
+
+const prisma = createDirectPrismaClient();
 
 const MANAGER_EMAIL = "rajeev.gill@omc.com";
 const JUDGE_EMAIL = "judge.one+clerk_test@example.com";
@@ -70,10 +71,15 @@ function createDesktopContext(browser: Browser) {
   });
 }
 
-async function signInWithTicket(page: Page, baseURL: string, email: string) {
+async function signInWithTicket(page: Page, baseURL: string, email: string, expectedRoleLabel: string) {
   const ticketUrl = createSignInTicket(baseURL, email);
   await page.goto(ticketUrl);
   await page.waitForURL((url) => url.origin + url.pathname === new URL(baseURL).origin + "/");
+  await expect(page.locator("span", { hasText: expectedRoleLabel }).first()).toBeVisible();
+}
+
+function visibleScoreboardAction(page: Page, slug: string) {
+  return page.locator(`[data-testid="scoreboard-action-${slug}"]:visible`).first();
 }
 
 async function uploadWorkbook(page: Page, workbookPath: string) {
@@ -86,7 +92,7 @@ async function uploadWorkbook(page: Page, workbookPath: string) {
 }
 
 async function ensureManagerCleanStart(page: Page, baseURL: string) {
-  await signInWithTicket(page, baseURL, MANAGER_EMAIL);
+  await signInWithTicket(page, baseURL, MANAGER_EMAIL, "Manager");
   await page.goto("/");
 
   const stateBadge = page.locator('[data-testid="competition-state-badge"]:visible').first();
@@ -141,12 +147,13 @@ test("event-day smoke: manager can recover to a clean round and a judge/public p
   await managerPage.getByTestId("manager-begin-voting").click();
   await expect(managerPage.locator('[data-testid="competition-state-badge"]:visible').first()).toHaveText("Voting live");
 
-  await signInWithTicket(judgePage, baseURL!, JUDGE_EMAIL);
-  await judgePage.getByTestId("scoreboard-action-aurora-atlas").first().click();
+  await signInWithTicket(judgePage, baseURL!, JUDGE_EMAIL, "Judge");
+  await expect(judgePage.getByText("Judge", { exact: true })).toBeVisible();
+  await visibleScoreboardAction(judgePage, "aurora-atlas").click();
   await judgePage.getByTestId("score-option-7").click();
   await judgePage.getByTestId("submit-vote").click();
   await expect(judgePage.getByText("Judge", { exact: true })).toBeVisible();
-  await expect(judgePage.getByTestId("scoreboard-action-aurora-atlas").first()).toContainText("Scored");
+  await expect(visibleScoreboardAction(judgePage, "aurora-atlas")).toContainText("Scored");
 
   await managerPage.goto("/");
   await expect(managerPage.getByTestId("manager-remaining-votes")).toContainText("Judge");

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireManagerIdentity } from "@/lib/auth";
+import { MAX_WORKBOOK_SIZE_BYTES } from "@/lib/constants";
 import { replaceEntriesFromWorkbook } from "@/lib/competition";
 
 export const runtime = "nodejs";
@@ -24,6 +25,15 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error: "Only .xlsx workbooks are supported."
+        },
+        { status: 400 }
+      );
+    }
+
+    if (file.size > MAX_WORKBOOK_SIZE_BYTES) {
+      return NextResponse.json(
+        {
+          error: "Workbook is too large. Keep the upload under 5 MB."
         },
         { status: 400 }
       );

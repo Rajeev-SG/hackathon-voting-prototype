@@ -29,7 +29,8 @@ The app is intentionally a single-screen hackathon voting surface.
 
 ### Manager
 
-- The manager identity is hard-coded as `rajeev.gill@omc.com`.
+- The manager identity defaults to `rajeev.gill@omc.com`.
+- Set `MANAGER_EMAIL` to override it without a code change.
 - Only the manager can download the template, upload the workbook, begin voting, finalize, and export finalized results.
 
 ## Data model

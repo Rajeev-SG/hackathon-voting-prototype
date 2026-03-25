@@ -131,7 +131,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
       snapshot.viewer.isManager
     ]
   );
-  const autoRefreshIntervalMs = snapshot.status === "OPEN" ? 5000 : 15000;
+  const shouldUseLiveRefresh = snapshot.status === "OPEN" && !snapshot.progress.isComplete;
   const autoRefreshPaused =
     Boolean(selectedEntry) ||
     authDialogOpen ||
@@ -166,7 +166,9 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
       });
     };
 
-    intervalId = window.setInterval(refreshIfVisible, autoRefreshIntervalMs);
+    if (shouldUseLiveRefresh) {
+      intervalId = window.setInterval(refreshIfVisible, 5000);
+    }
     window.addEventListener("focus", refreshIfVisible);
     document.addEventListener("visibilitychange", refreshIfVisible);
 
@@ -175,7 +177,7 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
       window.removeEventListener("focus", refreshIfVisible);
       document.removeEventListener("visibilitychange", refreshIfVisible);
     };
-  }, [autoRefreshIntervalMs, autoRefreshPaused, router, startTransition]);
+  }, [autoRefreshPaused, router, shouldUseLiveRefresh, startTransition]);
 
   async function sendJson(url: string, init?: RequestInit) {
     const response = await fetch(url, {
@@ -275,7 +277,19 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
   function openWorkbookPicker() {
     if (!snapshot.canUploadSheet || uploadState.status === "uploading") return;
     pushDataLayerEvent("workbook_picker_opened", analyticsContext);
-    uploadInputRef.current?.click();
+    const input = uploadInputRef.current;
+    if (!input) return;
+
+    if (typeof input.showPicker === "function") {
+      try {
+        input.showPicker();
+        return;
+      } catch {
+        // Fall back to click() when the browser blocks showPicker().
+      }
+    }
+
+    input.click();
   }
 
   function handleMobileSummaryOpenChange(nextOpen: boolean) {
@@ -713,9 +727,9 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                     <Button
                       aria-expanded={mobileSummaryOpen}
                       aria-haspopup="dialog"
-                      className="shrink-0"
+                      className={cn("shrink-0", mobileSummaryOpen ? "relative z-[60]" : "")}
                       data-testid="scoreboard-mobile-summary-toggle"
-                      onClick={() => handleMobileSummaryOpenChange(true)}
+                      onClick={() => handleMobileSummaryOpenChange(!mobileSummaryOpen)}
                       size="sm"
                       type="button"
                       variant="outline"

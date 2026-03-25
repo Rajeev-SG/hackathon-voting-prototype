@@ -2,10 +2,11 @@ import { execFileSync } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
 
-import { PrismaClient } from "@prisma/client";
 import { devices, expect, test, type Page } from "playwright/test";
 
-const prisma = new PrismaClient();
+import { createDirectPrismaClient } from "@/tests/e2e/support/direct-prisma";
+
+const prisma = createDirectPrismaClient();
 
 const MANAGER_EMAIL = "rajeev.gill@omc.com";
 const REPO_ROOT = process.cwd();
@@ -166,7 +167,7 @@ test.describe("mobile scoreboard controls", () => {
     await page.waitForURL((url) => url.origin + url.pathname === new URL(APP_URL).origin + "/");
 
     const resetButton = page.getByTestId("manager-reset-round");
-    if (await resetButton.isVisible().catch(() => false)) {
+    if (await resetButton.isEnabled().catch(() => false)) {
       page.once("dialog", (dialog) => dialog.accept());
       await resetButton.click();
       await expect(page.getByText("Competition reset. Upload a fresh workbook to start the next dry run.")).toBeVisible();

@@ -3,13 +3,13 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
-import { PrismaClient } from "@prisma/client";
 import { expect, test, type Browser, type Page, devices } from "playwright/test";
 import * as XLSX from "xlsx";
 
 import { TEMPLATE_SHEET_NAME } from "@/lib/constants";
+import { createDirectPrismaClient } from "@/tests/e2e/support/direct-prisma";
 
-const prisma = new PrismaClient();
+const prisma = createDirectPrismaClient();
 
 const MANAGER_EMAIL = "rajeev.gill@omc.com";
 const JUDGE_EMAIL = "judge.one+clerk_test@example.com";
@@ -338,7 +338,10 @@ test("manager, judges, and public users complete the single-screen voting flow",
 
       await managerPage.getByTestId("scoreboard-mobile-summary-toggle").click();
       await expect(managerPage.getByTestId("scoreboard-mobile-summary-panel")).toBeVisible();
-      await managerPage.getByTestId("scoreboard-mobile-summary-toggle").click();
+      await managerPage
+        .getByTestId("scoreboard-mobile-summary-panel")
+        .getByRole("button", { name: "Close" })
+        .click();
       await expect(managerPage.getByTestId("scoreboard-mobile-summary-panel")).toHaveCount(0);
 
       await managerPage.getByTestId("scoreboard-mobile-view-toggle").click();
@@ -436,6 +439,21 @@ test("manager, judges, and public users complete the single-screen voting flow",
     await expect(managerPage.getByTestId("manager-remaining-votes")).toContainText("1 vote still outstanding.");
     await expect(managerPage.getByTestId("manager-remaining-votes")).toContainText(JUDGE_EMAIL);
     await expect(managerPage.getByTestId("manager-remaining-votes")).toContainText("Signal Bloom");
+    await expect(
+      managerPage
+        .getByTestId("manager-entry-outstanding-signal-bloom")
+        .nth(activeResponsiveIndex(testInfo.project.name))
+    ).toContainText("1 judge left");
+
+    await managerPage
+      .getByTestId("manager-entry-toggle-signal-bloom")
+      .nth(activeResponsiveIndex(testInfo.project.name))
+      .click();
+    await expect(
+      managerPage.getByText(
+        "Cannot close voting for Signal Bloom yet. 1 judge still needs to score it, and every entry must stay equally covered."
+      )
+    ).toBeVisible();
 
     await openVoteDialog(judgePage, "Signal Bloom");
     await saveVote(judgePage, 7);
