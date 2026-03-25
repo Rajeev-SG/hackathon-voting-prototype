@@ -38,10 +38,10 @@ What still needs human discipline on the day:
 
 Fresh evidence from this pass:
 
-- `set -a && source .env.vercel-prod && set +a && pnpm readiness:db -- --url https://vote.rajeevg.com`
+- `tmpenv=$(mktemp) && vercel env pull "$tmpenv" --environment=production --yes >/dev/null && set -a && source "$tmpenv" && set +a && pnpm readiness:db -- --url https://vote.rajeevg.com && rm -f "$tmpenv"`
 - `pnpm exec vitest run tests/votes.integration.test.ts tests/readiness.integration.test.ts --reporter=verbose`
 - `pnpm readiness:public -- --url https://vote.rajeevg.com --concurrency 50 --requests 500`
-- `set -a && source .env.vercel-prod && set +a && pnpm readiness:smoke -- --base-url https://vote.rajeevg.com`
+- `tmpenv=$(mktemp) && vercel env pull "$tmpenv" --environment=production --yes >/dev/null && set -a && source "$tmpenv" && set +a && pnpm readiness:smoke -- --base-url https://vote.rajeevg.com && rm -f "$tmpenv"`
 - `LAYOUT_PROOF=1 E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/scoreboard-breakpoints.spec.ts --reporter=list`
 
 Current live public-read result:
@@ -85,8 +85,11 @@ Expected:
 2. Run the non-destructive database and vendor preflight.
 
 ```bash
-set -a && source .env.vercel-prod && set +a
+tmpenv=$(mktemp)
+vercel env pull "$tmpenv" --environment=production --yes >/dev/null
+set -a && source "$tmpenv" && set +a
 pnpm readiness:db -- --url https://vote.rajeevg.com
+rm -f "$tmpenv"
 ```
 
 Expected:
@@ -94,7 +97,7 @@ Expected:
 - public site check returns `200` and a scoreboard signal
 - `neon-hotfix` is `Available`
 - `HOTFIX_DATABASE_URL` and `HOTFIX_DATABASE_URL_UNPOOLED` are present in production
-- the direct database query succeeds when `.env.vercel-prod` is loaded
+- the direct database query succeeds when the live production env is pulled from Vercel first
 - a suspended legacy Prisma resource is not itself a blocker as long as the hotfix Neon resource is green
 
 3. Confirm the public board still handles expected spectator load.
@@ -111,8 +114,11 @@ Expected:
 4. Run the production smoke path.
 
 ```bash
-set -a && source .env.vercel-prod && set +a
+tmpenv=$(mktemp)
+vercel env pull "$tmpenv" --environment=production --yes >/dev/null
+set -a && source "$tmpenv" && set +a
 pnpm readiness:smoke -- --base-url https://vote.rajeevg.com
+rm -f "$tmpenv"
 ```
 
 Expected:
@@ -452,8 +458,9 @@ Use:
 ```bash
 curl -I https://vote.rajeevg.com
 pnpm readiness:public -- --url https://vote.rajeevg.com --concurrency 50 --requests 500
-set -a && source .env.vercel-prod && set +a
+tmpenv=$(mktemp) && vercel env pull "$tmpenv" --environment=production --yes >/dev/null && set -a && source "$tmpenv" && set +a
 pnpm readiness:smoke -- --base-url https://vote.rajeevg.com
+rm -f "$tmpenv"
 ```
 
 ## Final operating advice

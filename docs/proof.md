@@ -332,7 +332,7 @@ Production validation:
 ```bash
 vercel --prod --yes
 curl -I https://vote.rajeevg.com
-set -a && source .env.vercel-prod && set +a && E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/mobile-scoreboard-controls.spec.ts --project=mobile-dark --reporter=list
+tmpenv=$(mktemp) && vercel env pull "$tmpenv" --environment=production --yes >/dev/null && set -a && source "$tmpenv" && set +a && E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/mobile-scoreboard-controls.spec.ts --project=mobile-dark --reporter=list && rm -f "$tmpenv"
 LAYOUT_PROOF=1 E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/scoreboard-breakpoints.spec.ts --reporter=list
 ```
 
@@ -456,7 +456,7 @@ pnpm readiness:public -- --url https://vote.rajeevg.com --concurrency 50 --reque
 
 What this covers:
 
-- `tests/readiness.integration.test.ts` exercises the real Prisma-backed voting rules with 50 concurrent judges voting in project-by-project waves.
+- `tests/readiness.integration.test.ts` exercises the real Prisma-ORM voting rules with 50 concurrent judges voting in project-by-project waves, but the local env used for that run must be refreshed if production has moved to a different Postgres provider.
 - The readiness test also proves the self-vote denominator stays correct when some judges are blocked from some entries.
 - `readiness:public` applies 50 concurrent public GETs and 250 total scoreboard requests against production to catch obvious response degradation or broken HTML under spectator traffic.
 - The main Playwright journey now additionally proves that one device sees another device's score change without a manual reload.
@@ -556,8 +556,9 @@ pnpm check
 pnpm build
 pnpm exec vitest run tests/votes.integration.test.ts tests/readiness.integration.test.ts --reporter=verbose
 pnpm readiness:public -- --url https://vote.rajeevg.com --concurrency 50 --requests 500
-set -a && source .env.vercel-prod && set +a
+tmpenv=$(mktemp) && vercel env pull "$tmpenv" --environment=production --yes >/dev/null && set -a && source "$tmpenv" && set +a
 pnpm readiness:smoke -- --base-url https://vote.rajeevg.com
+rm -f "$tmpenv"
 LAYOUT_PROOF=1 E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/scoreboard-breakpoints.spec.ts --reporter=list
 ```
 
@@ -621,7 +622,7 @@ Commands:
 ```bash
 curl -I https://vote.rajeevg.com
 curl https://vote.rajeevg.com/metrics/healthy
-set -a && source .env.vercel-prod && set +a && E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/analytics-stack.spec.ts --reporter=list
+tmpenv=$(mktemp) && vercel env pull "$tmpenv" --environment=production --yes >/dev/null && set -a && source "$tmpenv" && set +a && E2E_BASE_URL=https://vote.rajeevg.com pnpm exec playwright test tests/e2e/analytics-stack.spec.ts --reporter=list && rm -f "$tmpenv"
 ```
 
 Behavior proof:
