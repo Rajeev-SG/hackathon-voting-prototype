@@ -486,15 +486,10 @@ export function ResultsScoreboardTable({
                       {entry.rank}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-radix-purple-a-4 font-display text-lg font-black text-foreground">
-                          {entry.projectName.slice(0, 1)}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="truncate font-semibold text-foreground">{entry.projectName}</div>
-                          <div className="truncate text-sm text-muted-foreground">
-                            {entry.teamName ?? "Team name pending"}
-                          </div>
+                      <div className="min-w-0">
+                        <div className="truncate font-semibold text-foreground">{entry.projectName}</div>
+                        <div className="truncate text-sm text-muted-foreground">
+                          {entry.teamName ?? "Team name pending"}
                         </div>
                       </div>
                       {entry.summary ? (
@@ -581,20 +576,15 @@ export function ResultsScoreboardTable({
                           </div>
                         </td>
                         <td className="border-b border-border px-5 py-4">
-                          <div className="flex items-center gap-4">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-radix-purple-a-4 font-display text-lg font-black text-foreground">
-                              {entry.projectName.slice(0, 1)}
+                          <div className="min-w-0">
+                            <div className="font-semibold text-foreground">{entry.projectName}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {entry.teamName ?? "Team name pending"}
                             </div>
-                            <div className="min-w-0">
-                              <div className="font-semibold text-foreground">{entry.projectName}</div>
-                              <div className="text-sm text-muted-foreground">
-                                {entry.teamName ?? "Team name pending"}
-                              </div>
-                              {entry.summary ? (
-                                <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">{entry.summary}</div>
-                              ) : null}
-                              <ManagerEntryCoverage entry={entry} viewer={viewer} />
-                            </div>
+                            {entry.summary ? (
+                              <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">{entry.summary}</div>
+                            ) : null}
+                            <ManagerEntryCoverage entry={entry} viewer={viewer} />
                           </div>
                         </td>
                         <td className="border-b border-border px-5 py-4 text-sm text-muted-foreground">
