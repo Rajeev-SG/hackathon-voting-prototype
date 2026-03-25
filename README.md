@@ -57,6 +57,8 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 DATABASE_URL=
 POSTGRES_URL=
 PRISMA_DATABASE_URL=
+HOTFIX_DATABASE_URL=
+HOTFIX_DATABASE_URL_UNPOOLED=
 NEXT_PUBLIC_FLOWS_ORGANIZATION_ID=
 NEXT_PUBLIC_FLOWS_ENVIRONMENT=production
 ```
@@ -65,6 +67,8 @@ Notes:
 
 - `DATABASE_URL` is the runtime connection string Prisma uses in the app.
 - `POSTGRES_URL` and `PRISMA_DATABASE_URL` are kept for Vercel/Postgres compatibility.
+- `HOTFIX_DATABASE_URL` is an emergency runtime override. When present, the app will prefer it over `DATABASE_URL`.
+- `HOTFIX_DATABASE_URL_UNPOOLED` is the matching emergency migration URL for `prisma migrate deploy` or `prisma db push`.
 - Production Clerk is configured on `vote.rajeevg.com`.
 - Google SSO is configured on the production Clerk instance.
 - Local automated proof covers the email-code flow directly.

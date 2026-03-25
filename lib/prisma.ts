@@ -1,14 +1,17 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
+import { resolveDatabaseUrls } from "@/lib/database-config";
 import { env } from "@/lib/env";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+const databaseUrls = resolveDatabaseUrls(env);
+
 const adapter = new PrismaPg({
-  connectionString: env.DATABASE_URL ?? ""
+  connectionString: databaseUrls.runtimeUrl
 });
 
 export const prisma =

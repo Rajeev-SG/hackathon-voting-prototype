@@ -81,6 +81,17 @@ Expected:
 
 - `HTTP/2 200`
 
+If this returns `500`, check the attached Vercel database integration before you do anything else:
+
+```bash
+vercel integration ls
+```
+
+Expected:
+
+- the database resource for this project is `Available`, not `Suspended`
+- if the primary Prisma resource is suspended, provision or reconnect the emergency `HOTFIX_*` database path before judges arrive
+
 2. Confirm the public board still handles expected spectator load.
 
 ```bash

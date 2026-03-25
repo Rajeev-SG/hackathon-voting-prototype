@@ -7,6 +7,8 @@ const environmentSchema = z.object({
     .min(1, "Missing NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY")
     .optional(),
   DATABASE_URL: z.string().min(1, "Missing DATABASE_URL").optional(),
+  HOTFIX_DATABASE_URL: z.string().min(1, "Missing HOTFIX_DATABASE_URL").optional(),
+  HOTFIX_DATABASE_URL_UNPOOLED: z.string().min(1, "Missing HOTFIX_DATABASE_URL_UNPOOLED").optional(),
   NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
   NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().min(1).optional(),
   NEXT_PUBLIC_GTM_ID: z.string().min(1).optional(),
@@ -21,6 +23,8 @@ export const env = environmentSchema.parse({
   CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
   DATABASE_URL: process.env.DATABASE_URL,
+  HOTFIX_DATABASE_URL: process.env.HOTFIX_DATABASE_URL,
+  HOTFIX_DATABASE_URL_UNPOOLED: process.env.HOTFIX_DATABASE_URL_UNPOOLED,
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
   NEXT_PUBLIC_GTM_ID: process.env.NEXT_PUBLIC_GTM_ID,
