@@ -354,8 +354,9 @@ export function ResultsScoreboardTable({
           <Button
             aria-expanded={mobileViewPanelOpen}
             aria-haspopup="dialog"
+            className={cn(mobileViewPanelOpen ? "relative z-[60]" : "")}
             data-testid="scoreboard-mobile-view-toggle"
-            onClick={() => setMobileViewPanelOpen(true)}
+            onClick={() => setMobileViewPanelOpen((open) => !open)}
             size="sm"
             type="button"
             variant="outline"

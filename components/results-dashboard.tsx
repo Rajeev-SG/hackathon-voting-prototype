@@ -277,7 +277,19 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
   function openWorkbookPicker() {
     if (!snapshot.canUploadSheet || uploadState.status === "uploading") return;
     pushDataLayerEvent("workbook_picker_opened", analyticsContext);
-    uploadInputRef.current?.click();
+    const input = uploadInputRef.current;
+    if (!input) return;
+
+    if (typeof input.showPicker === "function") {
+      try {
+        input.showPicker();
+        return;
+      } catch {
+        // Fall back to click() when the browser blocks showPicker().
+      }
+    }
+
+    input.click();
   }
 
   function handleMobileSummaryOpenChange(nextOpen: boolean) {
@@ -715,9 +727,9 @@ export function ResultsDashboard({ snapshot }: { snapshot: CompetitionSnapshot }
                     <Button
                       aria-expanded={mobileSummaryOpen}
                       aria-haspopup="dialog"
-                      className="shrink-0"
+                      className={cn("shrink-0", mobileSummaryOpen ? "relative z-[60]" : "")}
                       data-testid="scoreboard-mobile-summary-toggle"
-                      onClick={() => handleMobileSummaryOpenChange(true)}
+                      onClick={() => handleMobileSummaryOpenChange(!mobileSummaryOpen)}
                       size="sm"
                       type="button"
                       variant="outline"

@@ -167,7 +167,7 @@ test.describe("mobile scoreboard controls", () => {
     await page.waitForURL((url) => url.origin + url.pathname === new URL(APP_URL).origin + "/");
 
     const resetButton = page.getByTestId("manager-reset-round");
-    if (await resetButton.isVisible().catch(() => false)) {
+    if (await resetButton.isEnabled().catch(() => false)) {
       page.once("dialog", (dialog) => dialog.accept());
       await resetButton.click();
       await expect(page.getByText("Competition reset. Upload a fresh workbook to start the next dry run.")).toBeVisible();

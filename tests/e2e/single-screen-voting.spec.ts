@@ -338,7 +338,10 @@ test("manager, judges, and public users complete the single-screen voting flow",
 
       await managerPage.getByTestId("scoreboard-mobile-summary-toggle").click();
       await expect(managerPage.getByTestId("scoreboard-mobile-summary-panel")).toBeVisible();
-      await managerPage.getByTestId("scoreboard-mobile-summary-toggle").click();
+      await managerPage
+        .getByTestId("scoreboard-mobile-summary-panel")
+        .getByRole("button", { name: "Close" })
+        .click();
       await expect(managerPage.getByTestId("scoreboard-mobile-summary-panel")).toHaveCount(0);
 
       await managerPage.getByTestId("scoreboard-mobile-view-toggle").click();
