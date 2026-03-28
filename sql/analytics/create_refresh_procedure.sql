@@ -12,7 +12,7 @@ BEGIN
       ),
       " UNION ALL "
     )
-    FROM `personal-gws-1.ga4_498363924.INFORMATION_SCHEMA.TABLES`
+    FROM `personal-gws-1.analytics_498363924.INFORMATION_SCHEMA.TABLES`
     WHERE table_name LIKE 'events_%'
   );
 
@@ -146,7 +146,22 @@ BEGIN
     GROUP BY event_date, event_name, viewer_role, competition_status;
 
     TRUNCATE TABLE `personal-gws-1.hackathon_reporting.entry_performance`;
-    INSERT INTO `personal-gws-1.hackathon_reporting.entry_performance`
+    INSERT INTO `personal-gws-1.hackathon_reporting.entry_performance` (
+      event_date,
+      entry_slug,
+      entry_name,
+      competition_status,
+      dialog_views,
+      eligible_dialog_views,
+      blocked_dialog_views,
+      vote_submit_starts,
+      vote_submit_failures,
+      votes_submitted,
+      unique_voters,
+      total_score,
+      average_score,
+      view_to_vote_rate
+    )
     SELECT
       event_date,
       entry_slug,

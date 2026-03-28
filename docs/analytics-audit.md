@@ -132,10 +132,10 @@ Important nuance:
 
 Verified:
 
-- dataset `personal-gws-1:ga4_498363924` exists
+- dataset `personal-gws-1:analytics_498363924` exists
 - export link is attached to the voting-app stream
 - streaming and daily export are enabled
-- `bq show --format=prettyjson personal-gws-1:ga4_498363924` returns the linked EU dataset owned by `rajeev.sgill@gmail.com`
+- `bq show --format=prettyjson personal-gws-1:analytics_498363924` returns the linked EU dataset owned by `firebase-measurement@system.gserviceaccount.com`
 - reporting dataset `personal-gws-1:hackathon_reporting` exists in `EU`
 - reporting tables exist:
   - `auth_funnel_daily`
@@ -163,7 +163,7 @@ Verified:
 Not yet verified in this same pass:
 
 - landed `events_intraday_*` or `events_*` rows attributable to the new voting stream
-- `bq ls -a -n 20 personal-gws-1:ga4_498363924` currently returns no tables
+- `bq ls -a -n 20 personal-gws-1:analytics_498363924` returns the landed `events_*`, `events_intraday_*`, and `pseudonymous_users_*` export tables
 
 This is an expected latency-sensitive area inside Google’s export pipeline. The reporting shell is no longer blocked on that latency because the refresh procedure and scheduled query are already in place and proven.
 
@@ -273,19 +273,19 @@ Outcome:
 
 ## Residual risk
 
-The remaining risk is export latency rather than implementation completeness:
+The remaining risk is no longer export latency. The raw export is live; the operational risk is keeping the warehouse wired to the correct dataset and rerunning the modeled refresh when the schema changes:
 
-- the GA export dataset still has no landed raw `events_*` tables during this audit window
-- the reporting shell is therefore connected to the stable reporting dataset and awaits the first landed raw rows before its visuals fill with historic data
-- the first page shell is in place, but the final event-commemorative “wow factor” composition can still be expanded once real event-day data exists
+- raw GA4 export tables are landing in `analytics_498363924`, including `events_*`, `events_intraday_*`, and `pseudonymous_users_*`
+- the reporting shell now reads from `hackathon_reporting`, which must continue refreshing from `analytics_498363924`
+- any future schema drift in the modeled tables should be handled with explicit column lists, because the `entry_performance` insert failed once when implicit column order stopped matching the table definition
 
 ## Recommended next check
 
-Within the next export window:
+After any analytics schema or dashboard change:
 
-1. re-run the GA export table check
-2. confirm `events_intraday_*` landed in `ga4_498363924`
-3. re-run the scheduled query if needed
-4. confirm the Looker shell begins rendering non-empty history from `hackathon_reporting`
+1. re-run the GA export table check against `analytics_498363924`
+2. re-run the reporting refresh procedure if the modeled dataset needs backfill
+3. confirm `hackathon_reporting` row counts move as expected
+4. validate the public dashboard against the refreshed warehouse
 
 The authoritative implementation notes live in [/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md](/Users/rajeev/Code/hackathon-voting-prototype/docs/google-tagging-stack.md).

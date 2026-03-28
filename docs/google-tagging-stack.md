@@ -12,7 +12,7 @@ Last updated: `2026-03-24`
 - Main-site web data stream retained: `11542983613`
 - First-party collection path: `https://vote.rajeevg.com/metrics`
 - Live server tagging upstream: `https://sgtm-live-6tmqixdp3a-nw.a.run.app`
-- BigQuery dataset: `personal-gws-1:ga4_498363924`
+- BigQuery dataset: `personal-gws-1:analytics_498363924`
 - Reporting dataset: `personal-gws-1:hackathon_reporting`
 - Reporting refresh procedure: ``personal-gws-1.hackathon_reporting.refresh_reporting_tables``
 - Reporting transfer config: `projects/401448512581/locations/europe/transferConfigs/69d1795c-0000-21c1-bcb2-24058877ff20`
@@ -241,7 +241,7 @@ The analytics stack now has a durable reporting layer independent of when Google
 ### Raw export layer
 
 - GA4 property: `498363924`
-- linked export dataset: `personal-gws-1:ga4_498363924`
+- linked export dataset: `personal-gws-1:analytics_498363924`
 - current export state:
   - link is enabled
   - daily and streaming export are enabled
@@ -271,7 +271,7 @@ Stable reporting tables:
 
 Refresh behavior:
 
-- the stored procedure scans `ga4_498363924.INFORMATION_SCHEMA.TABLES`
+- the stored procedure scans `analytics_498363924.INFORMATION_SCHEMA.TABLES`
 - if raw GA export tables exist, it rebuilds the reporting tables from them
 - if raw GA export tables do not yet exist, it safely no-ops instead of failing
 
@@ -378,7 +378,7 @@ Evidence:
 
 The remaining latency-sensitive part is Google’s raw export materialization:
 
-- `ga4_498363924` still had no landed raw `events_*` tables during this audit window
+- `analytics_498363924` is the active raw GA4 export dataset and contains the landed raw `events_*` tables for this property
 - the shell is therefore intentionally scaffolded rather than historically populated
 - `Experience and devices` and `Event taxonomy` are currently visible shell pages first, with deeper source wiring and data richness still dependent on raw export landing and the next reporting pass
 - once those raw tables land, the scheduled procedure already in place will begin populating `hackathon_reporting`, and the existing Looker shell will start filling in
