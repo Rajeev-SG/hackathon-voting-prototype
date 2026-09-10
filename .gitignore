@@ -32,3 +32,6 @@ artifacts/
 *.tsbuildinfo
 .vercel
 .env*.local
+
+# local secret env files (never commit)
+.env*
