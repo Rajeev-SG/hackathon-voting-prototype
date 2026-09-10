@@ -55,4 +55,6 @@ jobs:
       - run: pnpm test
         env:
           DATABASE_URL: postgres://ci:placeholder@localhost:5432/ci?sslmode=disable
+          HOTFIX_DATABASE_URL: postgres://ci:placeholder@localhost:5432/ci?sslmode=disable
+          HOTFIX_DATABASE_URL_UNPOOLED: postgres://ci:placeholder@localhost:5432/ci?sslmode=disable
       - run: pnpm build
