@@ -27,6 +27,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+      - run: cp .env.example .env.local
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - run: pnpm build
