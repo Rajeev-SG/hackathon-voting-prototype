@@ -27,7 +27,32 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - run: cp .env.example .env.local
+      - name: Generate test env
+        run: |
+          cp .env.example .env.local
+          sed -i \
+            -e 's|^CLERK_SECRET_KEY=$|CLERK_SECRET_KEY=ci-placeholder|' \
+            -e 's|^NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$|NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=ci-placeholder|' \
+            -e 's|^NEXT_PUBLIC_GA_MEASUREMENT_ID=$|NEXT_PUBLIC_GA_MEASUREMENT_ID=ci-placeholder|' \
+            -e 's|^NEXT_PUBLIC_GTM_ID=$|NEXT_PUBLIC_GTM_ID=ci-placeholder|' \
+            -e 's|^SGTM_UPSTREAM_ORIGIN=$|SGTM_UPSTREAM_ORIGIN=https://vote.rajeevg.com|' \
+            -e 's|^NEXT_PUBLIC_FLOWS_ORGANIZATION_ID=$|NEXT_PUBLIC_FLOWS_ORGANIZATION_ID=ci-placeholder|' \
+            .env.local
       - run: pnpm install --frozen-lockfile
+      - name: Start test database
+        run: |
+          docker run --rm -d --name ci-postgres \
+            -e POSTGRES_USER=ci -e POSTGRES_PASSWORD=placeholder -e POSTGRES_DB=ci \
+            -p 5432:5432 postgres:16-alpine
+          for i in $(seq 1 30); do
+            docker exec ci-postgres pg_isready -U ci && break
+            sleep 1
+          done
+      - name: Apply Prisma migrations
+        run: pnpm exec prisma migrate deploy
+        env:
+          DATABASE_URL: postgres://ci:placeholder@localhost:5432/ci?sslmode=disable
       - run: pnpm test
+        env:
+          DATABASE_URL: postgres://ci:placeholder@localhost:5432/ci?sslmode=disable
       - run: pnpm build
